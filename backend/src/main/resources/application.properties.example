@@ -10,7 +10,7 @@ spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 
 jwt.secret=
-jwt.expiration=86400000
+jwt.expiration=
 
 logging.level.org.springframework.security=DEBUG
 
