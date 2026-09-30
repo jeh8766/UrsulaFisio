@@ -1,20 +1,30 @@
 package com.fisioUrsula.api.entities;
 
-import com.fisioUrsula.api.enums.FaixaEtaria;
-import com.fisioUrsula.api.enums.Vinculo;
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Objects;
+
+import com.fisioUrsula.api.enums.FaixaEtaria;
+import com.fisioUrsula.api.enums.Vinculo;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "pacientes")
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@RequiredArgsConstructor
+@AllArgsConstructor
 @NoArgsConstructor
 public class Paciente implements Serializable {
 

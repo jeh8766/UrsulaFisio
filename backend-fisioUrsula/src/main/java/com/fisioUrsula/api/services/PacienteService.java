@@ -1,14 +1,15 @@
 package com.fisioUrsula.api.services;
 
+import org.springframework.stereotype.Service;
+
 import com.fisioUrsula.api.repositories.PacienteRepository;
-import  org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class PacienteService {
 
     private final PacienteRepository pacienteRepository;
 
-    public PacienteService(PacienteRepository pacienteRepository) {
-        this.pacienteRepository = pacienteRepository;
-    }
 }
