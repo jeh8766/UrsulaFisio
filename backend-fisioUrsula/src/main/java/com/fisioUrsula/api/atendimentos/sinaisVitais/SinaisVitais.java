@@ -2,11 +2,7 @@ package com.fisioUrsula.api.atendimentos.sinaisVitais;
 
 import java.io.Serializable;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -27,8 +23,13 @@ public class SinaisVitais implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
+    @Column(nullable = false, length = 15)
     private String pressaoArterial;
+
+    @Column(nullable = false, length = 15)
     private Double saturacao;
+
+    @Column(nullable = false, length = 15)
     private int frequenciaCardiaca;
 
 }

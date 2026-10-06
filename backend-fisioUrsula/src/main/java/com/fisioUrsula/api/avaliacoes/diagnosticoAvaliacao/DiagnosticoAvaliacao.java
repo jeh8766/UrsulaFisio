@@ -2,13 +2,7 @@ package com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao;
 
 import java.time.LocalDate;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,10 +23,12 @@ public class DiagnosticoAvaliacao {
     @EqualsAndHashCode.Include
     private Long id;
 
+    @Column(nullable = false)
     private LocalDate dataDiagnostico;
 
     @Enumerated(EnumType.STRING)
     private StatusDiagnostico statusDiagnostico;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String observacao;
 }

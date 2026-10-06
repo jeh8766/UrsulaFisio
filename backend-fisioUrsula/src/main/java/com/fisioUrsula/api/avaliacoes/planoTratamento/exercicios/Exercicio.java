@@ -2,13 +2,7 @@ package com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios;
 
 import java.io.Serializable;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,11 +23,15 @@ public class Exercicio implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
+    @Column(nullable = false, length = 30)
     private String nome;
 
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     private TipoExercicio tipoExercicio;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String descricao;
 
 }

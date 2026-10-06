@@ -2,13 +2,8 @@ package com.fisioUrsula.api.pacientes.endereco;
 
 import java.io.Serializable;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fisioUrsula.api.pacientes.paciente.Paciente;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,15 +24,30 @@ public class Endereco implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
+    @OneToOne
+    @JoinColumn(name = "id_paciente",nullable = false,unique = true)
+    private Paciente paciente;
+
+    @Column(nullable = false, length = 9)
     private String cep;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 2)
     private Estado estado;
 
+    @Column(nullable = false, length = 30)
     private String cidade;
+
+    @Column(nullable = false, length = 40)
     private String bairro;
+
+    @Column(nullable = false, length = 30)
     private String rua;
+
+    @Column(nullable = false, length = 5)
     private int numero;
+
+    @Column(nullable = false, length = 40)
     private String complemento;
 
 }

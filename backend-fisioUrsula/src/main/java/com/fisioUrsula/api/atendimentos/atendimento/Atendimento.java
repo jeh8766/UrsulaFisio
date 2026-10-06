@@ -6,13 +6,7 @@ import java.time.LocalDateTime;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -32,12 +26,25 @@ public class Atendimento {
     @EqualsAndHashCode.Include
     private Long id;
 
+    @Column(nullable = false)
     private LocalDate data;
+
+    @Column(nullable = false)
     private LocalDateTime horaInicio;
+
+    @Column(nullable = false)
     private LocalDateTime horaFim;
+
+    @Column(nullable = false, length = 25)
     private String intercorrencia;
+
+    @Column(nullable = false, length = 60)
     private String evolucao;
+
+    @Column(nullable = false, length = 20)
     private Double valor;
+
+    @Column(nullable = false, length = 20)
     private Double taxaDeslocamento;
 
     @Enumerated(EnumType.STRING)
