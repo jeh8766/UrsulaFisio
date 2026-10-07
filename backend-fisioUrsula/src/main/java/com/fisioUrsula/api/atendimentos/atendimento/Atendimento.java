@@ -3,6 +3,8 @@ package com.fisioUrsula.api.atendimentos.atendimento;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fisioUrsula.api.agendamentos.agendamentoAtendimento.AgendamentoAtendimento;
+import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 
@@ -53,4 +55,11 @@ public class Atendimento {
     @Enumerated(EnumType.STRING)
     private StatusPagamento statusPagamento;
 
+    @OneToOne
+    @JoinColumn(name = "agendamento_atendimento_id")
+    private AgendamentoAtendimento agendamentoAtendimento;
+
+    @OneToOne
+    @JoinColumn(name = "sinais_Vitais_id")
+    private SinaisVitais sinaisVitais;
 }

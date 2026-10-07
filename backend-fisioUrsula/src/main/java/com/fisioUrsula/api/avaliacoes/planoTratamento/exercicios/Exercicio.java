@@ -1,8 +1,19 @@
 package com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios;
 
 import java.io.Serializable;
+import java.util.List;
 
-import jakarta.persistence.*;
+import com.fisioUrsula.api.avaliacoes.planoTratamento.planoExercicios.PlanoExercicio;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -33,5 +44,9 @@ public class Exercicio implements Serializable {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descricao;
+
+    @OneToMany(mappedBy = "exercicio")
+    private List<PlanoExercicio> exercicios;
+
 
 }

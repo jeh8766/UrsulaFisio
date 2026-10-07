@@ -2,6 +2,8 @@ package com.fisioUrsula.api.atendimentos.sinaisVitais;
 
 import java.io.Serializable;
 
+import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -31,5 +33,8 @@ public class SinaisVitais implements Serializable {
 
     @Column(nullable = false, length = 15)
     private int frequenciaCardiaca;
+
+    @OneToOne(mappedBy = "sinaisVitais", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Atendimento atendimento;
 
 }
