@@ -2,9 +2,24 @@ package com.fisioUrsula.api.pacientes.paciente;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.fisioUrsula.api.agendamentos.agendamentoAvaliacao.AgendamentoAvaliacao;
 import com.fisioUrsula.api.pacientes.endereco.Endereco;
-import jakarta.persistence.*;
+import com.fisioUrsula.api.pacientes.pacienteComorbidades.PacienteComorbidade;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -23,32 +38,39 @@ public class Paciente implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
-    @Column (name = "id_paciente")
+    @Column(name = "id_paciente")
     private Long id;
 
-    @Column (nullable = false, length = 3)
+    @Column(nullable = false, length = 3)
     private int idade;
 
     @Enumerated(EnumType.STRING)
-    @Column (nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private FaixaEtaria faixaEtaria;
 
     @Enumerated(EnumType.STRING)
-    @Column (nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private Vinculo vinculo;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private LocalDate dataNascimento;
 
-    @Column (nullable = false, length = 40)
+    @Column(nullable = false, length = 40)
     private String nome;
 
-    @Column (nullable = false, length = 40)
+    @Column(nullable = false, length = 40)
     private String nomeResponsavel;
 
-    @Column (nullable = false, length = 20)
+    @Column(nullable = false, length = 20)
     private String telefone;
 
-    @OneToOne(mappedBy = "paciente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne
+    @JoinColumn(name = "id_endereco", nullable = false, unique = true)
     private Endereco endereco;
+
+    @OneToMany(mappedBy = "paciente")
+    private List<PacienteComorbidade> comorbidades = new ArrayList<>();
+
+    @OneToMany(mappedBy = "paciente")
+    private List<AgendamentoAvaliacao> agendamentos = new ArrayList<>();
 }

@@ -24,8 +24,7 @@ public class Endereco implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "id_paciente",nullable = false,unique = true)
+    @OneToOne(mappedBy = "endereco", cascade = CascadeType.ALL, orphanRemoval = true)
     private Paciente paciente;
 
     @Column(nullable = false, length = 9)
@@ -45,7 +44,7 @@ public class Endereco implements Serializable {
     private String rua;
 
     @Column(nullable = false, length = 5)
-    private int numero;
+    private Integer numero;
 
     @Column(nullable = false, length = 40)
     private String complemento;
