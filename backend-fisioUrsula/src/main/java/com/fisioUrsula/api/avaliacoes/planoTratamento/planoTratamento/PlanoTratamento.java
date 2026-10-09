@@ -16,7 +16,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -39,16 +38,17 @@ public class PlanoTratamento implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
-    @Column(nullable = false, length = 3)
+
+    @Column(nullable = false)
     private int quantidadeSessoes;
 
-    @Column(nullable = false, length = 3)
+    @Column(nullable = false)
     private String frequencia;
 
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false)
     private Double taxaDeslocPadrao;
 
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false)
     private Double valorPadrao;
 
     @Enumerated(EnumType.STRING)
