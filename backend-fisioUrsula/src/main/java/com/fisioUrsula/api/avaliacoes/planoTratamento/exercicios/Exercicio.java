@@ -37,12 +37,11 @@ public class Exercicio implements Serializable {
     @Column(nullable = false, length = 30)
     private String nome;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private TipoExercicio tipoExercicio;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String descricao;
 
     @OneToMany(mappedBy = "exercicio")
