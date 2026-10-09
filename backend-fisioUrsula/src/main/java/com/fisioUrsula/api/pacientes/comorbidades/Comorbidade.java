@@ -35,10 +35,10 @@ public class Comorbidade implements Serializable {
     @Column(nullable = false, length = 40)
     private String nome;
 
-    @Column(nullable = false, length = 80)
+    @Column(length = 80)
     private String descricao;
 
-    @Column(length = 6)
+    @Column(length = 6, nullable = false)
     private String codigoCID;
 
     @OneToMany(mappedBy = "comorbidade")
