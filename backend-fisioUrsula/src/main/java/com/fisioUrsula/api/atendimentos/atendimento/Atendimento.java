@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "atendimentos")
+@Table(name = "atendimentos", uniqueConstraints = {@UniqueConstraint(columnNames = {"data", "horaInicio", "horaFim"})})
 @Getter
 @Setter
 @AllArgsConstructor
@@ -37,16 +37,16 @@ public class Atendimento {
     @Column(nullable = false)
     private LocalDateTime horaFim;
 
-    @Column(nullable = false, length = 25)
+    @Column(length = 250)
     private String intercorrencia;
 
-    @Column(nullable = false, length = 60)
+    @Column(length = 250)
     private String evolucao;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private Double valor;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private Double taxaDeslocamento;
 
     @Enumerated(EnumType.STRING)
