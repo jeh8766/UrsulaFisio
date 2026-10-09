@@ -35,13 +35,12 @@ public class DiagnosticoAvaliacao {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(nullable = false)
     private LocalDate dataDiagnostico;
 
     @Enumerated(EnumType.STRING)
     private StatusDiagnostico statusDiagnostico;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String observacao;
 
     @ManyToOne
