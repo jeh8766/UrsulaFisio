@@ -2,7 +2,7 @@ package com.fisioUrsula.api.avaliacoes.avaliacao;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import com.fisioUrsula.api.agendamentos.agendamentoAvaliacao.AgendamentoAvaliacao;
@@ -22,6 +22,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,7 +30,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "avaliacoes")
+@Table(name = "avaliacoes", uniqueConstraints = {@UniqueConstraint(columnNames = {"data", "horaInicio", "horaFim"})})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -49,10 +50,10 @@ public class Avaliacao implements Serializable {
     private LocalDate data;
 
     @Column(nullable = false)
-    private LocalDateTime horaInicio;
+    private LocalTime horaInicio;
 
     @Column(nullable = false)
-    private LocalDateTime horaFim;
+    private LocalTime horaFim;
 
     @Enumerated(EnumType.STRING)
     private StatusPagamento statusPagamento;
@@ -60,10 +61,10 @@ public class Avaliacao implements Serializable {
     @Enumerated(EnumType.STRING)
     private StatusAgendamento statusAgendamento;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String observacao;
 
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false)
     private Double valor;
 
     @OneToOne
