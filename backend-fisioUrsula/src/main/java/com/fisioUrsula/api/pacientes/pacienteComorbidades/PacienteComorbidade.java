@@ -41,7 +41,7 @@ public class PacienteComorbidade {
     @Enumerated(EnumType.STRING)
     private StatusDiagnostico statusDiagnostico;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String observacao;
 
     @ManyToOne
