@@ -33,7 +33,7 @@ public class Diagnostico {
     @Column(nullable = false, length = 40)
     private String nome;
 
-    @Column(nullable = false, length = 60)
+    @Column(length = 60)
     private String descricao;
 
     @Column(nullable = false, length = 6)
