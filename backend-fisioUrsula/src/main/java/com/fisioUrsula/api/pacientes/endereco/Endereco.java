@@ -3,7 +3,17 @@ package com.fisioUrsula.api.pacientes.endereco;
 import java.io.Serializable;
 
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
-import jakarta.persistence.*;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -46,7 +56,7 @@ public class Endereco implements Serializable {
     @Column(nullable = false, length = 5)
     private Integer numero;
 
-    @Column(nullable = false, length = 40)
+    @Column(length = 40)
     private String complemento;
 
 }
