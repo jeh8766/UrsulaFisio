@@ -41,7 +41,7 @@ public class Paciente implements Serializable {
     @Column(name = "id_paciente")
     private Long id;
 
-    @Column(nullable = false, length = 3)
+    @Column(nullable = false)
     private int idade;
 
     @Enumerated(EnumType.STRING)
@@ -65,7 +65,7 @@ public class Paciente implements Serializable {
     private String telefone;
 
     @OneToOne
-    @JoinColumn(name = "id_endereco", nullable = false, unique = true)
+    @JoinColumn(name = "id_endereco")
     private Endereco endereco;
 
     @OneToMany(mappedBy = "paciente")
