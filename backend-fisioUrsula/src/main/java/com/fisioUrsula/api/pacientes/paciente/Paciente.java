@@ -7,8 +7,10 @@ import java.util.List;
 
 import com.fisioUrsula.api.agendamentos.agendamentoAvaliacao.AgendamentoAvaliacao;
 import com.fisioUrsula.api.pacientes.endereco.Endereco;
+import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteRequestDTO;
 import com.fisioUrsula.api.pacientes.pacienteComorbidades.PacienteComorbidade;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -64,7 +66,7 @@ public class Paciente implements Serializable {
     @Column(nullable = false, length = 20)
     private String telefone;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_endereco")
     private Endereco endereco;
 
@@ -73,4 +75,19 @@ public class Paciente implements Serializable {
 
     @OneToMany(mappedBy = "paciente")
     private List<AgendamentoAvaliacao> agendamentos = new ArrayList<>();
+
+    public Paciente(CadastrarPacienteRequestDTO dto) {
+        this.nome = dto.nome();
+        this.dataNascimento = dto.dataNascimento();
+        this.vinculo = dto.vinculo();
+        this.nomeResponsavel = dto.nomeResponsavel();
+        this.telefone = dto.telefone();
+
+        this.endereco = new Endereco();
+        this.endereco.setCep(dto.cep());
+        this.endereco.setEstado(dto.estado());
+        this.endereco.setCidade(dto.cidade());
+        this.endereco.setBairro(dto.bairro());
+        this.endereco.setComplemento(dto.complemento());
+    }
 }
