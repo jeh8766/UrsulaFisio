@@ -2,6 +2,7 @@ package com.fisioUrsula.api.pacientes.paciente;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +60,9 @@ public class Paciente implements Serializable {
     @Column(nullable = false, length = 20)
     private String telefone;
 
+    @Column(name = "criado_em", updatable = false)
+    private LocalDateTime criadoEm;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_endereco")
     private Endereco endereco;
@@ -75,6 +79,7 @@ public class Paciente implements Serializable {
         this.vinculo = dto.vinculo();
         this.nomeResponsavel = dto.nomeResponsavel();
         this.telefone = dto.telefone();
+        this.criadoEm = LocalDateTime.now();
 
         this.endereco = new Endereco();
         this.endereco.setCep(dto.cep());
