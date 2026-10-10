@@ -43,13 +43,6 @@ public class Paciente implements Serializable {
     @Column(name = "id_paciente")
     private Long id;
 
-    @Column(nullable = false)
-    private int idade;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private FaixaEtaria faixaEtaria;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Vinculo vinculo;
