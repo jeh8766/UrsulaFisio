@@ -11,16 +11,18 @@ import com.fisioUrsula.api.shared.utils.DataUtil;
 
 public record CadastarPacienteResponseDTO(Long id, String nome, LocalDate dataNascimento, Integer idade,
         FaixaEtaria faixaEtaria, Vinculo vinculo,
-        String nomeResponsavel, String telefone, LocalDateTime criadoEm, String cep, Estado estado, String cidade, String bairro,
+        String nomeResponsavel, String telefone, LocalDateTime criadoEm, String cep, Estado estado, String cidade,
+        String bairro, String rua,
         Integer numero, String complemento) {
 
     public CadastarPacienteResponseDTO(Paciente paciente) {
         this(paciente.getId(), paciente.getNome(), paciente.getDataNascimento(),
                 DataUtil.calcularIdade(paciente.getDataNascimento()),
                 DataUtil.atribuirFaixaEtaria(paciente.getDataNascimento()), paciente.getVinculo(),
-                paciente.getNomeResponsavel(), paciente.getTelefone(), paciente.getCriadoEm(), paciente.getEndereco().getCep(),
+                paciente.getNomeResponsavel(), paciente.getTelefone(), paciente.getCriadoEm(),
+                paciente.getEndereco().getCep(),
                 paciente.getEndereco().getEstado(), paciente.getEndereco().getCidade(),
-                paciente.getEndereco().getBairro(), paciente.getEndereco().getNumero(),
+                paciente.getEndereco().getBairro(), paciente.getEndereco().getRua(), paciente.getEndereco().getNumero(),
                 paciente.getEndereco().getComplemento());
 
     }
