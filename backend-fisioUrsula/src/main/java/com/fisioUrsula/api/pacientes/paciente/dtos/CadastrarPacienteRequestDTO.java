@@ -5,7 +5,31 @@ import java.time.LocalDate;
 import com.fisioUrsula.api.pacientes.endereco.Estado;
 import com.fisioUrsula.api.pacientes.paciente.Vinculo;
 
-public record CadastrarPacienteRequestDTO(String nome, LocalDate dataNascimento, Vinculo vinculo,
-        String nomeResponsavel, String telefone, String cep, Estado estado, String cidade, String bairro,
-        Integer numero, String complemento) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+
+public record CadastrarPacienteRequestDTO(
+        @NotBlank(message = "O nome é obrigatório") String nome,
+
+        @NotNull(message = "A data de nascimento é obrigatória") @Past(message = "A data de nascimento deve ser no passado") LocalDate dataNascimento,
+
+        @NotNull(message = "O vínculo é obrigatório") Vinculo vinculo,
+
+        String nomeResponsavel,
+
+        @NotBlank(message = "O telefone é obrigatório") String telefone,
+
+        @NotBlank(message = "O CEP é obrigatório") @Pattern(regexp = "\\d{5}-\\d{3}", message = "CEP inválido") String cep,
+
+        @NotNull(message = "O estado é obrigatório") Estado estado,
+
+        @NotBlank(message = "A cidade é obrigatória") String cidade,
+
+        @NotBlank(message = "O bairro é obrigatório") String bairro,
+
+        @NotNull(message = "O número é obrigatório") Integer numero,
+
+        String complemento) {
 }
