@@ -16,7 +16,7 @@ public class PacienteService {
 
     @Transactional
     public CadastarPacienteResponseDTO cadastrarPaciente(CadastrarPacienteRequestDTO dto) {
-        Paciente paciente = new Paciente();
+        Paciente paciente = new Paciente(dto);
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
         return new CadastarPacienteResponseDTO(pacienteSalvo);
     }
