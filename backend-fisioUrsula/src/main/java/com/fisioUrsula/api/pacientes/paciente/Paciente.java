@@ -86,6 +86,7 @@ public class Paciente implements Serializable {
         this.endereco.setEstado(dto.estado());
         this.endereco.setCidade(dto.cidade());
         this.endereco.setBairro(dto.bairro());
+        this.endereco.setNumero(dto.numero());
         this.endereco.setComplemento(dto.complemento());
     }
 }
