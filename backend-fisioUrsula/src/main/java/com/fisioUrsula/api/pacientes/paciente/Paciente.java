@@ -48,13 +48,13 @@ public class Paciente implements Serializable {
     @Column(nullable = false, length = 20)
     private Vinculo vinculo;
 
-    @Column(nullable = false)
+    @Column(name = "data_nascimento")
     private LocalDate dataNascimento;
 
-    @Column(nullable = false, length = 40)
+    @Column(nullable = false, length = 120)
     private String nome;
 
-    @Column(nullable = false, length = 40)
+    @Column(nullable = false, length = 120)
     private String nomeResponsavel;
 
     @Column(nullable = false, length = 20)
@@ -76,6 +76,7 @@ public class Paciente implements Serializable {
     public Paciente(CadastrarPacienteRequestDTO dto) {
         this.nome = dto.nome();
         this.dataNascimento = dto.dataNascimento();
+
         this.vinculo = dto.vinculo();
         this.nomeResponsavel = dto.nomeResponsavel();
         this.telefone = dto.telefone();
@@ -86,6 +87,7 @@ public class Paciente implements Serializable {
         this.endereco.setEstado(dto.estado());
         this.endereco.setCidade(dto.cidade());
         this.endereco.setBairro(dto.bairro());
+        this.endereco.setRua(dto.rua());
         this.endereco.setNumero(dto.numero());
         this.endereco.setComplemento(dto.complemento());
     }
