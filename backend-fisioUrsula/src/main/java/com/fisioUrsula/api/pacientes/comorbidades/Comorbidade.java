@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fisioUrsula.api.pacientes.pacienteComorbidades.PacienteComorbidade;
+import com.fisioUrsula.api.pacientes.pacienteComorbidades.dtos.CadastrarComorbidadeRequestDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,5 +44,11 @@ public class Comorbidade implements Serializable {
 
     @OneToMany(mappedBy = "comorbidade")
     private List<PacienteComorbidade> pacientes;
+
+    public Comorbidade(CadastrarComorbidadeRequestDTO dto) {
+        this.nome = dto.nome();
+        this.descricao = dto.descricao();
+        this.codigoCID = dto.codigoCID();
+    }
 
 }
