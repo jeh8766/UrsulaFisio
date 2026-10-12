@@ -32,17 +32,16 @@ public class Comorbidade implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(nullable = false, length = 40)
+    @Column(nullable = false, length = 40, unique = true)
     private String nome;
 
-    @Column(length = 80)
+    @Column(length = 150)
     private String descricao;
 
-    @Column(length = 6, nullable = false)
+    @Column(length = 6, unique = true)
     private String codigoCID;
 
     @OneToMany(mappedBy = "comorbidade")
     private List<PacienteComorbidade> pacientes;
 
-    
 }
