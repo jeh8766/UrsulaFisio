@@ -1,0 +1,407 @@
+/* ==========================================================================
+   1. IMPORTS & BASE SHELL LAYOUT
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+.module-shell {
+  min-height: 100vh;
+  display: flex;
+  background: #f7f8f5;
+  color: #243c39;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.module-shell * {
+  box-sizing: border-box;
+}
+
+
+/* ==========================================================================
+   2. SIDEBAR, BRAND & PROFILE
+   ========================================================================== */
+
+.module-sidebar {
+  width: 248px;
+  flex: 0 0 248px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 17px 20px;
+  background: #fff;
+  border-right: 1px solid #e8eee9;
+}
+
+.module-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 10px 35px;
+  text-decoration: none;
+  color: #203d35;
+  font: 800 22px 'Manrope', sans-serif;
+  letter-spacing: -1px;
+}
+
+.module-brand > span:last-child span {
+  color: #438163;
+}
+
+.module-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  border-radius: 13px;
+  background: #eaf3ed;
+  color: #34705a;
+  font-size: 23px;
+}
+
+.module-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 10px;
+  border: 1px solid #e8eee9;
+  border-radius: 13px;
+  margin-bottom: 31px;
+  position: relative;
+}
+
+.module-profile strong,
+.module-sidebar-bottom strong {
+  display: block;
+  font-size: 11px;
+  color: #2c463c;
+  font-weight: 700;
+}
+
+.module-profile small,
+.module-sidebar-bottom small {
+  display: block;
+  margin-top: 4px;
+  color: #8a9a91;
+  font-size: 10px;
+}
+
+.module-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #dcece1;
+  color: #276349;
+  font: 700 14px 'Manrope', sans-serif;
+}
+
+.module-avatar.small {
+  width: 34px;
+  height: 34px;
+}
+
+.profile-status {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #63a879;
+  border: 2px solid white;
+  top: 12px;
+  left: 36px;
+}
+
+
+/* ==========================================================================
+   3. SIDEBAR NAVIGATION & BOTTOM
+   ========================================================================== */
+
+.module-nav-label {
+  margin: 0 12px 12px;
+  color: #a0aea5;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.module-nav {
+  display: grid;
+  gap: 5px;
+}
+
+.module-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 13px;
+  border-radius: 10px;
+  color: #718279;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background .2s, color .2s;
+}
+
+.module-nav-link:hover {
+  background: #f3f7f3;
+  color: #276349;
+}
+
+.module-nav-link.active {
+  background: #eaf3ed;
+  color: #276349;
+}
+
+.module-nav-icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  font-size: 17px;
+}
+
+.module-sidebar-bottom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 15px 8px 3px;
+  border-top: 1px solid #edf1ed;
+}
+
+.module-help-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #dce9df;
+  border-radius: 50%;
+  color: #4d8068;
+  font-weight: 700;
+}
+
+
+/* ==========================================================================
+   4. MAIN CONTENT AREA & TOPBAR
+   ========================================================================== */
+
+.module-main {
+  min-width: 0;
+  flex: 1;
+  padding: 0 36px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.module-topbar {
+  min-height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid #e9eee9;
+}
+
+.module-breadcrumb {
+  color: #91a097;
+  font-size: 11px;
+}
+
+.module-breadcrumb span {
+  margin: 0 9px;
+  color: #c0cbc3;
+}
+
+.module-breadcrumb strong {
+  color: #40584c;
+  font-weight: 600;
+}
+
+.module-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.module-date {
+  color: #8a9a91;
+  font-size: 11px;
+}
+
+.module-notification {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e5ece6;
+  border-radius: 10px;
+  background: #fff;
+  color: #567565;
+  font-size: 19px;
+}
+
+.module-notification i {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d88b72;
+  border: 1px solid #fff;
+}
+
+
+/* ==========================================================================
+   5. PAGE HEADINGS & CONTENT WRAPPER
+   ========================================================================== */
+
+.module-page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 29px 0 25px;
+}
+
+.module-eyebrow {
+  margin: 0 0 7px;
+  color: #4d8068;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+}
+
+.module-page-heading h1 {
+  margin: 0;
+  color: #203d35;
+  font: 700 29px/1.25 'Manrope', sans-serif;
+  letter-spacing: -1px;
+}
+
+.module-subtitle {
+  margin: 8px 0 0;
+  color: #85938b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.module-heading-mark {
+  display: grid;
+  place-items: center;
+  width: 49px;
+  height: 49px;
+  border: 1px solid #dcebe0;
+  border-radius: 15px;
+  background: #eaf3ed;
+  color: #438163;
+  font-size: 25px;
+}
+
+.module-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.module-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding-top: 23px;
+  margin-top: 26px;
+  border-top: 1px solid #e9eee9;
+  color: #9aa79f;
+  font-size: 9px;
+}
+
+
+/* ==========================================================================
+   6. RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+
+@media (max-width: 850px) {
+  .module-sidebar {
+    width: 210px;
+    flex-basis: 210px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  .module-main {
+    padding: 0 22px 18px;
+  }
+}
+
+@media (max-width: 650px) {
+  .module-shell {
+    display: block;
+  }
+  
+  .module-sidebar {
+    min-height: auto;
+    width: 100%;
+    padding: 14px 16px;
+    border-right: 0;
+    border-bottom: 1px solid #e8eee9;
+  }
+  
+  .module-brand {
+    margin: 0 0 13px;
+  }
+  
+  .module-profile,
+  .module-nav-label,
+  .module-sidebar-bottom {
+    display: none;
+  }
+  
+  .module-nav {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    padding-bottom: 3px;
+  }
+  
+  .module-nav-link {
+    flex: 0 0 auto;
+    min-height: 37px;
+    padding: 0 10px;
+    font-size: 10px;
+  }
+  
+  .module-nav-icon {
+    display: none;
+  }
+  
+  .module-main {
+    padding: 0 17px 18px;
+  }
+  
+  .module-topbar {
+    min-height: 57px;
+  }
+  
+  .module-date {
+    display: none;
+  }
+  
+  .module-page-heading {
+    padding: 24px 0 20px;
+  }
+  
+  .module-page-heading h1 {
+    font-size: 25px;
+  }
+  
+  .module-heading-mark {
+    width: 41px;
+    height: 41px;
+  }
+  
+  .module-footer {
+    flex-direction: column;
+    gap: 7px;
+  }
+}

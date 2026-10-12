@@ -1,0 +1,442 @@
+/* ==========================================================================
+   1. RECORDS INFO BANNER & LOCK
+   ========================================================================== */
+
+.records-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 17px 20px;
+  margin-bottom: 18px;
+  border: 1px solid #dcebe0;
+  border-radius: 14px;
+  background: linear-gradient(110deg, #edf6ef, #f7faf7);
+}
+
+.records-info-symbol {
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: #dcece1;
+  color: #34705a;
+  font-size: 21px;
+}
+
+.records-info-banner strong {
+  color: #2d5943;
+  font: 700 12px 'Manrope', sans-serif;
+}
+
+.records-info-banner p {
+  margin: 5px 0 0;
+  color: #6f8979;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.records-banner-lock {
+  margin-left: auto;
+  color: #6c8a77;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   2. STAT CARDS & METRICS
+   ========================================================================== */
+
+.records-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.records-stat-row article {
+  padding: 17px 19px;
+  border: 1px solid #e7eee8;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.records-stat-row small,
+.records-stat-row span {
+  display: block;
+  color: #89978f;
+  font-size: 10px;
+}
+
+.records-stat-row strong {
+  display: block;
+  margin: 5px 0 3px;
+  color: #203d35;
+  font: 700 24px 'Manrope', sans-serif;
+}
+
+
+/* ==========================================================================
+   3. PANEL & HEADINGS
+   ========================================================================== */
+
+.records-panel {
+  padding: 23px;
+  border: 1px solid #e7eee8;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.records-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.records-panel-heading h2 {
+  margin: 0;
+  color: #2b453a;
+  font: 700 16px 'Manrope', sans-serif;
+}
+
+.records-panel-heading p {
+  margin: 6px 0 0;
+  color: #8a9a91;
+  font-size: 11px;
+}
+
+.records-primary {
+  border: 0;
+  border-radius: 9px;
+  padding: 11px 15px;
+  background: #276349;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.records-primary:hover {
+  background: #1e523b;
+}
+
+.records-notice {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eef7f0;
+  color: #356b50;
+  font-size: 11px;
+}
+
+
+/* ==========================================================================
+   4. RECORD FORM & INPUTS
+   ========================================================================== */
+
+.records-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  padding: 16px;
+  margin-top: 18px;
+  border: 1px solid #e5eee7;
+  border-radius: 12px;
+  background: #f7faf7;
+}
+
+.records-form label {
+  display: grid;
+  gap: 7px;
+  color: #52685c;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.records-form input,
+.records-form select,
+.records-form textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #dce5df;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  color: #2c463c;
+  font: 11px 'DM Sans', sans-serif;
+}
+
+.records-form input,
+.records-form select {
+  height: 39px;
+}
+
+.records-form textarea {
+  resize: vertical;
+}
+
+.records-form input:focus,
+.records-form select:focus,
+.records-form textarea:focus {
+  border-color: #579378;
+}
+
+.records-summary-field {
+  grid-column: 1 / 3;
+}
+
+
+/* ==========================================================================
+   5. TOOLBAR & SEARCH
+   ========================================================================== */
+
+.records-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 22px 0 15px;
+}
+
+.records-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(100%, 350px);
+  height: 39px;
+  padding: 0 12px;
+  border: 1px solid #e1e9e2;
+  border-radius: 9px;
+  color: #8a9a91;
+}
+
+.records-search span {
+  font-size: 20px;
+}
+
+.records-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #2c463c;
+  font: 11px 'DM Sans', sans-serif;
+}
+
+.records-toolbar > select {
+  max-width: 190px;
+  padding: 0 10px;
+  border: 1px solid #e1e9e2;
+  border-radius: 9px;
+  background: #fff;
+  color: #718279;
+  font: 10px 'DM Sans', sans-serif;
+}
+
+
+/* ==========================================================================
+   6. RECORD LIST & CARDS
+   ========================================================================== */
+
+.records-list {
+  display: grid;
+  gap: 10px;
+}
+
+.record-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid #e8eee9;
+  border-radius: 12px;
+  transition: border-color .2s;
+}
+
+.record-card:hover {
+  border-color: #cbded0;
+}
+
+.record-avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: #e1efe5;
+  color: #397054;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.record-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.record-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #8a9a91;
+  font-size: 9px;
+}
+
+.record-meta span {
+  color: #438163;
+  font-weight: 700;
+}
+
+.record-meta i {
+  font-style: normal;
+  color: #c2ccc5;
+}
+
+.record-main h3 {
+  margin: 7px 0 5px;
+  color: #344b40;
+  font: 700 12px 'Manrope', sans-serif;
+}
+
+.record-main p {
+  margin: 0;
+  color: #77867d;
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.record-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 13px;
+  color: #9aa79f;
+  font-size: 9px;
+}
+
+.record-status {
+  padding: 5px 8px;
+  border-radius: 20px;
+  font-size: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.record-status.done {
+  background: #e8f5ec;
+  color: #438163;
+}
+
+.record-status.progress {
+  background: #fff3df;
+  color: #a77b34;
+}
+
+.record-more {
+  border: 0;
+  background: transparent;
+  color: #8a9a91;
+  font-size: 21px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.records-empty {
+  padding: 30px;
+  text-align: center;
+  color: #89978f;
+  font-size: 12px;
+}
+
+.records-disclaimer {
+  color: #9aa79f;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+
+/* ==========================================================================
+   7. RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+
+@media (max-width: 850px) {
+  .records-form {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .records-form > button {
+    justify-self: start;
+  }
+  
+  .records-summary-field {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 650px) {
+  .records-info-banner {
+    align-items: flex-start;
+    padding: 14px;
+  }
+  
+  .records-banner-lock {
+    display: none;
+  }
+  
+  .records-stat-row {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+  
+  .records-stat-row article {
+    padding: 13px 15px;
+  }
+  
+  .records-panel {
+    padding: 15px;
+  }
+  
+  .records-panel-heading h2 {
+    font-size: 14px;
+  }
+  
+  .records-form {
+    grid-template-columns: 1fr;
+  }
+  
+  .records-summary-field {
+    grid-column: auto;
+  }
+  
+  .records-toolbar {
+    flex-direction: column;
+  }
+  
+  .records-search {
+    width: 100%;
+  }
+  
+  .records-toolbar > select {
+    width: 100%;
+    max-width: none;
+    height: 39px;
+  }
+  
+  .record-card {
+    padding: 12px;
+    gap: 9px;
+  }
+  
+  .record-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+}
