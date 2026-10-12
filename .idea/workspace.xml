@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="11b46df1-3b4a-46d5-8312-5997593d4d90" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/agendamentos/agendamentoAtendimento/AgendamentoAtendimento.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/agendamentos/agendamentoAtendimento/AgendamentoAtendimento.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/agendamentos/agendamentoAvaliacao/AgendamentoAvaliacao.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/agendamentos/agendamentoAvaliacao/AgendamentoAvaliacao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/atendimentos/atendimento/Atendimento.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/atendimentos/atendimento/Atendimento.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/atendimentos/sinaisVitais/SinaisVitais.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/atendimentos/sinaisVitais/SinaisVitais.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/avaliacao/Avaliacao.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/avaliacao/Avaliacao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/diagnosticoAvaliacao/DiagnosticoAvaliacao.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/diagnosticoAvaliacao/DiagnosticoAvaliacao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/diagnosticos/Diagnostico.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/diagnosticos/Diagnostico.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/planoTratamento/exercicios/Exercicio.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/planoTratamento/exercicios/Exercicio.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/planoTratamento/planoTratamento/PlanoTratamento.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/planoTratamento/planoTratamento/PlanoTratamento.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/comorbidades/Comorbidade.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/comorbidades/Comorbidade.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/endereco/Endereco.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/endereco/Endereco.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/paciente/Paciente.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/paciente/Paciente.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/pacienteComorbidades/PacienteComorbidade.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/pacienteComorbidades/PacienteComorbidade.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3K2ijH1xjdxxVKblDHFl5pcbelE" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Maven.api [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.api [install].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.api [org.apache.maven.plugins:maven-clean-plugin:3.5.0:clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.api [org.apache.maven.plugins:maven-install-plugin:3.1.4:install].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.ApiApplication.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Kaique/OneDrive/Documentos/UrsulaFisio&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  }
+}</component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <module name="" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <option name="RUN_TOOL" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-37e91769500f-intellij.indexing.shared.core-IU-261.24374.151" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.24374.151" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="11b46df1-3b4a-46d5-8312-5997593d4d90" name="Changes" comment="" />
+      <created>1790762197617</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1790762197617</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
