@@ -10,6 +10,7 @@ import com.fisioUrsula.api.agendamentos.agendamentoAvaliacao.AgendamentoAvaliaca
 import com.fisioUrsula.api.pacientes.endereco.Endereco;
 import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteRequestDTO;
 import com.fisioUrsula.api.pacientes.pacienteComorbidades.PacienteComorbidade;
+import com.fisioUrsula.api.shared.utils.TelefoneUtil;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -23,6 +24,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -30,7 +32,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "pacientes")
+@Table(name = "pacientes", uniqueConstraints = { @UniqueConstraint(columnNames = { "nome", "telefone" }) })
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -79,7 +81,7 @@ public class Paciente implements Serializable {
 
         this.vinculo = dto.vinculo();
         this.nomeResponsavel = dto.nomeResponsavel();
-        this.telefone = dto.telefone();
+        this.telefone = TelefoneUtil.normalizarTelefone(dto.telefone());
         this.criadoEm = LocalDateTime.now();
 
         this.endereco = new Endereco();
