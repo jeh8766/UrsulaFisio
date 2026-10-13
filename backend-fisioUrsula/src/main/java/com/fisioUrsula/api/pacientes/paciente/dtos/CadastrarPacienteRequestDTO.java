@@ -11,27 +11,27 @@ import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 
 public record CadastrarPacienteRequestDTO(
-                @NotBlank(message = "O nome é obrigatório") String nome,
+        @NotBlank(message = "O nome é obrigatório") String nome,
 
-                @NotNull(message = "A data de nascimento é obrigatória") @Past(message = "A data de nascimento deve ser no passado") LocalDate dataNascimento,
+        @NotNull(message = "A data de nascimento é obrigatória") @Past(message = "A data de nascimento deve ser no passado") LocalDate dataNascimento,
 
-                @NotNull(message = "O vínculo é obrigatório") Vinculo vinculo,
+        @NotNull(message = "O vínculo é obrigatório") Vinculo vinculo,
 
-                String nomeResponsavel,
+        String nomeResponsavel,
 
-                @NotBlank(message = "O telefone é obrigatório") @Pattern(regexp = "^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$", message = "Telefone inválido") String telefone,
+        @NotBlank(message = "O telefone é obrigatório") @Pattern(regexp = "^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$", message = "Telefone inválido. Informe o DDD e o número.") String telefone,
 
-                @NotBlank(message = "O CEP é obrigatório") @Pattern(regexp = "\\d{5}-\\d{3}", message = "CEP inválido") String cep,
+        @NotBlank(message = "O CEP é obrigatório") @Pattern(regexp = "\\d{5}-\\d{3}", message = "CEP inválido") String cep,
 
-                @NotNull(message = "O estado é obrigatório") Estado estado,
+        @NotNull(message = "O estado é obrigatório") Estado estado,
 
-                @NotBlank(message = "A cidade é obrigatória") String cidade,
+        @NotBlank(message = "A cidade é obrigatória") String cidade,
 
-                @NotBlank(message = "O bairro é obrigatório") String bairro,
+        @NotBlank(message = "O bairro é obrigatório") String bairro,
 
-                @NotBlank(message = "A rua é obrigatória") String rua,
+        @NotBlank(message = "A rua é obrigatória") String rua,
 
-                @NotNull(message = "O número é obrigatório") Integer numero,
+        @NotNull(message = "O número é obrigatório") Integer numero,
 
-                String complemento) {
+        String complemento) {
 }
