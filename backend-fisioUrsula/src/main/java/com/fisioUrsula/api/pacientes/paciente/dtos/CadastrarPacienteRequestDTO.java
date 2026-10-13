@@ -19,7 +19,7 @@ public record CadastrarPacienteRequestDTO(
 
                 String nomeResponsavel,
 
-                @NotBlank(message = "O telefone é obrigatório") @Pattern(regexp = "^(\\(?\\d{2}\\)?\\s?)?\\d{4,5}-?\\d{4}$", message = "Telefone inválido") String telefone,
+                @NotBlank(message = "O telefone é obrigatório") @Pattern(regexp = "^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$", message = "Telefone inválido") String telefone,
 
                 @NotBlank(message = "O CEP é obrigatório") @Pattern(regexp = "\\d{5}-\\d{3}", message = "CEP inválido") String cep,
 
