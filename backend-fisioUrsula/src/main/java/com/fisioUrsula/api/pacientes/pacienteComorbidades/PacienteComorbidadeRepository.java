@@ -2,5 +2,6 @@ package com.fisioUrsula.api.pacientes.pacienteComorbidades;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PacienteComorbidadeRepository extends JpaRepository<PacienteComorbidade,Long> {
+public interface PacienteComorbidadeRepository extends JpaRepository<PacienteComorbidade, Long> {
+    boolean existsByPaciente_IdAndComorbidade_Id(Long pacienteId, Long comorbidadeId);
 }
