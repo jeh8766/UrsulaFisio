@@ -12,4 +12,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> registroDuplicado(RegistroDuplicadoException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
+
+    @ExceptionHandler(RegistroNaoEncontradoException.class)
+    public ResponseEntity<String> RegistroNaoEncontrado(RegistroNaoEncontradoException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
 }
