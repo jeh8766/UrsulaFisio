@@ -10,6 +10,8 @@ import com.fisioUrsula.api.shared.utils.TelefoneUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PacienteService {
@@ -27,5 +29,13 @@ public class PacienteService {
         Paciente paciente = new Paciente(dto);
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
         return new CadastarPacienteResponseDTO(pacienteSalvo);
+    }
+    @Transactional
+    public List<CadastarPacienteResponseDTO> listarTodosPacientes() {
+
+        return pacienteRepository.findAll()
+                .stream()
+                .map(CadastarPacienteResponseDTO::new)
+                .toList();
     }
 }
