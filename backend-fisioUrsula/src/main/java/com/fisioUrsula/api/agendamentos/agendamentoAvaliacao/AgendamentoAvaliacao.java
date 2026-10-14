@@ -3,6 +3,7 @@ package com.fisioUrsula.api.agendamentos.agendamentoAvaliacao;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import com.fisioUrsula.api.agendamentos.agendamentoAvaliacao.dtos.AgendarAvaliacaoRequestDTO;
 import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
@@ -27,7 +28,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "agendamentos_avaliacoes", uniqueConstraints = {@UniqueConstraint(columnNames = {"data", "horaInicio", "horaFim"})})
+@Table(name = "agendamentos_avaliacoes", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "data", "horaInicio", "horaFim" }) })
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -60,5 +62,13 @@ public class AgendamentoAvaliacao {
 
     @OneToOne(mappedBy = "agendamentoAvaliacao", cascade = CascadeType.ALL, orphanRemoval = true)
     private Avaliacao avaliacao;
+
+    public AgendamentoAvaliacao(AgendarAvaliacaoRequestDTO dto, Paciente paciente) {
+        this.paciente = paciente;
+        this.data = dto.data();
+        this.horaInicio = dto.horaInicio();
+        this.horaFim = dto.horaFim();
+        this.statusAgendamento = StatusAgendamento.PENDENTE;
+    }
 
 }
