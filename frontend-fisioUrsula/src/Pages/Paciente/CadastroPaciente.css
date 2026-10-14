@@ -1,0 +1,376 @@
+
+/* ==========================================================================
+   1. CADASTRO DE PACIENTE — BASE
+   ========================================================================== */
+
+.cadastro-paciente {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-bottom: 12px;
+  color: #263f36;
+}
+
+.cadastro-paciente *,
+.cadastro-paciente *::before,
+.cadastro-paciente *::after {
+  box-sizing: border-box;
+}
+
+.cadastro-paciente button,
+.cadastro-paciente input,
+.cadastro-paciente select {
+  font: inherit;
+}
+
+.cadastro-paciente button {
+  cursor: pointer;
+}
+
+
+/* ==========================================================================
+   2. INTRODUÇÃO
+   ========================================================================== */
+
+.cadastro-intro {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 23px;
+}
+
+.cadastro-intro-icon {
+  display: grid;
+  place-items: center;
+  width: 47px;
+  height: 47px;
+  flex: 0 0 auto;
+  border: 1px solid #dcebe0;
+  border-radius: 14px;
+  background: #eaf3ed;
+  color: #34705a;
+  font-size: 25px;
+}
+
+.cadastro-intro h2 {
+  margin: 0;
+  color: #2a4438;
+  font: 700 16px 'Manrope', sans-serif;
+  letter-spacing: -0.3px;
+}
+
+.cadastro-intro p {
+  margin: 6px 0 0;
+  color: #8a9a91;
+  font-size: 11px;
+}
+
+.cadastro-intro p span,
+.cadastro-field label span {
+  color: #c77b60;
+}
+
+
+/* ==========================================================================
+   3. CARDS E TÍTULOS DAS SEÇÕES
+   ========================================================================== */
+
+.cadastro-card {
+  padding: 25px;
+  margin-bottom: 19px;
+  border: 1px solid #e8ede7;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(40, 70, 50, 0.018);
+}
+
+.cadastro-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 21px;
+  margin-bottom: 23px;
+  border-bottom: 1px solid #edf1ed;
+}
+
+.cadastro-section-icon {
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: #eaf3ed;
+  color: #34705a;
+  font: 700 12px 'Manrope', sans-serif;
+}
+
+.cadastro-section-heading h3 {
+  margin: 0;
+  color: #2a4438;
+  font: 700 14px 'Manrope', sans-serif;
+}
+
+.cadastro-section-heading p {
+  margin: 5px 0 0;
+  color: #96a39a;
+  font-size: 10px;
+}
+
+
+/* ==========================================================================
+   4. GRID E CAMPOS
+   ========================================================================== */
+
+.cadastro-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 20px;
+}
+
+.cadastro-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 8px;
+}
+
+.cadastro-field.field-full {
+  grid-column: 1 / -1;
+}
+
+.cadastro-field label {
+  color: #52665a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cadastro-field input,
+.cadastro-field select {
+  width: 100%;
+  min-width: 0;
+  height: 43px;
+  padding: 0 13px;
+  outline: none;
+  border: 1px solid #e2e9e2;
+  border-radius: 9px;
+  background: #fbfcfa;
+  color: #344b40;
+  font-size: 11px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+}
+
+.cadastro-field input::placeholder {
+  color: #a5b0a9;
+}
+
+.cadastro-field input:focus,
+.cadastro-field select:focus {
+  border-color: #8db49a;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(87, 147, 120, 0.1);
+}
+
+.cadastro-field input:hover,
+.cadastro-field select:hover {
+  border-color: #cbdccf;
+}
+
+.cadastro-field input[type='date'] {
+  color-scheme: light;
+}
+
+.cadastro-field select {
+  cursor: pointer;
+}
+
+.cadastro-field small {
+  margin-top: -2px;
+  color: #9aa69e;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+
+/* ==========================================================================
+   5. MENSAGENS DE FEEDBACK
+   ========================================================================== */
+
+.cadastro-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 15px;
+  margin-bottom: 18px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.cadastro-message > span {
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.cadastro-message.error {
+  border-color: #f0d8d0;
+  background: #fff7f4;
+  color: #a95742;
+}
+
+.cadastro-message.error > span {
+  background: #f9e6df;
+}
+
+.cadastro-message.success {
+  border-color: #d5e9d9;
+  background: #f2faf3;
+  color: #34734b;
+}
+
+.cadastro-message.success > span {
+  background: #dcefe0;
+}
+
+
+/* ==========================================================================
+   6. BOTÕES
+   ========================================================================== */
+
+.cadastro-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 0 5px;
+}
+
+.cadastro-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 43px;
+  padding: 0 19px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s,
+    transform 0.2s;
+}
+
+.cadastro-button.secondary {
+  border-color: #e1e9e1;
+  background: #fff;
+  color: #64776b;
+}
+
+.cadastro-button.secondary:hover {
+  border-color: #cbdccf;
+  background: #f5f8f4;
+  color: #276349;
+}
+
+.cadastro-button.primary {
+  background: #276349;
+  color: #fff;
+  box-shadow: 0 5px 12px rgba(39, 99, 73, 0.12);
+}
+
+.cadastro-button.primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #1e523b;
+}
+
+.cadastro-button.primary:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+
+/* ==========================================================================
+   7. RESPONSIVIDADE
+   ========================================================================== */
+
+@media (max-width: 850px) {
+  .cadastro-card {
+    padding: 21px;
+  }
+
+  .cadastro-form-grid {
+    gap: 19px 15px;
+  }
+}
+
+@media (max-width: 550px) {
+  .cadastro-intro {
+    align-items: flex-start;
+  }
+
+  .cadastro-intro-icon {
+    width: 41px;
+    height: 41px;
+    border-radius: 12px;
+  }
+
+  .cadastro-card {
+    padding: 18px 15px;
+    margin-bottom: 15px;
+    border-radius: 12px;
+  }
+
+  .cadastro-section-heading {
+    gap: 10px;
+    padding-bottom: 17px;
+    margin-bottom: 19px;
+  }
+
+  .cadastro-section-icon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .cadastro-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .cadastro-field.field-full {
+    grid-column: auto;
+  }
+
+  .cadastro-field input,
+  .cadastro-field select {
+    height: 44px;
+  }
+
+  .cadastro-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .cadastro-button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cadastro-paciente *,
+  .cadastro-paciente *::before,
+  .cadastro-paciente *::after {
+    transition: none !important;
+  }
+}
