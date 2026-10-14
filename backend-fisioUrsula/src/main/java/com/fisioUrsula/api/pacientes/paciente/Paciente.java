@@ -65,6 +65,9 @@ public class Paciente implements Serializable {
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean ativo = true;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_endereco")
     private Endereco endereco;
@@ -78,12 +81,11 @@ public class Paciente implements Serializable {
     public Paciente(CadastrarPacienteRequestDTO dto) {
         this.nome = dto.nome();
         this.dataNascimento = dto.dataNascimento();
-
         this.vinculo = dto.vinculo();
         this.nomeResponsavel = dto.nomeResponsavel();
         this.telefone = TelefoneUtil.normalizarTelefone(dto.telefone());
-        this.criadoEm = LocalDateTime.now();
 
+        this.criadoEm = LocalDateTime.now();
         this.endereco = new Endereco();
         this.endereco.setCep(dto.cep());
         this.endereco.setEstado(dto.estado());
@@ -92,5 +94,21 @@ public class Paciente implements Serializable {
         this.endereco.setRua(dto.rua());
         this.endereco.setNumero(dto.numero());
         this.endereco.setComplemento(dto.complemento());
+    }
+    public void atualizar(CadastrarPacienteRequestDTO dto) {
+        this.nome = dto.nome().trim();
+        this.dataNascimento = dto.dataNascimento();
+        this.vinculo = dto.vinculo();
+        this.nomeResponsavel = dto.nomeResponsavel();
+        this.telefone = TelefoneUtil.normalizarTelefone(dto.telefone());
+
+        this.endereco.setCep(dto.cep());
+        this.endereco.setEstado(dto.estado());
+        this.endereco.setCidade(dto.cidade());
+        this.endereco.setBairro(dto.bairro());
+        this.endereco.setRua(dto.rua());
+        this.endereco.setNumero(dto.numero());
+        this.endereco.setComplemento(dto.complemento());
+
     }
 }
