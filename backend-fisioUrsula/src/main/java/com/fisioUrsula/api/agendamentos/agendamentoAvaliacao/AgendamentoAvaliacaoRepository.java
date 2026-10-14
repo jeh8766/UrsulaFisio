@@ -1,6 +1,27 @@
 package com.fisioUrsula.api.agendamentos.agendamentoAvaliacao;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
-public interface AgendamentoAvaliacaoRepository extends JpaRepository<AgendamentoAvaliacao,Long> {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.fisioUrsula.api.shared.enums.StatusAgendamento;
+
+public interface AgendamentoAvaliacaoRepository extends JpaRepository<AgendamentoAvaliacao, Long> {
+
+    @Query("""
+            SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END
+            FROM AgendamentoAvaliacao a
+            WHERE a.data = :data
+                AND a.horaInicio < :horaFim
+                AND a.horaFim > :horaInicio
+                AND a.statusAgendamento <> :statusCancelado
+                        """)
+    boolean existeConflito(
+            @Param("data") LocalDate data,
+            @Param("horaInicio") LocalTime horaInicio,
+            @Param("horaFim") LocalTime horaFim,
+            @Param("statusCancelado") StatusAgendamento statusCancelado);
 }
