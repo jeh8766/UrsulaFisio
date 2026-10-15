@@ -2,6 +2,7 @@ package com.fisioUrsula.api.atendimentos.atendimento;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import com.fisioUrsula.api.agendamentos.agendamentoAtendimento.AgendamentoAtendimento;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
@@ -32,10 +33,10 @@ public class Atendimento {
     private LocalDate data;
 
     @Column(nullable = false)
-    private LocalDateTime horaInicio;
+    private LocalTime horaInicio;
 
     @Column(nullable = false)
-    private LocalDateTime horaFim;
+    private LocalTime horaFim;
 
     @Column(length = 250)
     private String intercorrencia;
