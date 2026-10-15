@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.fisioUrsula.api.pacientes.paciente.dtos.CadastarPacienteResponseDTO;
+import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteResponseDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteRequestDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.DetalharPacienteResponseDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.ListarPacienteResponseDTO;
@@ -23,7 +23,7 @@ public class PacienteService {
     private final PacienteRepository pacienteRepository;
 
     @Transactional
-    public CadastarPacienteResponseDTO cadastrarPaciente(CadastrarPacienteRequestDTO dto) {
+    public CadastrarPacienteResponseDTO cadastrarPaciente(CadastrarPacienteRequestDTO dto) {
 
         if (pacienteRepository.existsByNomeIgnoreCaseAndTelefone(dto.nome().trim(),
                 TelefoneUtil.normalizarTelefone(dto.telefone()))) {
@@ -32,7 +32,7 @@ public class PacienteService {
 
         Paciente paciente = new Paciente(dto);
         Paciente pacienteSalvo = pacienteRepository.save(paciente);
-        return new CadastarPacienteResponseDTO(pacienteSalvo);
+        return new CadastrarPacienteResponseDTO(pacienteSalvo);
     }
 
     @Transactional

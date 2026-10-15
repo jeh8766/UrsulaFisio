@@ -1,6 +1,7 @@
 package com.fisioUrsula.api.agendamentos.agendamentoAtendimento;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
@@ -56,7 +57,7 @@ public class AgendamentoAtendimento {
     @Enumerated(EnumType.STRING)
     private StatusAgendamento statusAgendamento;
 
-    private LocalDate dataCancelamento;
+    private LocalDateTime dataCancelamento;
 
     @ManyToOne
     @JoinColumn(name = "plano_tratamento_id")

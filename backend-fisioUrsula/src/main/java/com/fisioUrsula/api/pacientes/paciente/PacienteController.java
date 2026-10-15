@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.fisioUrsula.api.pacientes.paciente.dtos.CadastarPacienteResponseDTO;
+import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteResponseDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteRequestDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.DetalharPacienteResponseDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.ListarPacienteResponseDTO;
@@ -30,10 +30,10 @@ public class PacienteController {
     private final PacienteService pacienteService;
 
     @PostMapping
-    public ResponseEntity<CadastarPacienteResponseDTO> cadastrarPaciente(
+    public ResponseEntity<CadastrarPacienteResponseDTO> cadastrarPaciente(
             @Valid @RequestBody CadastrarPacienteRequestDTO dto) {
 
-        CadastarPacienteResponseDTO paciente = pacienteService.cadastrarPaciente(dto);
+        CadastrarPacienteResponseDTO paciente = pacienteService.cadastrarPaciente(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(paciente);
     }
 
