@@ -8,6 +8,7 @@ import Prontuario from "./Pages/Prontuario/Prontuario";
 import CadastroPaciente from "./Pages/Paciente/CadastroPaciente";
 import Paciente from "./Pages/Paciente/Paciente";
 import "./App.css";
+import Agendamentos from "./Pages/Agenda/Agendamentos";
 
 
 
@@ -30,7 +31,7 @@ export default function App() {
         <Route path="/paciente" element={<Paciente />} />
         <Route path="/cadastro-paciente" element={<CadastroPaciente />} />
         <Route path="/modulo/:modulo" element={<ModuleLayout title="Módulo" subtitle="Área de trabalho do módulo selecionado." eyebrow="MÓDULO EM DESENVOLVIMENTO"><p>Conteúdo do módulo em desenvolvimento.</p></ModuleLayout>} />
-        
+        <Route path="/agendamento" element={<Agendamentos />} />
         
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -500,3 +500,71 @@
     font-size: 14px;
   }
 }
+
+.agenda-add-form select,
+.agenda-add-form input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  color: #30443a;
+  background: #fff;
+  border: 1px solid #dce5dd;
+  border-radius: 10px;
+  font: inherit;
+}
+
+.agenda-add-form select:focus,
+.agenda-add-form input:focus {
+  outline: none;
+  border-color: #6ca681;
+  box-shadow: 0 0 0 3px rgb(108 166 129 / 13%);
+}
+
+.agenda-add-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agenda-primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.agenda-error {
+  padding: 12px 16px;
+  color: #9b3030;
+  background: #fff0f0;
+  border-radius: 10px;
+}
+
+.agenda-status.pendente {
+  color: #8a641c;
+  background: #fff4d8;
+}
+
+.agenda-status.confirmado {
+  color: #2e754b;
+  background: #e7f5e9;
+}
+
+.agenda-status.cancelado {
+  color: #9b3030;
+  background: #fff0f0;
+}
+
+.agenda-status.remarcado {
+  color: #476c9b;
+  background: #eaf1fb;
+}
+
+.agenda-status.realizado {
+  color: #2e754b;
+  background: #e7f5e9;
+}
+
+.agenda-appointment-info small {
+  color: #718078;
+  font-size: 12px;
+}
