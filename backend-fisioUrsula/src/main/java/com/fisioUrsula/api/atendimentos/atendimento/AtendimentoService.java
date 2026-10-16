@@ -7,6 +7,7 @@ import com.fisioUrsula.api.agendamentos.agendamentos.AgendamentoRepository;
 import com.fisioUrsula.api.agendamentos.agendamentos.enums.TipoAgendamento;
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.CriarAtendimentoRequestDTO;
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.CriarAtendimentoResponseDTO;
+import com.fisioUrsula.api.atendimentos.atendimento.dtos.DetalharAtendimentoResponseDTO;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitaisRepository;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
@@ -56,6 +57,13 @@ public class AtendimentoService {
 
         return criarAtendimentoResponseDTO;
 
+    }
+
+    public DetalharAtendimentoResponseDTO detalharAtendimento(Long id){
+
+        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Atendimento com o Id não existe!"));
+
+        return new DetalharAtendimentoResponseDTO(atendimento);
     }
 
 }
