@@ -1,9 +1,10 @@
-package com.fisioUrsula.api.agendamentos.agendamentoAvaliacao.dtos;
+package com.fisioUrsula.api.agendamentos.agendamentos.dtos;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.fisioUrsula.api.agendamentos.agendamentoAvaliacao.AgendamentoAvaliacao;
+import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
+import com.fisioUrsula.api.agendamentos.agendamentos.enums.TipoAgendamento;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 
 public record AgendarAvaliacaoResponseDTO(
@@ -12,15 +13,16 @@ public record AgendarAvaliacaoResponseDTO(
         LocalDate data,
         LocalTime horaInicio,
         LocalTime horaFim,
-        StatusAgendamento statusAgendamento) {
+        StatusAgendamento statusAgendamento, TipoAgendamento tipoAgendamento) {
 
-    public AgendarAvaliacaoResponseDTO(AgendamentoAvaliacao dto) {
+    public AgendarAvaliacaoResponseDTO(Agendamento dto) {
         this(
                 dto.getId(),
                 dto.getPaciente().getId(),
                 dto.getData(),
                 dto.getHoraInicio(),
                 dto.getHoraFim(),
-                dto.getStatusAgendamento());
+                dto.getStatusAgendamento(),
+                dto.getTipoAgendamento());
     }
 }

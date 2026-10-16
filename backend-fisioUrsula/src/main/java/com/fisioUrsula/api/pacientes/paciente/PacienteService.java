@@ -37,7 +37,7 @@ public class PacienteService {
 
     @Transactional
     public List<ListarPacienteResponseDTO> listar(String nome, FaixaEtaria faixaEtaria,
-                                                  Long comorbidadeId, boolean ativo) {
+            Long comorbidadeId, boolean ativo) {
         return pacienteRepository
                 .findAll(PacienteSpecification.filtrar(nome, faixaEtaria, comorbidadeId, ativo),
                         Sort.by("nome").ascending())

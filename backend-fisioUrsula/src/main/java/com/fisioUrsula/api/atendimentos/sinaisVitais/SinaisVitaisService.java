@@ -1,11 +1,11 @@
 package com.fisioUrsula.api.atendimentos.sinaisVitais;
 
+import org.springframework.stereotype.Service;
 
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.CriarSinaisVitaisRequestDTO;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.CriarSinaisVitaisResponseDTO;
-import lombok.NoArgsConstructor;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -13,8 +13,7 @@ public class SinaisVitaisService {
 
     public final SinaisVitaisRepository sinaisVitaisRepository;
 
-
-    public CriarSinaisVitaisResponseDTO criarSinaisVitais(CriarSinaisVitaisRequestDTO criarSinaisVitaisRequestDTO){
+    public CriarSinaisVitaisResponseDTO criarSinaisVitais(CriarSinaisVitaisRequestDTO criarSinaisVitaisRequestDTO) {
 
         SinaisVitais sinaisVitais = new SinaisVitais();
 
@@ -29,8 +28,7 @@ public class SinaisVitaisService {
                 sinaisVitaisSalvo.getPressaoArterial(),
                 sinaisVitaisSalvo.getSaturacao(),
                 sinaisVitaisSalvo.getFrequenciaCardiaca(),
-                sinaisVitaisSalvo.getFrequenciaRespiratoria()
-        );
+                sinaisVitaisSalvo.getFrequenciaRespiratoria());
 
         return criarSinaisVitaisResponseDTO;
 

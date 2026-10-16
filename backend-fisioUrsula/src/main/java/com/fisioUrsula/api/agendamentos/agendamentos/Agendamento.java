@@ -1,14 +1,17 @@
-package com.fisioUrsula.api.agendamentos.agendamentoAtendimento;
+package com.fisioUrsula.api.agendamentos.agendamentos;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import com.fisioUrsula.api.agendamentos.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
+import com.fisioUrsula.api.agendamentos.agendamentos.enums.TipoAgendamento;
 import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
+import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
 import com.fisioUrsula.api.avaliacoes.planoTratamento.planoTratamento.PlanoTratamento;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -28,13 +31,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "agendamentos_atendimentos", uniqueConstraints = {@UniqueConstraint(columnNames = {"data", "horaInicio", "horaFim"})})
+@Table(name = "agendamentos_avaliacoes", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "data", "horaInicio", "horaFim" }) })
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgendamentoAtendimento {
+public class Agendamento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,19 +54,36 @@ public class AgendamentoAtendimento {
     @Column(nullable = false)
     private LocalTime horaFim;
 
-    @ManyToOne
-    @JoinColumn(name = "paciente", nullable = false)
-    private Paciente paciente;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoAgendamento tipoAgendamento;
 
     @Enumerated(EnumType.STRING)
     private StatusAgendamento statusAgendamento;
 
-    private LocalDateTime dataCancelamento;
+    private LocalDate dataCancelamento;
 
     @ManyToOne
     @JoinColumn(name = "plano_tratamento_id")
     private PlanoTratamento planoTratamento;
 
-    @OneToOne(mappedBy = "agendamentoAtendimento")
+    @ManyToOne
+    @JoinColumn(name = "paciente", nullable = false)
+    private Paciente paciente;
+
+    @OneToOne(mappedBy = "agendamento", cascade = CascadeType.ALL, orphanRemoval = true)
     private Atendimento atendimento;
+
+    @OneToOne(mappedBy = "agendamento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Avaliacao avaliacao;
+
+    public Agendamento(AgendarAvaliacaoRequestDTO dto, Paciente paciente) {
+        this.paciente = paciente;
+        this.data = dto.data();
+        this.horaInicio = dto.horaInicio();
+        this.horaFim = dto.horaFim();
+        this.statusAgendamento = StatusAgendamento.PENDENTE;
+        this.tipoAgendamento = TipoAgendamento.AVALIACAO;
+    }
+
 }

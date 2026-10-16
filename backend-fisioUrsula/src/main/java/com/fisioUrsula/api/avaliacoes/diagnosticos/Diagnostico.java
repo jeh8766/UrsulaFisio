@@ -23,7 +23,7 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor 
 public class Diagnostico {
 
     @Id

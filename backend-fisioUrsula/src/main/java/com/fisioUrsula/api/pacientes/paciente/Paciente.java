@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fisioUrsula.api.agendamentos.agendamentoAvaliacao.AgendamentoAvaliacao;
+import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
 import com.fisioUrsula.api.pacientes.endereco.Endereco;
 import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteRequestDTO;
 import com.fisioUrsula.api.pacientes.pacienteComorbidades.PacienteComorbidade;
@@ -76,7 +76,7 @@ public class Paciente implements Serializable {
     private List<PacienteComorbidade> comorbidades = new ArrayList<>();
 
     @OneToMany(mappedBy = "paciente")
-    private List<AgendamentoAvaliacao> agendamentos = new ArrayList<>();
+    private List<Agendamento> agendamentos = new ArrayList<>();
 
     public Paciente(CadastrarPacienteRequestDTO dto) {
         this.nome = dto.nome();

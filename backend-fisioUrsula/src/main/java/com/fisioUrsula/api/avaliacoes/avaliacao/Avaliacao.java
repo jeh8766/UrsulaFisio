@@ -1,14 +1,13 @@
 package com.fisioUrsula.api.avaliacoes.avaliacao;
 
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.math.BigDecimal;
 import java.util.List;
 
-import com.fisioUrsula.api.agendamentos.agendamentoAvaliacao.AgendamentoAvaliacao;
+import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
 import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.DiagnosticoAvaliacao;
 import com.fisioUrsula.api.avaliacoes.planoTratamento.planoTratamento.PlanoTratamento;
-import com.fisioUrsula.api.shared.enums.StatusAgendamento;
+import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 
 import jakarta.persistence.Column;
@@ -45,30 +44,21 @@ public class Avaliacao implements Serializable {
     @Column(nullable = false, length = 60)
     private String queixaPrincipal;
 
-    @Column(nullable = false)
-    private LocalDate data;
-
-    @Column(nullable = false)
-    private LocalTime horaInicio;
-
-    @Column(nullable = false)
-    private LocalTime horaFim;
-
     @Enumerated(EnumType.STRING)
     private StatusPagamento statusPagamento;
 
     @Enumerated(EnumType.STRING)
-    private StatusAgendamento statusAgendamento;
+    private StatusAtendimento statusAtendimento;
 
     @Column(columnDefinition = "TEXT")
     private String observacao;
 
     @Column(nullable = false)
-    private Double valor;
+    private BigDecimal valor;
 
     @OneToOne
-    @JoinColumn(name = "agendammentoAvaliacao_id", nullable = false)
-    private AgendamentoAvaliacao agendamentoAvaliacao;
+    @JoinColumn(name = "agendamento_id", nullable = false, unique = true)
+    private Agendamento agendamento;
 
     @OneToMany(mappedBy = "avaliacao")
     private List<DiagnosticoAvaliacao> diagnosticos;

@@ -3,7 +3,7 @@ package com.fisioUrsula.api.avaliacoes.planoTratamento.planoTratamento;
 import java.io.Serializable;
 import java.util.List;
 
-import com.fisioUrsula.api.agendamentos.agendamentoAtendimento.AgendamentoAtendimento;
+import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
 import com.fisioUrsula.api.atendimentos.atendimento.TipoAtendimento;
 import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
 import com.fisioUrsula.api.avaliacoes.planoTratamento.planoExercicios.PlanoExercicio;
@@ -62,5 +62,5 @@ public class PlanoTratamento implements Serializable {
     private List<PlanoExercicio> planosDeExercicio;
 
     @OneToMany(mappedBy = "planoTratamento")
-    private List<AgendamentoAtendimento> agendamentosDeAtendimento;
+    private List<Agendamento> agendamentos;
 }

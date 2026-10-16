@@ -1,31 +1,22 @@
 package com.fisioUrsula.api.atendimentos.atendimento.dtos;
 
-import com.fisioUrsula.api.shared.enums.StatusAgendamento;
-import com.fisioUrsula.api.shared.enums.StatusPagamento;
+import java.math.BigDecimal;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import com.fisioUrsula.api.shared.enums.StatusAtendimento;
+import com.fisioUrsula.api.shared.enums.StatusPagamento;
 
 public record CriarAtendimentoResponseDTO(
         Long id,
-
-        LocalDate data,
-
-        LocalTime horaInicio,
-
-        LocalTime horaFim,
 
         String intercorrencia,
 
         String evolucao,
 
-        Double valor,
+        BigDecimal valor,
 
-        Double taxaDeslocamento,
+        BigDecimal taxaDeslocamento,
 
-        StatusAgendamento statusAgendamento,
+        StatusAtendimento statusAtendimento,
 
-        StatusPagamento statusPagamento
-) {
+        StatusPagamento statusPagamento) {
 }
