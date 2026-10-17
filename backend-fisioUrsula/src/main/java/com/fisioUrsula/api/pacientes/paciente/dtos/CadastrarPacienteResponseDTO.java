@@ -3,10 +3,10 @@ package com.fisioUrsula.api.pacientes.paciente.dtos;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.fisioUrsula.api.pacientes.endereco.Estado;
-import com.fisioUrsula.api.pacientes.paciente.FaixaEtaria;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
-import com.fisioUrsula.api.pacientes.paciente.Vinculo;
+import com.fisioUrsula.api.shared.enums.Estado;
+import com.fisioUrsula.api.shared.enums.FaixaEtaria;
+import com.fisioUrsula.api.shared.enums.Vinculo;
 import com.fisioUrsula.api.shared.utils.DataUtil;
 
 public record CadastrarPacienteResponseDTO(Long id, String nome, LocalDate dataNascimento, Integer idade,

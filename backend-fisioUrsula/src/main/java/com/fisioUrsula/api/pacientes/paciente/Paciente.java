@@ -6,10 +6,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
+import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.pacientes.endereco.Endereco;
 import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteRequestDTO;
 import com.fisioUrsula.api.pacientes.pacienteComorbidades.PacienteComorbidade;
+import com.fisioUrsula.api.shared.enums.Vinculo;
 import com.fisioUrsula.api.shared.utils.TelefoneUtil;
 
 import jakarta.persistence.CascadeType;

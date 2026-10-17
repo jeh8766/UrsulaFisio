@@ -2,7 +2,7 @@ package com.fisioUrsula.api.pacientes.pacienteComorbidades.dtos;
 
 import java.time.LocalDate;
 
-import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.StatusDiagnostico;
+import com.fisioUrsula.api.shared.enums.StatusDiagnostico;
 
 import jakarta.validation.constraints.NotNull;
 

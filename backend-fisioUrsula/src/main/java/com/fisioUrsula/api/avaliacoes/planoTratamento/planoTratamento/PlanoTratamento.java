@@ -4,10 +4,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
-import com.fisioUrsula.api.atendimentos.atendimento.TipoAtendimento;
+import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
 import com.fisioUrsula.api.avaliacoes.planoTratamento.planoExercicios.PlanoExercicio;
+import com.fisioUrsula.api.shared.enums.TipoAtendimento;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

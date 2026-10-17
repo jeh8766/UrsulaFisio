@@ -1,16 +1,16 @@
-package com.fisioUrsula.api.agendamentos.agendamentos;
+package com.fisioUrsula.api.agendamentos;
 
 import org.springframework.stereotype.Service;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.AgendarAvaliacaoResponseDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.CriarAgendamentoAtendimentoRequestDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.CriarAgendamentoAtendimentoResponseDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.enums.TipoAgendamento;
+import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
+import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoResponseDTO;
+import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoRequestDTO;
+import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoResponseDTO;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
 import com.fisioUrsula.api.pacientes.paciente.PacienteRepository;
 import com.fisioUrsula.api.pacientes.paciente.dtos.PacienteResumoResponseDTO;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
+import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 
 import jakarta.persistence.EntityNotFoundException;

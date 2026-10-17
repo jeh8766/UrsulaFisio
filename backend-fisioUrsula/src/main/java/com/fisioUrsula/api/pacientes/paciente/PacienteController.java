@@ -18,6 +18,7 @@ import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteResponseDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteRequestDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.DetalharPacienteResponseDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.ListarPacienteResponseDTO;
+import com.fisioUrsula.api.shared.enums.FaixaEtaria;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.fisioUrsula.api.agendamentos.agendamentos;
+package com.fisioUrsula.api.agendamentos;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

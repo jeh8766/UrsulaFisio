@@ -9,6 +9,7 @@ import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteResponseDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteRequestDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.DetalharPacienteResponseDTO;
 import com.fisioUrsula.api.pacientes.paciente.dtos.ListarPacienteResponseDTO;
+import com.fisioUrsula.api.shared.enums.FaixaEtaria;
 import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 import com.fisioUrsula.api.shared.utils.TelefoneUtil;

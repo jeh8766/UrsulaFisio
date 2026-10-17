@@ -1,4 +1,4 @@
-package com.fisioUrsula.api.pacientes.endereco;
+package com.fisioUrsula.api.shared.enums;
 
 public enum Estado {
     

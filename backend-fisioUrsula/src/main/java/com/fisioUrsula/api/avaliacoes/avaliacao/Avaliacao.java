@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
+import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.DiagnosticoAvaliacao;
 import com.fisioUrsula.api.avaliacoes.planoTratamento.planoTratamento.PlanoTratamento;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;

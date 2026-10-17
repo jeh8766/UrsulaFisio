@@ -2,7 +2,7 @@ package com.fisioUrsula.api.atendimentos.atendimento;
 
 import java.math.BigDecimal;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
+import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;

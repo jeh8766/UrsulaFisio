@@ -1,4 +1,4 @@
-package com.fisioUrsula.api.atendimentos.atendimento;
+package com.fisioUrsula.api.shared.enums;
 
 public enum TipoAtendimento {
     PARTICULAR, CLINICA

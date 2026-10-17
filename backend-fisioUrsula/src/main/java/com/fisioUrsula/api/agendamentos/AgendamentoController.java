@@ -1,4 +1,4 @@
-package com.fisioUrsula.api.agendamentos.agendamentos;
+package com.fisioUrsula.api.agendamentos;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.AgendarAvaliacaoResponseDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.CriarAgendamentoAtendimentoRequestDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.CriarAgendamentoAtendimentoResponseDTO;
+import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
+import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoResponseDTO;
+import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoRequestDTO;
+import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoResponseDTO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

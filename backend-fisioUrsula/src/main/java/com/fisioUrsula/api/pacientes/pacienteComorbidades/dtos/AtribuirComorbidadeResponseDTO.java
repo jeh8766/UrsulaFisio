@@ -2,8 +2,8 @@ package com.fisioUrsula.api.pacientes.pacienteComorbidades.dtos;
 
 import java.time.LocalDate;
 
-import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.StatusDiagnostico;
 import com.fisioUrsula.api.pacientes.pacienteComorbidades.PacienteComorbidade;
+import com.fisioUrsula.api.shared.enums.StatusDiagnostico;
 
 public record AtribuirComorbidadeResponseDTO(
         Long id,
