@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "agendamentos_avaliacoes", uniqueConstraints = {
+@Table(name = "agendamentos", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "data", "horaInicio", "horaFim" }) })
 @Getter
 @Setter

@@ -1,15 +1,21 @@
 package com.fisioUrsula.api.agendamentos;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
 import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoResponseDTO;
 import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoRequestDTO;
 import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoResponseDTO;
+import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
+import com.fisioUrsula.api.avaliacoes.avaliacao.AvaliacaoRepository;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
 import com.fisioUrsula.api.pacientes.paciente.PacienteRepository;
 import com.fisioUrsula.api.pacientes.paciente.dtos.PacienteResumoResponseDTO;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
+import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 
@@ -23,6 +29,7 @@ public class AgendamentoService {
 
     private final PacienteRepository pacienteRepository;
     private final AgendamentoRepository agendamentoRepository;
+    private final AvaliacaoRepository avaliacaoRepository;
 
     @Transactional
     public AgendarAvaliacaoResponseDTO AgendarAvaliacao(Long pacienteId, AgendarAvaliacaoRequestDTO dto) {
@@ -34,8 +41,9 @@ public class AgendamentoService {
         Paciente paciente = pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado."));
 
-        boolean existeConflito = agendamentoRepository.existeConflito(dto.data(), dto.horaInicio(), dto.horaFim(),
-                StatusAgendamento.CANCELADO);
+        boolean existeConflito = agendamentoRepository.existeConflito(
+                dto.data(), dto.horaInicio(), dto.horaFim(),
+                List.of(StatusAgendamento.CANCELADO_FISIOTERAPEUTA, StatusAgendamento.CANCELADO_PACIENTE));
 
         if (existeConflito) {
             throw new RegistroDuplicadoException("Já existe um agendamento nesse intervalo de horário.");
@@ -64,7 +72,7 @@ public class AgendamentoService {
 
         boolean existeConflito = agendamentoRepository.existeConflito(criarAgendamentoAtendimentoRequestDTO.data(),
                 criarAgendamentoAtendimentoRequestDTO.horaInicio(), criarAgendamentoAtendimentoRequestDTO.horaFim(),
-                StatusAgendamento.CANCELADO);
+                List.of(StatusAgendamento.CANCELADO_FISIOTERAPEUTA, StatusAgendamento.CANCELADO_PACIENTE));
 
         if (existeConflito) {
             throw new RegistroDuplicadoException("Já existe um agendamento nesse intervalo de horário.");
@@ -87,5 +95,35 @@ public class AgendamentoService {
                 new PacienteResumoResponseDTO(agendamentoAtendimentoSalvo.getPaciente()));
 
         return criarAgendamentoAtendimentoResponseDTO;
+    }
+
+    @Transactional
+    public void alterarStatus(Long id, StatusAgendamento novoStatus) {
+
+        Agendamento agendamento = agendamentoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Agendamento não encontrado."));
+
+        agendamento.setStatusAgendamento(novoStatus);
+
+        if (novoStatus == StatusAgendamento.CANCELADO_FISIOTERAPEUTA
+                || novoStatus == StatusAgendamento.CANCELADO_PACIENTE) {
+            agendamento.setDataCancelamento(LocalDate.now());
+            return;
+        }
+
+        if (novoStatus == StatusAgendamento.CONFIRMADO
+                && agendamento.getTipoAgendamento() == TipoAgendamento.AVALIACAO) {
+
+            if (agendamento.getAvaliacao() != null) {
+                return;
+            }
+
+            Avaliacao avaliacao = new Avaliacao();
+            avaliacao.setAgendamento(agendamento);
+            avaliacao.setStatusAtendimento(StatusAtendimento.AGENDADO);
+            agendamento.setAvaliacao(avaliacao);
+
+            avaliacaoRepository.save(avaliacao);
+        }
     }
 }

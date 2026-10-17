@@ -41,7 +41,7 @@ public class Avaliacao implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(nullable = false, length = 60)
+    @Column(length = 60)
     private String queixaPrincipal;
 
     @Enumerated(EnumType.STRING)
@@ -53,7 +53,6 @@ public class Avaliacao implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String observacao;
 
-    @Column(nullable = false)
     private BigDecimal valor;
 
     @OneToOne
