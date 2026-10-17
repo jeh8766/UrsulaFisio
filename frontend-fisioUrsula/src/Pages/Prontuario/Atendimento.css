@@ -1,0 +1,255 @@
+
+.atendimento-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-bottom: 24px;
+  color: #30443a;
+}
+
+.atendimento-panel {
+  padding: 26px;
+  background: #fff;
+  border: 1px solid #e5ebe5;
+  border-radius: 18px;
+  box-shadow: 0 4px 16px rgb(36 60 57 / 3%);
+}
+
+.atendimento-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.atendimento-section-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  color: #3f7759;
+  background: #edf5ee;
+  border-radius: 13px;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.atendimento-section-heading h2 {
+  margin: 0 0 5px;
+  color: #243c39;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.atendimento-section-heading p {
+  margin: 0;
+  color: #819087;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.atendimento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.atendimento-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  color: #40534a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.atendimento-field-full {
+  grid-column: 1 / -1;
+}
+
+.atendimento-field input,
+.atendimento-field select,
+.atendimento-field textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px 14px;
+  color: #30443a;
+  background: #fcfdfb;
+  border: 1px solid #dce5dd;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.atendimento-field input,
+.atendimento-field select {
+  min-height: 46px;
+}
+
+.atendimento-field textarea {
+  min-height: 95px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.atendimento-field input::placeholder,
+.atendimento-field textarea::placeholder {
+  color: #a3afa6;
+}
+
+.atendimento-field input:focus,
+.atendimento-field select:focus,
+.atendimento-field textarea:focus {
+  outline: none;
+  border-color: #6ca681;
+  box-shadow: 0 0 0 3px rgb(108 166 129 / 13%);
+  background: #fff;
+}
+
+.atendimento-field small {
+  color: #849188;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.atendimento-info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 17px;
+  background: #f7f9f6;
+  border: 1px solid #edf0eb;
+  border-radius: 12px;
+}
+
+.atendimento-info-card span,
+.atendimento-total span {
+  color: #829087;
+  font-size: 12px;
+}
+
+.atendimento-info-card strong {
+  color: #30443a;
+  font-size: 14px;
+}
+
+.atendimento-info-card small,
+.atendimento-total small {
+  color: #87938a;
+  font-size: 12px;
+}
+
+.atendimento-helper {
+  margin: 4px 0 0;
+  color: #87938a;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.atendimento-total {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  padding: 16px 18px;
+  background: #edf5ee;
+  border: 1px solid #dcebdd;
+  border-radius: 12px;
+}
+
+.atendimento-total strong {
+  color: #2f704a;
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.atendimento-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.atendimento-button-primary,
+.atendimento-button-secondary {
+  min-height: 46px;
+  padding: 12px 20px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.atendimento-button-primary {
+  color: #fff;
+  background: #315c45;
+  border: 1px solid #315c45;
+}
+
+.atendimento-button-primary:hover {
+  background: #244b36;
+  transform: translateY(-1px);
+}
+
+.atendimento-button-secondary {
+  color: #496052;
+  background: #fff;
+  border: 1px solid #dce5dd;
+}
+
+.atendimento-button-secondary:hover {
+  background: #f4f7f3;
+}
+
+.atendimento-notice {
+  padding: 14px 17px;
+  color: #356947;
+  background: #edf7ee;
+  border: 1px solid #d8ead9;
+  border-radius: 11px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.atendimento-demo-note {
+  margin: 0;
+  color: #8b978e;
+  font-size: 12px;
+  line-height: 1.6;
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .atendimento-panel {
+    padding: 19px;
+  }
+
+  .atendimento-grid {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+
+  .atendimento-field-full {
+    grid-column: auto;
+  }
+
+  .atendimento-actions {
+    flex-direction: column-reverse;
+  }
+
+  .atendimento-button-primary,
+  .atendimento-button-secondary {
+    width: 100%;
+  }
+
+  .atendimento-demo-note {
+    text-align: left;
+  }
+}
