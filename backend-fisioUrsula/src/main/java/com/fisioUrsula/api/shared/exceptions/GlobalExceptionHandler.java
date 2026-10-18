@@ -1,11 +1,8 @@
 package com.fisioUrsula.api.shared.exceptions;
 
-import java.util.Map;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,17 +24,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> tratarDadosInvalidos(MethodArgumentNotValidException ex) {
-        // Quero deixar com o aviso, não quero ignorar...
-        String mensagem = ex.getBindingResult().getFieldErrors().stream().map(FieldError::getDefaultMessage).findFirst()
-                .orElse("Dados inválidos.");
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mensagem);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Dados Inválidos.");
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, String>> tratarViolacaoIntegridade(DataIntegrityViolationException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("mensagem", "Não foi possível realizar o agendamento devido a um conflito nos dados."));
+    public ResponseEntity<String> tratarViolacaoIntegridade(DataIntegrityViolationException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -54,5 +46,4 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> estadoIlegal(IllegalStateException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
-    //Tratar o IllegalStateException
 }
