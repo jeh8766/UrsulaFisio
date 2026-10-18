@@ -5,19 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="11b46df1-3b4a-46d5-8312-5997593d4d90" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/agendamentos/agendamentoAtendimento/AgendamentoAtendimento.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/agendamentos/agendamentoAtendimento/AgendamentoAtendimento.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/agendamentos/agendamentoAvaliacao/AgendamentoAvaliacao.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/agendamentos/agendamentoAvaliacao/AgendamentoAvaliacao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/atendimentos/atendimento/Atendimento.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/atendimentos/atendimento/Atendimento.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/atendimentos/sinaisVitais/SinaisVitais.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/atendimentos/sinaisVitais/SinaisVitais.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/avaliacao/Avaliacao.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/avaliacao/Avaliacao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/diagnosticoAvaliacao/DiagnosticoAvaliacao.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/diagnosticoAvaliacao/DiagnosticoAvaliacao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/diagnosticos/Diagnostico.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/diagnosticos/Diagnostico.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/planoTratamento/exercicios/Exercicio.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/planoTratamento/exercicios/Exercicio.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/planoTratamento/planoTratamento/PlanoTratamento.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/planoTratamento/planoTratamento/PlanoTratamento.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/comorbidades/Comorbidade.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/comorbidades/Comorbidade.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/endereco/Endereco.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/endereco/Endereco.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/paciente/Paciente.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/paciente/Paciente.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/pacienteComorbidades/PacienteComorbidade.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/pacientes/pacienteComorbidades/PacienteComorbidade.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,7 +14,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/backend-fisioUrsula" />
   </component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
@@ -43,28 +32,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Maven.api [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.api [install].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.api [org.apache.maven.plugins:maven-clean-plugin:3.5.0:clean].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.api [org.apache.maven.plugins:maven-install-plugin:3.1.4:install].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;Spring Boot.ApiApplication.executor&quot;: &quot;Run&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Kaique/OneDrive/Documentos/UrsulaFisio&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Maven.api [clean].executor": "Run",
+    "Maven.api [install].executor": "Run",
+    "Maven.api [org.apache.maven.plugins:maven-clean-plugin:3.5.0:clean].executor": "Run",
+    "Maven.api [org.apache.maven.plugins:maven-install-plugin:3.1.4:install].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Spring Boot.ApiApplication.executor": "Run",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Kaique/OneDrive/Documentos/UrsulaFisio",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration default="true" type="JetRunConfigurationType">
       <method v="2">

@@ -242,11 +242,13 @@ export default function Atendimento() {
                   setStatusAtendimento(evento.target.value)
                 }
               >
-                <option value="PENDENTE">Pendente</option>
-                <option value="REALIZADO">Realizado</option>
-                <option value="CANCELADO">Cancelado</option>
+                <option value="AGENDADO">Agendado</option>
+                <option value="ATENDIDO">Atendido</option>
+                <option value="CANCELADO_PACIENTE">Cancelado pelo paciente</option>
+                <option value="CANCELADO_FISIOTERAPEUTA">Cancelado pelo fisioterapeuta</option>
+                <option value="REAGENDADO">Reagendado</option>
               </select>
-            </label>
+            </label>  
 
             <label className="atendimento-field">
               Status do pagamento
