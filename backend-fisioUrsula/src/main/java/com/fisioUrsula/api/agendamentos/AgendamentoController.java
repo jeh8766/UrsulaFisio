@@ -47,7 +47,7 @@ public class AgendamentoController {
     public ResponseEntity<Void> alterarStatus(@PathVariable Long id,
             @Valid @RequestBody AlterarStatusAgendamentoRequestDTO dto) {
 
-        agendamentoService.alterarStatus(id, dto.statusAgendamento());
+        agendamentoService.alterarStatusAgendamento(id, dto.statusAgendamento());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

@@ -49,4 +49,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> entidadeNaoEncontrada(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> estadoIlegal(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+    //Tratar o IllegalStateException
 }

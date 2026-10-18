@@ -9,6 +9,8 @@ import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
 import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoResponseDTO;
 import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoRequestDTO;
 import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoResponseDTO;
+import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
+import com.fisioUrsula.api.atendimentos.atendimento.AtendimentoRepository;
 import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
 import com.fisioUrsula.api.avaliacoes.avaliacao.AvaliacaoRepository;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
@@ -30,6 +32,7 @@ public class AgendamentoService {
     private final PacienteRepository pacienteRepository;
     private final AgendamentoRepository agendamentoRepository;
     private final AvaliacaoRepository avaliacaoRepository;
+    private final AtendimentoRepository atendimentoRepository;
 
     @Transactional
     public AgendarAvaliacaoResponseDTO AgendarAvaliacao(Long pacienteId, AgendarAvaliacaoRequestDTO dto) {
@@ -98,7 +101,12 @@ public class AgendamentoService {
     }
 
     @Transactional
-    public void alterarStatus(Long id, StatusAgendamento novoStatus) {
+    public void alterarStatusAgendamento(Long id, StatusAgendamento novoStatus) {
+
+        // VALIDAR REGRAS DE NEGÓCIO COM DEMADANTE. AGENDAMENTO CANCELADO AINDA PODE SER
+        // CONFIRMADO? E O CONTRÁRIO?
+        // QUAIS AS REGRAS PRA REMARCADO? DEVE CRIAR UM NOVO AGENDAMENTO? NÃO DEVE
+        // ESXISTIR, APENAS O CANCELADO?
 
         Agendamento agendamento = agendamentoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Agendamento não encontrado."));
@@ -111,11 +119,14 @@ public class AgendamentoService {
             return;
         }
 
-        if (novoStatus == StatusAgendamento.CONFIRMADO
-                && agendamento.getTipoAgendamento() == TipoAgendamento.AVALIACAO) {
+        if (novoStatus != StatusAgendamento.CONFIRMADO) {
+            return;
+        }
+
+        if (agendamento.getTipoAgendamento() == TipoAgendamento.AVALIACAO) {
 
             if (agendamento.getAvaliacao() != null) {
-                return;
+                throw new IllegalStateException("Este agendamento já possui uma avaliação associada.");
             }
 
             Avaliacao avaliacao = new Avaliacao();
@@ -124,6 +135,21 @@ public class AgendamentoService {
             agendamento.setAvaliacao(avaliacao);
 
             avaliacaoRepository.save(avaliacao);
+            return;
+        }
+
+        if (agendamento.getTipoAgendamento() == TipoAgendamento.ATENDIMENTO) {
+
+            if (agendamento.getAtendimento() != null) {
+                throw new IllegalStateException("Este agendamento já possui um atendimento associado.");
+            }
+
+            Atendimento atendimento = new Atendimento();
+            atendimento.setAgendamento(agendamento);
+            atendimento.setStatusAtendimento(StatusAtendimento.AGENDADO);
+            agendamento.setAtendimento(atendimento);
+
+            atendimentoRepository.save(atendimento);
         }
     }
 }
