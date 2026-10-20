@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from "react";
 import "./Login.css";
+import { Link } from "react-router";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -76,7 +77,10 @@ export default function Login() {
               <span className="custom-check" /><span>Manter conectado neste dispositivo</span>
             </label>
             {mensagem && <p className="form-message" role="status">{mensagem}</p>}
-            <button className="submit-button" type="submit">Entrar na minha conta <span aria-hidden="true">→</span></button>
+              <Link to="/dashboard" >
+            <button className="submit-button" type="submit">Entrar na minha conta <span aria-hidden="true">→</span>
+            </button>
+              </Link>
           </form>
           <div className="secure-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg><span>Ambiente profissional com foco em privacidade</span></div>
         </div>
