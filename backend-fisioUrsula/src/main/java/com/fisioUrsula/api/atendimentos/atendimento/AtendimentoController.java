@@ -1,5 +1,6 @@
 package com.fisioUrsula.api.atendimentos.atendimento;
 
+import com.fisioUrsula.api.atendimentos.atendimento.dtos.ConcluirAtendimentoRequestDTO;
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.CriarAtendimentoRequestDTO;
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.CriarAtendimentoResponseDTO;
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.DetalharAtendimentoResponseDTO;
@@ -28,6 +29,14 @@ public class AtendimentoController {
     @GetMapping("/{id}")
     public ResponseEntity<DetalharAtendimentoResponseDTO> detalharAtendimento(@PathVariable Long id){
         DetalharAtendimentoResponseDTO detalharAtendimentoResponseDTO = atendimentoService.detalharAtendimento(id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(detalharAtendimentoResponseDTO);
+    }
+
+    @PatchMapping("/{id}/concluir")
+    public ResponseEntity<DetalharAtendimentoResponseDTO> concluirAtendimento(@Valid @RequestBody ConcluirAtendimentoRequestDTO dto, @PathVariable Long id){
+
+        DetalharAtendimentoResponseDTO detalharAtendimentoResponseDTO = atendimentoService.concluirAtendimento(id, dto);
 
         return ResponseEntity.status(HttpStatus.OK).body(detalharAtendimentoResponseDTO);
     }

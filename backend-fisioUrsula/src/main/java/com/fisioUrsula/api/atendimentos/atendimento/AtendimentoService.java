@@ -1,5 +1,6 @@
 package com.fisioUrsula.api.atendimentos.atendimento;
 
+import com.fisioUrsula.api.atendimentos.atendimento.dtos.ConcluirAtendimentoRequestDTO;
 import org.springframework.stereotype.Service;
 
 import com.fisioUrsula.api.agendamentos.Agendamento;
@@ -64,6 +65,24 @@ public class AtendimentoService {
         Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Atendimento com o Id não existe!"));
 
         return new DetalharAtendimentoResponseDTO(atendimento);
+    }
+
+    public DetalharAtendimentoResponseDTO concluirAtendimento(Long id, ConcluirAtendimentoRequestDTO dto){
+
+        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Atendimento com esse id não existe!"));
+
+        if (atendimento.getStatusAtendimento() == StatusAtendimento.ATENDIDO){
+            throw new RuntimeException("Esse atendimento ja foi realizado!");
+        }
+
+        atendimento.setIntercorrencia(dto.intercorrencia());
+        atendimento.setEvolucao(dto.evolucao());
+
+        atendimento.setStatusAtendimento(StatusAtendimento.ATENDIDO);
+
+        Atendimento atendimentoSalvo = atendimentoRepository.save(atendimento);
+
+        return new DetalharAtendimentoResponseDTO(atendimentoSalvo);
     }
 
 }

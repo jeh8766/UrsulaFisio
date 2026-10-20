@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("agendamento")
+@RequestMapping("agendamentos")
 public class AgendamentoController {
 
     private final AgendamentoService agendamentoService;
