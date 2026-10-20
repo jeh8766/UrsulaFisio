@@ -4,6 +4,7 @@ import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -20,9 +21,9 @@ public record DetalharAtendimentoResponseDTO(
 
         String evolucao,
 
-        Double valor,
+        BigDecimal valor,
 
-        Double taxaDeslocamento,
+        BigDecimal taxaDeslocamento,
 
         StatusAgendamento statusAgendamento,
 
@@ -36,9 +37,9 @@ public record DetalharAtendimentoResponseDTO(
     public DetalharAtendimentoResponseDTO(Atendimento atendimento) {
         this(
                 atendimento.getId(),
-                atendimento.getData(),
-                atendimento.getHoraInicio(),
-                atendimento.getHoraFim(),
+                atendimento.getAgendamento().getData(),
+                atendimento.getAgendamento().getHoraInicio(),
+                atendimento.getAgendamento().getHoraFim(),
 
                 atendimento.getIntercorrencia(),
                 atendimento.getEvolucao(),
@@ -46,14 +47,14 @@ public record DetalharAtendimentoResponseDTO(
                 atendimento.getValor(),
                 atendimento.getTaxaDeslocamento(),
 
-                atendimento.getStatusAgendamento(),
+                atendimento.getAgendamento().getStatusAgendamento(),
                 atendimento.getStatusPagamento(),
 
-                atendimento.getAgendamentoAtendimento()
+                atendimento.getAgendamento()
                         .getPaciente()
                         .getId(),
 
-                atendimento.getAgendamentoAtendimento()
+                atendimento.getAgendamento()
                         .getPaciente()
                         .getNome(),
 
