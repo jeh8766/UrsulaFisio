@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.fisioUrsula.api.pacientes.pacienteComorbidades.PacienteComorbidade;
+import com.fisioUrsula.api.shared.enums.FaixaEtaria;
 
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;

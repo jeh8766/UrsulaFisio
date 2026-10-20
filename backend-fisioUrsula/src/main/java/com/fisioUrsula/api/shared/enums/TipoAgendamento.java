@@ -1,4 +1,4 @@
-package com.fisioUrsula.api.agendamentos.agendamentos.enums;
+package com.fisioUrsula.api.shared.enums;
 
 public enum TipoAgendamento {
     AVALIACAO,

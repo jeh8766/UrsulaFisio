@@ -1,4 +1,4 @@
-package com.fisioUrsula.api.pacientes.paciente;
+package com.fisioUrsula.api.shared.enums;
 
 public enum Vinculo {
     PARTICULAR,

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fisioUrsula.api.avaliacoes.planoTratamento.planoExercicios.PlanoExercicio;
+import com.fisioUrsula.api.shared.enums.TipoExercicio;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

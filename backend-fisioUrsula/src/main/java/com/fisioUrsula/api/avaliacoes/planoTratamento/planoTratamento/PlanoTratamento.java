@@ -1,12 +1,13 @@
 package com.fisioUrsula.api.avaliacoes.planoTratamento.planoTratamento;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
-import com.fisioUrsula.api.atendimentos.atendimento.TipoAtendimento;
+import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
 import com.fisioUrsula.api.avaliacoes.planoTratamento.planoExercicios.PlanoExercicio;
+import com.fisioUrsula.api.shared.enums.TipoAtendimento;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,10 +47,10 @@ public class PlanoTratamento implements Serializable {
     private String frequencia;
 
     @Column(nullable = false)
-    private Double taxaDeslocPadrao;
+    private BigDecimal taxaDeslocPadrao;
 
     @Column(nullable = false)
-    private Double valorPadrao;
+    private BigDecimal valorPadrao;
 
     @Enumerated(EnumType.STRING)
     private TipoAtendimento tipoAtendimento;

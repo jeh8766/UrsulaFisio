@@ -2,7 +2,7 @@ package com.fisioUrsula.api.atendimentos.atendimento;
 
 import java.math.BigDecimal;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
+import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
@@ -44,10 +44,8 @@ public class Atendimento {
     @Column(length = 250)
     private String evolucao;
 
-    @Column(nullable = false)
     private BigDecimal valor;
 
-    @Column(nullable = false)
     private BigDecimal taxaDeslocamento;
 
     @Enumerated(EnumType.STRING)
@@ -57,7 +55,7 @@ public class Atendimento {
     private StatusPagamento statusPagamento;
 
     @OneToOne
-    @JoinColumn(name = "agendamento_id")
+    @JoinColumn(name = "agendamento_id", unique = true)
     private Agendamento agendamento;
 
     @OneToOne

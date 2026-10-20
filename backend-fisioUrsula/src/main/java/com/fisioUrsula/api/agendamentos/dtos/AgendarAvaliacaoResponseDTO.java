@@ -1,11 +1,11 @@
-package com.fisioUrsula.api.agendamentos.agendamentos.dtos;
+package com.fisioUrsula.api.agendamentos.dtos;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
-import com.fisioUrsula.api.agendamentos.agendamentos.enums.TipoAgendamento;
+import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
+import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 
 public record AgendarAvaliacaoResponseDTO(
         Long id,

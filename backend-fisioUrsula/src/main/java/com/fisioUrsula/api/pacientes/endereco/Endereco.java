@@ -3,6 +3,7 @@ package com.fisioUrsula.api.pacientes.endereco;
 import java.io.Serializable;
 
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
+import com.fisioUrsula.api.shared.enums.Estado;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

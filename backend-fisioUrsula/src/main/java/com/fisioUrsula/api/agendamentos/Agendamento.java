@@ -1,15 +1,15 @@
-package com.fisioUrsula.api.agendamentos.agendamentos;
+package com.fisioUrsula.api.agendamentos;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.enums.TipoAgendamento;
+import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
 import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
 import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
 import com.fisioUrsula.api.avaliacoes.planoTratamento.planoTratamento.PlanoTratamento;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
+import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -31,7 +31,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "agendamentos_avaliacoes", uniqueConstraints = {
+@Table(name = "agendamentos", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "data", "horaInicio", "horaFim" }) })
 @Getter
 @Setter

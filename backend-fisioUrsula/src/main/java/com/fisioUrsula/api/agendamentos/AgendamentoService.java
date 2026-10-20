@@ -1,16 +1,24 @@
-package com.fisioUrsula.api.agendamentos.agendamentos;
+package com.fisioUrsula.api.agendamentos;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.AgendarAvaliacaoResponseDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.CriarAgendamentoAtendimentoRequestDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.dtos.CriarAgendamentoAtendimentoResponseDTO;
-import com.fisioUrsula.api.agendamentos.agendamentos.enums.TipoAgendamento;
+import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
+import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoResponseDTO;
+import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoRequestDTO;
+import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoResponseDTO;
+import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
+import com.fisioUrsula.api.atendimentos.atendimento.AtendimentoRepository;
+import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
+import com.fisioUrsula.api.avaliacoes.avaliacao.AvaliacaoRepository;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
 import com.fisioUrsula.api.pacientes.paciente.PacienteRepository;
 import com.fisioUrsula.api.pacientes.paciente.dtos.PacienteResumoResponseDTO;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
+import com.fisioUrsula.api.shared.enums.StatusAtendimento;
+import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -23,6 +31,8 @@ public class AgendamentoService {
 
     private final PacienteRepository pacienteRepository;
     private final AgendamentoRepository agendamentoRepository;
+    private final AvaliacaoRepository avaliacaoRepository;
+    private final AtendimentoRepository atendimentoRepository;
 
     @Transactional
     public AgendarAvaliacaoResponseDTO AgendarAvaliacao(Long pacienteId, AgendarAvaliacaoRequestDTO dto) {
@@ -34,8 +44,9 @@ public class AgendamentoService {
         Paciente paciente = pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado."));
 
-        boolean existeConflito = agendamentoRepository.existeConflito(dto.data(), dto.horaInicio(), dto.horaFim(),
-                StatusAgendamento.CANCELADO);
+        boolean existeConflito = agendamentoRepository.existeConflito(
+                dto.data(), dto.horaInicio(), dto.horaFim(),
+                List.of(StatusAgendamento.CANCELADO_FISIOTERAPEUTA, StatusAgendamento.CANCELADO_PACIENTE));
 
         if (existeConflito) {
             throw new RegistroDuplicadoException("Já existe um agendamento nesse intervalo de horário.");
@@ -64,7 +75,7 @@ public class AgendamentoService {
 
         boolean existeConflito = agendamentoRepository.existeConflito(criarAgendamentoAtendimentoRequestDTO.data(),
                 criarAgendamentoAtendimentoRequestDTO.horaInicio(), criarAgendamentoAtendimentoRequestDTO.horaFim(),
-                StatusAgendamento.CANCELADO);
+                List.of(StatusAgendamento.CANCELADO_FISIOTERAPEUTA, StatusAgendamento.CANCELADO_PACIENTE));
 
         if (existeConflito) {
             throw new RegistroDuplicadoException("Já existe um agendamento nesse intervalo de horário.");
@@ -87,5 +98,58 @@ public class AgendamentoService {
                 new PacienteResumoResponseDTO(agendamentoAtendimentoSalvo.getPaciente()));
 
         return criarAgendamentoAtendimentoResponseDTO;
+    }
+
+    @Transactional
+    public void alterarStatusAgendamento(Long id, StatusAgendamento novoStatus) {
+
+        // VALIDAR REGRAS DE NEGÓCIO COM DEMADANTE. AGENDAMENTO CANCELADO AINDA PODE SER
+        // CONFIRMADO? E O CONTRÁRIO?
+        // QUAIS AS REGRAS PRA REMARCADO? DEVE CRIAR UM NOVO AGENDAMENTO? NÃO DEVE
+        // ESXISTIR, APENAS O CANCELADO?
+
+        Agendamento agendamento = agendamentoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Agendamento não encontrado."));
+
+        agendamento.setStatusAgendamento(novoStatus);
+
+        if (novoStatus == StatusAgendamento.CANCELADO_FISIOTERAPEUTA
+                || novoStatus == StatusAgendamento.CANCELADO_PACIENTE) {
+            agendamento.setDataCancelamento(LocalDate.now());
+            return;
+        }
+
+        if (novoStatus != StatusAgendamento.CONFIRMADO) {
+            return;
+        }
+
+        if (agendamento.getTipoAgendamento() == TipoAgendamento.AVALIACAO) {
+
+            if (agendamento.getAvaliacao() != null) {
+                throw new IllegalStateException("Este agendamento já possui uma avaliação associada.");
+            }
+
+            Avaliacao avaliacao = new Avaliacao();
+            avaliacao.setAgendamento(agendamento);
+            avaliacao.setStatusAtendimento(StatusAtendimento.AGENDADO);
+            agendamento.setAvaliacao(avaliacao);
+
+            avaliacaoRepository.save(avaliacao);
+            return;
+        }
+
+        if (agendamento.getTipoAgendamento() == TipoAgendamento.ATENDIMENTO) {
+
+            if (agendamento.getAtendimento() != null) {
+                throw new IllegalStateException("Este agendamento já possui um atendimento associado.");
+            }
+
+            Atendimento atendimento = new Atendimento();
+            atendimento.setAgendamento(agendamento);
+            atendimento.setStatusAtendimento(StatusAtendimento.AGENDADO);
+            agendamento.setAtendimento(atendimento);
+
+            atendimentoRepository.save(atendimento);
+        }
     }
 }

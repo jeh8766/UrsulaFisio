@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
 import com.fisioUrsula.api.avaliacoes.diagnosticos.Diagnostico;
+import com.fisioUrsula.api.shared.enums.StatusDiagnostico;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -2,9 +2,8 @@ package com.fisioUrsula.api.atendimentos.atendimento;
 
 import org.springframework.stereotype.Service;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
-import com.fisioUrsula.api.agendamentos.agendamentos.AgendamentoRepository;
-import com.fisioUrsula.api.agendamentos.agendamentos.enums.TipoAgendamento;
+import com.fisioUrsula.api.agendamentos.Agendamento;
+import com.fisioUrsula.api.agendamentos.AgendamentoRepository;
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.CriarAtendimentoRequestDTO;
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.CriarAtendimentoResponseDTO;
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.DetalharAtendimentoResponseDTO;
@@ -12,6 +11,7 @@ import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitaisRepository;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
+import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 
 import lombok.RequiredArgsConstructor;
 

@@ -3,7 +3,7 @@ package com.fisioUrsula.api.shared.utils;
 import java.time.LocalDate;
 import java.time.Period;
 
-import com.fisioUrsula.api.pacientes.paciente.FaixaEtaria;
+import com.fisioUrsula.api.shared.enums.FaixaEtaria;
 
 public class DataUtil {
 

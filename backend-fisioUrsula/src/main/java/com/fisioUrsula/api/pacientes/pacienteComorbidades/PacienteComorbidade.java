@@ -2,9 +2,9 @@ package com.fisioUrsula.api.pacientes.pacienteComorbidades;
 
 import java.time.LocalDate;
 
-import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.StatusDiagnostico;
 import com.fisioUrsula.api.pacientes.comorbidades.Comorbidade;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
+import com.fisioUrsula.api.shared.enums.StatusDiagnostico;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

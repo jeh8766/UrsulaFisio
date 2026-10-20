@@ -2,8 +2,8 @@ package com.fisioUrsula.api.pacientes.paciente.dtos;
 
 import java.time.LocalDate;
 
-import com.fisioUrsula.api.pacientes.endereco.Estado;
-import com.fisioUrsula.api.pacientes.paciente.Vinculo;
+import com.fisioUrsula.api.shared.enums.Estado;
+import com.fisioUrsula.api.shared.enums.Vinculo;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.fisioUrsula.api.agendamentos.agendamentos.Agendamento;
+import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.DiagnosticoAvaliacao;
 import com.fisioUrsula.api.avaliacoes.planoTratamento.planoTratamento.PlanoTratamento;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
@@ -41,7 +41,7 @@ public class Avaliacao implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(nullable = false, length = 60)
+    @Column(length = 60)
     private String queixaPrincipal;
 
     @Enumerated(EnumType.STRING)
@@ -53,7 +53,6 @@ public class Avaliacao implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String observacao;
 
-    @Column(nullable = false)
     private BigDecimal valor;
 
     @OneToOne
