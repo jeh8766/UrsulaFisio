@@ -40,4 +40,12 @@ public class AtendimentoController {
 
         return ResponseEntity.status(HttpStatus.OK).body(detalharAtendimentoResponseDTO);
     }
+
+    @PatchMapping("/{id}/pagamento")
+    public ResponseEntity<Void> registrarPagamento(@PathVariable Long id){
+
+        atendimentoService.registrarPagamento(id);
+
+        return  ResponseEntity.noContent().build();
+    }
 }
