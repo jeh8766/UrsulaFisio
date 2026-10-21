@@ -85,4 +85,19 @@ public class AtendimentoService {
         return new DetalharAtendimentoResponseDTO(atendimentoSalvo);
     }
 
+    public void registrarPagamento(Long id){
+
+        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(()-> new RuntimeException("Atendimento com esse id não existe!"));
+
+        if (atendimento.getStatusPagamento() == StatusPagamento.PAGO){
+            throw new RuntimeException("Atendimento ja foi pago!");
+        }
+
+        atendimento.setStatusPagamento(StatusPagamento.PAGO);
+
+        atendimentoRepository.save(atendimento);
+
+    }
+
+
 }
