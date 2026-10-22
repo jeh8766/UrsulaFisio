@@ -7,7 +7,7 @@ import './CadastroPaciente.css';
 export type CadastroPacienteData = {
   nome: string;
   dataNascimento: string;
-  vinculo: 'PARTICULAR' | 'CONVENIO';
+  vinculo: 'PARTICULAR' | 'CLINICA';
   nomeResponsavel: string;
   telefone: string;
   cep: string;
@@ -20,15 +20,16 @@ export type CadastroPacienteData = {
 };
 
 type CadastroPacienteProps = {
-  onCadastrar?: (
-    paciente: CadastroPacienteData
-  ) => void | Promise<void>;
+  
+  onCadastrar?: (paciente: CadastroPacienteData) => void | Promise<void>;
 };
+
+const API_PACIENTES_URL = 'http://localhost:8080/pacientes';
 
 const initialForm: CadastroPacienteData = {
   nome: '',
   dataNascimento: '',
-  vinculo: 'PARTICULAR',
+  vinculo: 'PARTICULAR' ,
   nomeResponsavel: '',
   telefone: '',
   cep: '',
@@ -113,17 +114,10 @@ export default function CadastroPaciente({
       return;
     }
 
-    if (!onCadastrar) {
-      setErro(
-        'O formulário está pronto, mas ainda precisa ser conectado à API de cadastro.'
-      );
-      return;
-    }
-
     try {
       setSalvando(true);
 
-      await onCadastrar({
+      const dadosPaciente: CadastroPacienteData = {
         ...form,
         nome: form.nome.trim(),
         nomeResponsavel: form.nomeResponsavel.trim(),
@@ -135,14 +129,66 @@ export default function CadastroPaciente({
         rua: form.rua.trim(),
         numero: Number(form.numero),
         complemento: form.complemento.trim(),
-      });
+      };
+
+      if (onCadastrar) {
+        // Se o componente pai forneceu uma função, ela continua sendo utilizada.
+        await onCadastrar(dadosPaciente);
+      } else {
+        // Caso contrário, envia os dados diretamente ao endpoint do Spring Boot.
+        const resposta = await fetch(API_PACIENTES_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(dadosPaciente),
+        });
+
+        if (!resposta.ok) {
+          const corpoErro = await resposta.text();
+          let mensagem = `Erro ${resposta.status}: não foi possível cadastrar o paciente.`;
+
+          if (corpoErro) {
+            try {
+              const detalhe = JSON.parse(corpoErro);
+              mensagem =
+                detalhe.detail ||
+                detalhe.message ||
+                detalhe.mensagem ||
+                detalhe.title ||
+                mensagem;
+
+              // Compatível com respostas de validação que retornam uma lista de erros.
+              if (Array.isArray(detalhe.errors) && detalhe.errors.length > 0) {
+                mensagem = detalhe.errors
+                  .map((item: { defaultMessage?: string; message?: string }) =>
+                    item.defaultMessage || item.message
+                  )
+                  .filter(Boolean)
+                  .join(' ');
+              }
+            } catch {
+              mensagem = corpoErro;
+            }
+          }
+
+          throw new Error(mensagem);
+        }
+      }
 
       setSucesso(true);
       setForm(initialForm);
-    } catch {
-      setErro(
-        'Não foi possível cadastrar o paciente. Verifique os dados e tente novamente.'
-      );
+    } catch (e: unknown) {
+      if (e instanceof TypeError) {
+        setErro(
+          'Não foi possível conectar à API. Confira se o Spring Boot está rodando em http://localhost:8080.'
+        );
+      } else if (e instanceof Error) {
+        setErro(e.message || 'Não foi possível cadastrar o paciente.');
+      } else {
+        setErro('Não foi possível cadastrar o paciente. Verifique os dados e tente novamente.');
+      }
     } finally {
       setSalvando(false);
     }
@@ -227,7 +273,7 @@ export default function CadastroPaciente({
                   required
                 >
                   <option value="PARTICULAR">Particular</option>
-                  <option value="CONVENIO">Convênio</option>
+                  <option value="CLINICA">Convênio</option>
                 </select>
               </div>
 
@@ -314,34 +360,34 @@ export default function CadastroPaciente({
                   autoComplete="address-level1"
                   required
                 >
-                  <option value="">Selecione o estado</option>
-                  <option value="ACRE">Acre</option>
-                  <option value="ALAGOAS">Alagoas</option>
-                  <option value="AMAPA">Amapá</option>
-                  <option value="AMAZONAS">Amazonas</option>
-                  <option value="BAHIA">Bahia</option>
-                  <option value="CEARA">Ceará</option>
-                  <option value="DISTRITO_FEDERAL">Distrito Federal</option>
-                  <option value="ESPIRITO_SANTO">Espírito Santo</option>
-                  <option value="GOIAS">Goiás</option>
-                  <option value="MARANHAO">Maranhão</option>
-                  <option value="MATO_GROSSO">Mato Grosso</option>
-                  <option value="MATO_GROSSO_DO_SUL">Mato Grosso do Sul</option>
-                  <option value="MINAS_GERAIS">Minas Gerais</option>
-                  <option value="PARA">Pará</option>
-                  <option value="PARAIBA">Paraíba</option>
-                  <option value="PARANA">Paraná</option>
-                  <option value="PERNAMBUCO">Pernambuco</option>
-                  <option value="PIAUI">Piauí</option>
-                  <option value="RIO_DE_JANEIRO">Rio de Janeiro</option>
-                  <option value="RIO_GRANDE_DO_NORTE">Rio Grande do Norte</option>
-                  <option value="RIO_GRANDE_DO_SUL">Rio Grande do Sul</option>
-                  <option value="RONDONIA">Rondônia</option>
-                  <option value="RORAIMA">Roraima</option>
-                  <option value="SANTA_CATARINA">Santa Catarina</option>
-                  <option value="SAO_PAULO">São Paulo</option>
-                  <option value="SERGIPE">Sergipe</option>
-                  <option value="TOCANTINS">Tocantins</option>
+                    <option value="">Selecione o estado</option>
+                    <option value="AC">Acre</option>
+                    <option value="AL">Alagoas</option>
+                    <option value="AP">Amapá</option>
+                    <option value="AM">Amazonas</option>
+                    <option value="BA">Bahia</option>
+                    <option value="CE">Ceará</option>
+                <option value="DF">Distrito Federal</option>
+                <option value="ES">Espírito Santo</option>
+                <option value="GO">Goiás</option>
+                <option value="MA">Maranhão</option>
+                <option value="MT">Mato Grosso</option>
+                <option value="MS">Mato Grosso do Sul</option>
+                <option value="MG">Minas Gerais</option>
+                <option value="PA">Pará</option>
+                <option value="PB">Paraíba</option>
+                <option value="PR">Paraná</option>
+                <option value="PE">Pernambuco</option>
+                <option value="PI">Piauí</option>
+                <option value="RJ">Rio de Janeiro</option>
+                <option value="RN">Rio Grande do Norte</option>
+                <option value="RS">Rio Grande do Sul</option>
+                <option value="RO">Rondônia</option>
+                <option value="RR">Roraima</option>
+                <option value="SC">Santa Catarina</option>
+                <option value="SP">São Paulo</option>
+                <option value="SE">Sergipe</option>
+                <option value="TO">Tocantins</option>
                 </select>
               </div>
 
