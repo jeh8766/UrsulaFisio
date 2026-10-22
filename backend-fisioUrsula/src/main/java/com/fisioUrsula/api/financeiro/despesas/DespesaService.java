@@ -1,5 +1,6 @@
 package com.fisioUrsula.api.financeiro.despesas;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,14 +29,19 @@ public class DespesaService {
     @Transactional(readOnly = true)
     public List<DetalharDespesaResponseDTO> listar(CategoriaDespesa categoria, LocalDate inicio,
                                                    LocalDate fim, String busca) {
-        if (inicio != null && fim != null && inicio.isAfter(fim)) {
-            throw new IllegalArgumentException("A data inicial não pode ser depois da data final.");
-        }
+        validarPeriodo(inicio, fim);
         String termo = (busca == null || busca.isBlank()) ? null : busca.trim();
         return despesaRepository.filtrar(categoria, inicio, fim, termo)
                 .stream()
                 .map(DetalharDespesaResponseDTO::new)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal calcularTotal(CategoriaDespesa categoria, LocalDate inicio, LocalDate fim) {
+        validarPeriodo(inicio, fim);
+        BigDecimal total = despesaRepository.somarValores(categoria, inicio, fim);
+        return total != null ? total : BigDecimal.ZERO;
     }
 
     @Transactional(readOnly = true)
@@ -54,6 +60,12 @@ public class DespesaService {
     public void excluir(Long id) {
         Despesa despesa = buscarEntidade(id);
         despesaRepository.delete(despesa);
+    }
+
+    private void validarPeriodo(LocalDate inicio, LocalDate fim) {
+        if (inicio != null && fim != null && inicio.isAfter(fim)) {
+            throw new IllegalArgumentException("A data inicial não pode ser depois da data final.");
+        }
     }
 
     private Despesa buscarEntidade(Long id) {

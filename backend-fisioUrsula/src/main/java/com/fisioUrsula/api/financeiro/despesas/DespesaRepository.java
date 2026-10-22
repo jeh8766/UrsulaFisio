@@ -1,5 +1,6 @@
 package com.fisioUrsula.api.financeiro.despesas;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -24,4 +25,15 @@ public interface DespesaRepository extends JpaRepository<Despesa, Long> {
             @Param("inicio") LocalDate inicio,
             @Param("fim") LocalDate fim,
             @Param("busca") String busca);
+
+    @Query("""
+            SELECT SUM(d.valor) FROM Despesa d
+            WHERE (:categoria IS NULL OR d.categoria = :categoria)
+              AND (:inicio IS NULL OR d.dataDespesa >= :inicio)
+              AND (:fim IS NULL OR d.dataDespesa <= :fim)
+            """)
+    BigDecimal somarValores(
+            @Param("categoria") CategoriaDespesa categoria,
+            @Param("inicio") LocalDate inicio,
+            @Param("fim") LocalDate fim);
 }

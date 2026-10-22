@@ -1,5 +1,6 @@
 package com.fisioUrsula.api.financeiro.despesas;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -43,6 +44,14 @@ public class DespesaController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
             @RequestParam(required = false) String busca) {
         return ResponseEntity.ok(despesaService.listar(categoria, inicio, fim, busca));
+    }
+
+    @GetMapping("/total")
+    public ResponseEntity<BigDecimal> calcularTotal(
+            @RequestParam(required = false) CategoriaDespesa categoria,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
+        return ResponseEntity.ok(despesaService.calcularTotal(categoria, inicio, fim));
     }
 
     @GetMapping("/{id}")
