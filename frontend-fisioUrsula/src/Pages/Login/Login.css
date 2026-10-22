@@ -1,8 +1,7 @@
-
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: #243c39;
   background: #f7f8f5;
   font-synthesis: none;
@@ -33,7 +32,7 @@ button {
 .login-page {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(390px, .92fr) minmax(470px, 1.08fr);
+  grid-template-columns: minmax(390px, 0.92fr) minmax(470px, 1.08fr);
   background: #fbfcfa;
 }
 
@@ -47,7 +46,11 @@ button {
   padding: 42px clamp(34px, 5.2vw, 78px) 34px;
   color: #f6fbf7;
   background:
-    radial-gradient(ellipse at 15% 90%, rgba(111, 163, 138, .22), transparent 40%),
+    radial-gradient(
+      ellipse at 15% 90%,
+      rgba(111, 163, 138, 0.22),
+      transparent 40%
+    ),
     linear-gradient(145deg, #173f39 0%, #20564b 52%, #2a6254 100%);
   isolation: isolate;
 }
@@ -63,11 +66,11 @@ button {
 .brand-mark {
   width: 42px;
   height: 42px;
-  border: 1px solid rgba(255, 255, 255, .35);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 14px;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, .1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .brand-mark svg {
@@ -81,7 +84,9 @@ button {
 .brand-name {
   display: flex;
   align-items: center;
-  font: 800 23px 'Manrope', sans-serif;
+  font:
+    800 23px "Manrope",
+    sans-serif;
   letter-spacing: -1.2px;
   color: #fff;
 }
@@ -112,12 +117,14 @@ button {
   height: 7px;
   border-radius: 50%;
   background: #b3dfbf;
-  box-shadow: 0 0 0 5px rgba(179, 223, 191, .12);
+  box-shadow: 0 0 0 5px rgba(179, 223, 191, 0.12);
 }
 
 .visual-copy h1 {
   margin: 25px 0 20px;
-  font: 600 clamp(42px, 4.1vw, 62px)/1.12 'Manrope', sans-serif;
+  font:
+    600 clamp(42px, 4.1vw, 62px)/1.12 "Manrope",
+    sans-serif;
   letter-spacing: -2.9px;
 }
 
@@ -153,7 +160,7 @@ button {
   place-items: center;
   width: 22px;
   height: 22px;
-  border: 1px solid rgba(194, 226, 205, .4);
+  border: 1px solid rgba(194, 226, 205, 0.4);
   border-radius: 50%;
   color: #c7e9d1;
   font-size: 11px;
@@ -163,19 +170,23 @@ button {
 .visual-bottom {
   position: relative;
   z-index: 2;
-  border-top: 1px solid rgba(255, 255, 255, .17);
+  border-top: 1px solid rgba(255, 255, 255, 0.17);
   padding-top: 24px;
   max-width: 460px;
 }
 
 .quote-mark {
   color: #b8dfc8;
-  font: 54px/.7 Georgia, serif;
+  font:
+    54px/0.7 Georgia,
+    serif;
 }
 
 .visual-bottom p {
   margin: 12px 0 17px;
-  font: 500 16px/1.6 'Manrope', sans-serif;
+  font:
+    500 16px/1.6 "Manrope",
+    sans-serif;
   color: #f0f7f1;
 }
 
@@ -197,7 +208,7 @@ button {
 .decor {
   position: absolute;
   z-index: -1;
-  border: 1px solid rgba(204, 238, 218, .09);
+  border: 1px solid rgba(204, 238, 218, 0.09);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -208,8 +219,8 @@ button {
   right: -290px;
   top: 12%;
   box-shadow:
-    0 0 0 48px rgba(204, 238, 218, .025),
-    0 0 0 96px rgba(204, 238, 218, .02);
+    0 0 0 48px rgba(204, 238, 218, 0.025),
+    0 0 0 96px rgba(204, 238, 218, 0.02);
 }
 
 .decor-two {
@@ -217,7 +228,7 @@ button {
   height: 340px;
   left: -240px;
   bottom: -110px;
-  box-shadow: 0 0 0 35px rgba(204, 238, 218, .025);
+  box-shadow: 0 0 0 35px rgba(204, 238, 218, 0.025);
 }
 
 /* Painel do formulário */
@@ -268,7 +279,9 @@ button {
 
 .login-content h2 {
   margin: 0;
-  font: 700 clamp(30px, 3vw, 38px)/1.2 'Manrope', sans-serif;
+  font:
+    700 clamp(30px, 3vw, 38px)/1.2 "Manrope",
+    sans-serif;
   letter-spacing: -1.6px;
   color: #203d35;
 }
@@ -289,110 +302,6 @@ form label {
   font-weight: 700;
 }
 
-.input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  height: 52px;
-  padding: 0 15px;
-  border: 1px solid #dce5df;
-  border-radius: 11px;
-  background: #fff;
-  transition: border-color .2s, box-shadow .2s;
-  margin-bottom: 21px;
-}
-
-.input-wrap:focus-within {
-  border-color: #579378;
-  box-shadow: 0 0 0 3px rgba(87, 147, 120, .12);
-}
-
-.input-wrap > svg {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 auto;
-  fill: none;
-  stroke: #84968d;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.input-wrap input {
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: #263f36;
-  font-size: 12px;
-}
-
-.input-wrap input::placeholder {
-  color: #a5b0aa;
-}
-
-.label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.text-button {
-  border: 0;
-  padding: 0 0 9px;
-  background: transparent;
-  color: #438163;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.text-button:hover {
-  color: #245c43;
-  text-decoration: underline;
-}
-
-.show-password {
-  display: grid;
-  place-items: center;
-  padding: 4px;
-  border: 0;
-  background: transparent;
-  color: #84968d;
-  font-size: 9px;
-}
-
-.show-password svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Opção de manter conectado */
-.remember-row {
-  display: flex !important;
-  align-items: center;
-  gap: 10px;
-  color: #73837b !important;
-  font-weight: 400 !important;
-  font-size: 11px !important;
-  cursor: pointer;
-  margin: 1px 0 24px !important;
-}
-
-.remember-row input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
 .custom-check {
   width: 16px;
   height: 16px;
@@ -402,69 +311,6 @@ form label {
   background: #fff;
   display: grid;
   place-items: center;
-}
-
-.remember-row input:checked + .custom-check {
-  background: #2e6c50;
-  border-color: #2e6c50;
-}
-
-.remember-row input:checked + .custom-check:after {
-  content: '✓';
-  color: white;
-  font-size: 11px;
-  line-height: 1;
-}
-
-.remember-row input:focus-visible + .custom-check {
-  outline: 2px solid #579378;
-  outline-offset: 2px;
-}
-
-/* Mensagens e botão de acesso */
-.form-message {
-  padding: 11px 12px;
-  margin: -7px 0 16px;
-  background: #f0f6f1;
-  border: 1px solid #dcebe0;
-  border-radius: 8px;
-  color: #356b50;
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-.submit-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 52px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 11px;
-  background: #276349;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  box-shadow: 0 7px 16px rgba(39, 99, 73, .15);
-  transition: transform .2s, background .2s, box-shadow .2s;
-}
-
-.submit-button span {
-  font-size: 19px;
-  font-weight: 400;
-  transition: transform .2s;
-}
-
-.submit-button:hover {
-  background: #1e523b;
-  box-shadow: 0 9px 20px rgba(39, 99, 73, .22);
-  transform: translateY(-1px);
-}
-
-.submit-button:hover span {
-  transform: translateX(3px);
 }
 
 /* Aviso de segurança e rodapé */
@@ -498,10 +344,79 @@ form label {
   font-size: 9px;
 }
 
+/* Botão de autenticação Google */
+.google-login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 54px;
+  margin-top: 8px;
+  padding: 0 18px;
+  border: 1px solid #dce5df;
+  border-radius: 11px;
+  background: #fff;
+  color: #263f36;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(36, 60, 57, 0.04);
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s,
+    transform 0.2s;
+}
+
+.google-login-button:hover {
+  border-color: #a9c8b5;
+  background: #f8fbf8;
+  box-shadow: 0 7px 16px rgba(36, 60, 57, 0.09);
+  transform: translateY(-1px);
+}
+
+.google-login-button:focus-visible {
+  outline: 3px solid rgba(87, 147, 120, 0.35);
+  outline-offset: 3px;
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.google-button-arrow {
+  margin-left: auto;
+  color: #438163;
+  font-size: 20px;
+  font-weight: 400;
+  transition: transform 0.2s;
+}
+
+.google-login-button:hover .google-button-arrow {
+  transform: translateX(3px);
+}
+
+.login-access-note {
+  margin: 18px 0 0;
+  color: #7d8c85;
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .google-login-button,
+  .google-button-arrow {
+    transition: none;
+  }
+}
+
 /* Tablets e telas médias */
 @media (max-width: 900px) {
   .login-page {
-    grid-template-columns: minmax(300px, .8fr) minmax(400px, 1.2fr);
+    grid-template-columns: minmax(300px, 0.8fr) minmax(400px, 1.2fr);
   }
 
   .login-visual {
@@ -605,3 +520,221 @@ form label {
   }
 }
 
+/* Login proporcional à altura e largura da tela */
+.login-page {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background: #fbfcfa;
+}
+
+/* Painel verde: preserva a identidade visual */
+.login-visual {
+  display: flex;
+  min-width: 0;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding: clamp(20px, 3.2vh, 36px) clamp(24px, 4vw, 60px);
+  overflow: hidden;
+}
+
+/* Ajusta o conteúdo verde ao espaço disponível */
+.visual-copy {
+  margin: clamp(16px, 3vh, 32px) 0;
+}
+
+.visual-copy h1 {
+  margin: clamp(12px, 2vh, 22px) 0;
+  font-size: clamp(32px, 3.1vw, 48px);
+  letter-spacing: -1.8px;
+}
+
+.visual-copy > p {
+  font-size: clamp(12px, 1vw, 14px);
+  line-height: 1.65;
+}
+
+.visual-points {
+  gap: clamp(8px, 1.5vh, 15px);
+  margin-top: clamp(16px, 2.5vh, 26px);
+}
+
+.visual-bottom {
+  padding-top: clamp(12px, 2vh, 20px);
+}
+
+.visual-bottom p {
+  margin: 8px 0 12px;
+  font-size: clamp(12px, 1.1vw, 15px);
+}
+
+/* Painel de login */
+.login-panel {
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 36px clamp(24px, 5vw, 64px) 54px;
+}
+
+.mobile-brand {
+  display: none;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 370px;
+}
+
+.welcome-icon {
+  width: 42px;
+  height: 42px;
+  margin-bottom: 16px;
+}
+
+.login-content h2 {
+  font-size: clamp(28px, 2.7vw, 35px);
+}
+
+.form-description {
+  margin: 10px 0 22px;
+}
+
+.google-login-button {
+  margin-top: 4px;
+}
+
+.login-access-note {
+  margin-top: 14px;
+}
+
+.secure-note {
+  margin-top: 18px;
+}
+
+.panel-footer {
+  bottom: 14px;
+  font-size: 9px;
+}
+
+/* Telas de pouca altura */
+@media (max-height: 760px) and (min-width: 681px) {
+  .login-visual,
+  .login-panel {
+    padding-top: 18px;
+    padding-bottom: 42px;
+  }
+
+  .visual-copy {
+    margin: 12px 0;
+  }
+
+  .visual-copy h1 {
+    font-size: clamp(29px, 3vw, 40px);
+  }
+
+  .visual-copy > p {
+    line-height: 1.45;
+  }
+
+  .visual-points {
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .visual-point {
+    font-size: 11px;
+  }
+
+  .visual-bottom {
+    padding-top: 10px;
+  }
+
+  .visual-bottom p {
+    margin: 6px 0 8px;
+  }
+
+  .quote-mark {
+    font-size: 38px;
+  }
+
+  .welcome-icon {
+    margin-bottom: 10px;
+  }
+
+  .form-description {
+    margin: 8px 0 16px;
+  }
+
+  .secure-note {
+    margin-top: 12px;
+  }
+}
+
+/* Celulares: painel verde como faixa de apresentação */
+@media (max-width: 680px) {
+  .login-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .login-visual {
+    display: flex;
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 18px 22px;
+  }
+
+  .visual-top {
+    gap: 9px;
+  }
+
+  .visual-copy,
+  .visual-bottom,
+  .decor {
+    display: none;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+  }
+
+  .brand-name {
+    font-size: 20px;
+  }
+
+  .login-panel {
+    flex: 1;
+    justify-content: center;
+    min-height: 0;
+    padding: 24px 24px 54px;
+  }
+
+  .mobile-brand {
+    display: none;
+  }
+
+  .login-content {
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .login-content h2 {
+    font-size: 31px;
+  }
+
+  .panel-footer {
+    left: 20px;
+    right: 20px;
+    bottom: 12px;
+  }
+}
