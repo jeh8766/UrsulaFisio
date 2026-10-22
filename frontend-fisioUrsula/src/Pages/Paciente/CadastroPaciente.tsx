@@ -16,6 +16,7 @@ export type CadastroPacienteData = {
   bairro: string;
   rua: string;
   numero: number;
+  complemento: string;
 };
 
 type CadastroPacienteProps = {
@@ -36,6 +37,7 @@ const initialForm: CadastroPacienteData = {
   bairro: '',
   rua: '',
   numero: 0,
+  complemento: '',
 };
 
 export default function CadastroPaciente({
@@ -132,6 +134,7 @@ export default function CadastroPaciente({
         bairro: form.bairro.trim(),
         rua: form.rua.trim(),
         numero: Number(form.numero),
+        complemento: form.complemento.trim(),
       });
 
       setSucesso(true);
@@ -201,6 +204,7 @@ export default function CadastroPaciente({
                   name="dataNascimento"
                   type="date"
                   value={form.dataNascimento}
+                  max={new Date().toISOString().slice(0, 10)}
                   onChange={(e) =>
                     atualizarCampo('dataNascimento', e.target.value)
                   }
@@ -302,22 +306,43 @@ export default function CadastroPaciente({
                 <label htmlFor="estado">
                   Estado (UF) <span>*</span>
                 </label>
-                <input
+                <select
                   id="estado"
                   name="estado"
-                  type="text"
-                  placeholder="PB"
                   value={form.estado}
-                  onChange={(e) =>
-                    atualizarCampo(
-                      'estado',
-                      e.target.value.replace(/[^a-z]/gi, '').slice(0, 2).toUpperCase()
-                    )
-                  }
+                  onChange={(e) => atualizarCampo('estado', e.target.value)}
                   autoComplete="address-level1"
-                  maxLength={2}
                   required
-                />
+                >
+                  <option value="">Selecione o estado</option>
+                  <option value="ACRE">Acre</option>
+                  <option value="ALAGOAS">Alagoas</option>
+                  <option value="AMAPA">Amapá</option>
+                  <option value="AMAZONAS">Amazonas</option>
+                  <option value="BAHIA">Bahia</option>
+                  <option value="CEARA">Ceará</option>
+                  <option value="DISTRITO_FEDERAL">Distrito Federal</option>
+                  <option value="ESPIRITO_SANTO">Espírito Santo</option>
+                  <option value="GOIAS">Goiás</option>
+                  <option value="MARANHAO">Maranhão</option>
+                  <option value="MATO_GROSSO">Mato Grosso</option>
+                  <option value="MATO_GROSSO_DO_SUL">Mato Grosso do Sul</option>
+                  <option value="MINAS_GERAIS">Minas Gerais</option>
+                  <option value="PARA">Pará</option>
+                  <option value="PARAIBA">Paraíba</option>
+                  <option value="PARANA">Paraná</option>
+                  <option value="PERNAMBUCO">Pernambuco</option>
+                  <option value="PIAUI">Piauí</option>
+                  <option value="RIO_DE_JANEIRO">Rio de Janeiro</option>
+                  <option value="RIO_GRANDE_DO_NORTE">Rio Grande do Norte</option>
+                  <option value="RIO_GRANDE_DO_SUL">Rio Grande do Sul</option>
+                  <option value="RONDONIA">Rondônia</option>
+                  <option value="RORAIMA">Roraima</option>
+                  <option value="SANTA_CATARINA">Santa Catarina</option>
+                  <option value="SAO_PAULO">São Paulo</option>
+                  <option value="SERGIPE">Sergipe</option>
+                  <option value="TOCANTINS">Tocantins</option>
+                </select>
               </div>
 
               <div className="cadastro-field">
@@ -382,6 +407,19 @@ export default function CadastroPaciente({
                   value={form.numero || ''}
                   onChange={(e) => atualizarCampo('numero', e.target.value)}
                   required
+                />
+              </div>
+
+              <div className="cadastro-field field-full">
+                <label htmlFor="complemento">Complemento</label>
+                <input
+                  id="complemento"
+                  name="complemento"
+                  type="text"
+                  placeholder="Apartamento, bloco, referência (opcional)"
+                  value={form.complemento}
+                  onChange={(e) => atualizarCampo('complemento', e.target.value)}
+                  autoComplete="address-line2"
                 />
               </div>
             </div>
