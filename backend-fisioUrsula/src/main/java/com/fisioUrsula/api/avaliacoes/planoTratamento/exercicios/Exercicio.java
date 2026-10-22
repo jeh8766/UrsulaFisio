@@ -3,6 +3,7 @@ package com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios.dtos.CadastrarExercicioRequestDTO;
 import com.fisioUrsula.api.avaliacoes.planoTratamento.planoExercicios.PlanoExercicio;
 import com.fisioUrsula.api.shared.enums.TipoExercicio;
 
@@ -45,8 +46,19 @@ public class Exercicio implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean ativo = true;
+
     @OneToMany(mappedBy = "exercicio")
     private List<PlanoExercicio> exercicios;
 
+    public Exercicio(CadastrarExercicioRequestDTO dto) {
+        atualizar(dto);
+    }
 
+    public void atualizar(CadastrarExercicioRequestDTO dto) {
+        this.nome = dto.nome().trim();
+        this.tipoExercicio = dto.tipo();
+        this.descricao = dto.descricao();
+    }
 }
