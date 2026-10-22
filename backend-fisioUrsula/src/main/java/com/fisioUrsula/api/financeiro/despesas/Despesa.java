@@ -3,6 +3,7 @@ package com.fisioUrsula.api.financeiro.despesas;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.fisioUrsula.api.financeiro.despesas.dtos.CadastrarDespesaRequestDTO;
 import com.fisioUrsula.api.shared.enums.CategoriaDespesa;
 
 import jakarta.persistence.Column;
@@ -19,14 +20,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity 
-@Table(name="despesas")
-@Getter 
-@Setter 
-@AllArgsConstructor 
-@NoArgsConstructor 
+@Entity
+@Table(name = "despesas")
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class Despesa {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
@@ -47,5 +49,16 @@ public class Despesa {
 
     @Column(columnDefinition = "TEXT")
     private String observacao;
-}
 
+    public Despesa(CadastrarDespesaRequestDTO dto) {
+        atualizar(dto);
+    }
+
+    public void atualizar(CadastrarDespesaRequestDTO dto) {
+        this.descricao = dto.descricao().trim();
+        this.categoria = dto.categoria();
+        this.valor = dto.valor();
+        this.dataDespesa = dto.dataDespesa();
+        this.observacao = dto.observacao();
+    }
+}
