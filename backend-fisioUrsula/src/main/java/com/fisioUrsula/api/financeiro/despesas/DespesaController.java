@@ -32,26 +32,40 @@ public class DespesaController {
     private final DespesaService despesaService;
 
     @PostMapping
-    public ResponseEntity<DetalharDespesaResponseDTO> cadastrar(
+    public ResponseEntity<DetalharDespesaResponseDTO> registrarDespesa(
             @Valid @RequestBody CadastrarDespesaRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(despesaService.cadastrar(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(despesaService.registrarDespesa(dto));
     }
 
     @GetMapping
-    public ResponseEntity<List<DetalharDespesaResponseDTO>> listar(
-            @RequestParam(required = false) CategoriaDespesa categoria,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
-            @RequestParam(required = false) String busca) {
-        return ResponseEntity.ok(despesaService.listar(categoria, inicio, fim, busca));
+    public ResponseEntity<List<DetalharDespesaResponseDTO>> listarDespesas() {
+        return ResponseEntity.ok(despesaService.listarDespesas());
     }
 
-    @GetMapping("/total")
-    public ResponseEntity<BigDecimal> calcularTotal(
-            @RequestParam(required = false) CategoriaDespesa categoria,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
-        return ResponseEntity.ok(despesaService.calcularTotal(categoria, inicio, fim));
+    @GetMapping("/periodo")
+    public ResponseEntity<List<DetalharDespesaResponseDTO>> listarDespesasPorPeriodo(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
+        return ResponseEntity.ok(despesaService.listarDespesasPorPeriodo(inicio, fim));
+    }
+
+    @GetMapping("/categoria")
+    public ResponseEntity<List<DetalharDespesaResponseDTO>> listarDespesasPorCategoria(
+            @RequestParam CategoriaDespesa categoria) {
+        return ResponseEntity.ok(despesaService.listarDespesasPorCategoria(categoria));
+    }
+
+    @GetMapping("/total/periodo")
+    public ResponseEntity<BigDecimal> calcularTotalDespesasPorPeriodo(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
+        return ResponseEntity.ok(despesaService.calcularTotalDespesasPorPeriodo(inicio, fim));
+    }
+
+    @GetMapping("/total/categoria")
+    public ResponseEntity<BigDecimal> calcularTotalDespesasPorCategoria(
+            @RequestParam CategoriaDespesa categoria) {
+        return ResponseEntity.ok(despesaService.calcularTotalDespesasPorCategoria(categoria));
     }
 
     @GetMapping("/{id}")
@@ -66,8 +80,8 @@ public class DespesaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        despesaService.excluir(id);
+    public ResponseEntity<Void> excluirDespesa(@PathVariable Long id) {
+        despesaService.excluirDespesa(id);
         return ResponseEntity.noContent().build();
     }
 }
