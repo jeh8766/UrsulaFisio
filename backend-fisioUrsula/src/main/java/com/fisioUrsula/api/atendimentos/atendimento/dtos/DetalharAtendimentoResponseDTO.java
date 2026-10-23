@@ -2,6 +2,7 @@ package com.fisioUrsula.api.atendimentos.atendimento.dtos;
 
 import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
+import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 
 import java.math.BigDecimal;
@@ -25,7 +26,7 @@ public record DetalharAtendimentoResponseDTO(
 
         BigDecimal taxaDeslocamento,
 
-        StatusAgendamento statusAgendamento,
+        StatusAtendimento statusAtendimento,
 
         StatusPagamento statusPagamento,
 
@@ -47,7 +48,7 @@ public record DetalharAtendimentoResponseDTO(
                 atendimento.getValor(),
                 atendimento.getTaxaDeslocamento(),
 
-                atendimento.getAgendamento().getStatusAgendamento(),
+                atendimento.getStatusAtendimento(),
                 atendimento.getStatusPagamento(),
 
                 atendimento.getAgendamento()

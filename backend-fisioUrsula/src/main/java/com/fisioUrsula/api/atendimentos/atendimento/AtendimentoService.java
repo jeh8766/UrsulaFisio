@@ -1,13 +1,10 @@
 package com.fisioUrsula.api.atendimentos.atendimento;
 
-import com.fisioUrsula.api.atendimentos.atendimento.dtos.ConcluirAtendimentoRequestDTO;
+import com.fisioUrsula.api.atendimentos.atendimento.dtos.*;
 import org.springframework.stereotype.Service;
 
 import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.agendamentos.AgendamentoRepository;
-import com.fisioUrsula.api.atendimentos.atendimento.dtos.CriarAtendimentoRequestDTO;
-import com.fisioUrsula.api.atendimentos.atendimento.dtos.CriarAtendimentoResponseDTO;
-import com.fisioUrsula.api.atendimentos.atendimento.dtos.DetalharAtendimentoResponseDTO;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitaisRepository;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
@@ -15,6 +12,8 @@ import com.fisioUrsula.api.shared.enums.StatusPagamento;
 import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -60,18 +59,18 @@ public class AtendimentoService {
 
     }
 
-    public DetalharAtendimentoResponseDTO detalharAtendimento(Long id){
+    public DetalharAtendimentoResponseDTO detalharAtendimento(Long id) {
 
         Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Atendimento com o Id não existe!"));
 
         return new DetalharAtendimentoResponseDTO(atendimento);
     }
 
-    public DetalharAtendimentoResponseDTO concluirAtendimento(Long id, ConcluirAtendimentoRequestDTO dto){
+    public DetalharAtendimentoResponseDTO concluirAtendimento(Long id, ConcluirAtendimentoRequestDTO dto) {
 
         Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Atendimento com esse id não existe!"));
 
-        if (atendimento.getStatusAtendimento() == StatusAtendimento.ATENDIDO){
+        if (atendimento.getStatusAtendimento() == StatusAtendimento.ATENDIDO) {
             throw new RuntimeException("Esse atendimento ja foi realizado!");
         }
 
@@ -85,17 +84,47 @@ public class AtendimentoService {
         return new DetalharAtendimentoResponseDTO(atendimentoSalvo);
     }
 
-    public void registrarPagamento(Long id){
+    public void registrarPagamento(Long id) {
 
-        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(()-> new RuntimeException("Atendimento com esse id não existe!"));
+        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Atendimento com esse id não existe!"));
 
-        if (atendimento.getStatusPagamento() == StatusPagamento.PAGO){
+        if (atendimento.getStatusPagamento() == StatusPagamento.PAGO) {
             throw new RuntimeException("Atendimento ja foi pago!");
         }
 
         atendimento.setStatusPagamento(StatusPagamento.PAGO);
 
         atendimentoRepository.save(atendimento);
+
+    }
+
+    public List<ListarAtendimentosResponseDTO> listarAtendimentos() {
+        return atendimentoRepository.findAll().stream().map(ListarAtendimentosResponseDTO::new).toList();
+    }
+
+    public DetalharAtendimentoResponseDTO atualizarAtendimento(Long id, AtualizarAtendimentoRequestDTO dto) {
+
+        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Atendimento com esse id não existe!"));
+
+        if (dto.intercorrencia() != null) {
+            atendimento.setIntercorrencia(dto.intercorrencia());
+        }
+
+        if (dto.evolucao() != null) {
+            atendimento.setEvolucao(dto.evolucao());
+        }
+
+        if (dto.valor() != null) {
+            atendimento.setValor(dto.valor());
+        }
+
+        if (dto.taxaDeslocamento() != null) {
+            atendimento.setTaxaDeslocamento(dto.taxaDeslocamento());
+        }
+
+        atendimentoRepository.save(atendimento);
+
+        return new DetalharAtendimentoResponseDTO(atendimento);
 
     }
 

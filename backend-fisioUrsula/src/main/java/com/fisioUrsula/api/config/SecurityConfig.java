@@ -19,22 +19,30 @@ public class SecurityConfig {
     private List<String> emailsAutorizados;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, OidcUserService oidcUserService)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            OidcUserService oidcUserService) throws Exception {
 
-        http.authorizeHttpRequests(auth -> auth
-                // .anyRequest().authenticated())
-                .anyRequest().permitAll())
-                .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo
-                        .oidcUserService(oidcUserService))
-                        .defaultSuccessUrl("http://localhost:5173/dashboard", true))
+        http
+                .csrf(csrf -> csrf.disable())
+
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll())
+
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .oidcUserService(oidcUserService))
+                        .defaultSuccessUrl(
+                                "http://localhost:5173/dashboard", true))
+
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
-                        .logoutSuccessHandler((request, response, authentication) -> response.setStatus(
-                                jakarta.servlet.http.HttpServletResponse.SC_NO_CONTENT)));
+                        .logoutSuccessHandler((request, response, authentication) ->
+                                response.setStatus(
+                                        jakarta.servlet.http.HttpServletResponse.SC_NO_CONTENT)));
 
         return http.build();
     }
