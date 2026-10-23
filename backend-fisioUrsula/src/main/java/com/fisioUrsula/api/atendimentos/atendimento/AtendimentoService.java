@@ -128,5 +128,12 @@ public class AtendimentoService {
 
     }
 
+    public List<DetalharAtendimentoResponseDTO> listarAtendimentoPorPaciente(Long pacienteId) {
+        return atendimentoRepository.findByAgendamento_Paciente_IdOrderByAgendamento_DataDesc(pacienteId)
+                        .stream()
+                .map(DetalharAtendimentoResponseDTO::new)
+                .toList();
+    }
+
 
 }

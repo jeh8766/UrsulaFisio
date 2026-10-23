@@ -61,6 +61,12 @@ public class AtendimentoController {
         return ResponseEntity.ok().body(detalharAtendimentoResponseDTO);
     }
 
+    @GetMapping("/paciente/{pacienteId}")
+    public ResponseEntity<List<DetalharAtendimentoResponseDTO>> listarAtendimentoPorPaciente (@PathVariable Long pacienteId){
+
+        return ResponseEntity.ok().body(atendimentoService.listarAtendimentoPorPaciente(pacienteId));
+    }
+
 
 
 
