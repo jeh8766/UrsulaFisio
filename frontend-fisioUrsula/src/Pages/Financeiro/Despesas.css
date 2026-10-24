@@ -1,4 +1,3 @@
-
 /* =========================================
    PÁGINA DE DESPESAS — VITTAFISIO
    Padrão visual da página Financeiro
@@ -287,7 +286,10 @@
 
 .expenses-filters {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(150px, 220px) minmax(130px, 180px);
+  grid-template-columns:
+    minmax(180px, 1fr)
+    minmax(150px, 220px)
+    minmax(130px, 180px);
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -466,13 +468,55 @@
   background: #eff1ef;
 }
 
-/* Valores e exclusão */
+/* =========================================
+   VALOR DA DESPESA — SAÍDA FINANCEIRA
+   Padrão visual da página Financeiro
+   ========================================= */
+
+.expenses-value-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+/* Seta para baixo */
+
+.expenses-value-arrow {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 27px;
+  height: 27px;
+  color: #b86f67;
+  background: #fbeae8;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+/* Valor em vermelho suave */
 
 .expenses-value {
-  color: #344b40 !important;
+  color: #b86f67 !important;
+  font-family: 'Manrope', sans-serif;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
 }
+
+/* Animação discreta da seta */
+
+.expenses-table tbody tr:hover .expenses-value-arrow {
+  transform: translateY(2px);
+}
+
+/* Botão de exclusão */
 
 .expenses-delete-button {
   display: grid;
@@ -607,4 +651,32 @@
   .expenses-table {
     min-width: 650px;
   }
+}
+
+/* Mensagens de retorno da API */
+
+.expenses-message {
+  padding: 12px 15px;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.expenses-error {
+  color: #a33333;
+  background: #fff0f0;
+  border: 1px solid #f5dede;
+}
+
+.expenses-success {
+  color: #276349;
+  background: #eef7f0;
+  border: 1px solid #d8eadc;
+}
+
+.expenses-primary-button:disabled,
+.expenses-secondary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }

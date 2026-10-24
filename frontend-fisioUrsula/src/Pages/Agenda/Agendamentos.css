@@ -594,4 +594,17 @@
   outline: 3px solid #a5cfb2;
   outline-offset: 2px;
 }
-
+.agenda-patient-field{position:relative;display:flex;flex-direction:column;gap:8px;min-width:0;color:#40544a;font-size:12px;font-weight:600}
+.agenda-patient-input-row{display:flex;align-items:center;gap:8px}
+.agenda-patient-input-row input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px 12px;color:#30443a;background:#fff;border:1px solid #dce5dd;border-radius:10px;font:inherit;font-size:13px}
+.agenda-patient-input-row input:focus{outline:none;border-color:#6ca681;box-shadow:0 0 0 3px rgb(108 166 129 / 13%)}
+.agenda-clear-patient{flex-shrink:0;width:36px;height:36px;color:#39775a;background:#edf5ef;border:0;border-radius:9px;font-size:22px;cursor:pointer}
+.agenda-patient-results{position:absolute;z-index:20;top:calc(100% - 2px);right:0;left:0;max-height:230px;margin:0;padding:5px;overflow-y:auto;list-style:none;background:#fff;border:1px solid #dce5dd;border-radius:10px;box-shadow:0 10px 24px rgb(34 68 49 / 12%)}
+.agenda-patient-results li{margin:0;padding:0}
+.agenda-patient-results button{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:11px 10px;color:#30443a;text-align:left;background:#fff;border:0;border-radius:7px;cursor:pointer}
+.agenda-patient-results button:hover,.agenda-patient-results button:focus-visible{background:#edf5ef;outline:none}
+.agenda-patient-results button span{overflow-wrap:anywhere}
+.agenda-patient-results button small{flex-shrink:0;color:#39775a;font-size:10px;font-weight:500}
+.agenda-patient-hint{color:#87948b;font-size:11px;font-weight:400;line-height:1.5}
+.agenda-patient-error{color:#a33d3d;font-size:11px;font-weight:500}
+.agenda-patient-selected{color:#2f704a;font-size:11px;font-weight:500}

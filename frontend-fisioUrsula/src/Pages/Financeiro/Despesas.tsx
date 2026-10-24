@@ -1,5 +1,4 @@
-
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ModuleLayout from '../ModuleLayout/ModuleLayout';
 import './Despesas.css';
 
@@ -16,54 +15,18 @@ type Despesa = {
   categoria: CategoriaDespesa;
   valor: number;
   dataDespesa: string;
+  observacao: string | null;
+};
+
+type DespesaRequest = {
+  descricao: string;
+  categoria: CategoriaDespesa;
+  valor: number;
+  dataDespesa: string;
   observacao: string;
 };
 
-const hoje = new Date();
-
-const dataHoje = [
-  hoje.getFullYear(),
-  String(hoje.getMonth() + 1).padStart(2, '0'),
-  String(hoje.getDate()).padStart(2, '0'),
-].join('-');
-
-const dataAnterior = (dias: number) => {
-  const data = new Date();
-  data.setDate(data.getDate() - dias);
-
-  return [
-    data.getFullYear(),
-    String(data.getMonth() + 1).padStart(2, '0'),
-    String(data.getDate()).padStart(2, '0'),
-  ].join('-');
-};
-
-const despesasIniciais: Despesa[] = [
-  {
-    id: 1,
-    descricao: 'Faixas elásticas para exercícios',
-    categoria: 'MATERIAIS',
-    valor: 85.9,
-    dataDespesa: dataHoje,
-    observacao: 'Materiais utilizados nos atendimentos.',
-  },
-  {
-    id: 2,
-    descricao: 'Combustível para deslocamentos',
-    categoria: 'TRANSPORTE',
-    valor: 120,
-    dataDespesa: dataAnterior(2),
-    observacao: 'Visitas domiciliares.',
-  },
-  {
-    id: 3,
-    descricao: 'Manutenção de equipamentos',
-    categoria: 'MANUTENCAO',
-    valor: 150,
-    dataDespesa: dataAnterior(3),
-    observacao: 'Revisão dos equipamentos de fisioterapia.',
-  },
-];
+const API_URL = 'http://localhost:8080/despesas';
 
 const categorias: { value: CategoriaDespesa; label: string }[] = [
   { value: 'MATERIAIS', label: 'Materiais' },
@@ -72,6 +35,23 @@ const categorias: { value: CategoriaDespesa; label: string }[] = [
   { value: 'MANUTENCAO', label: 'Manutenção' },
   { value: 'OUTROS', label: 'Outros' },
 ];
+
+const obterDataLocal = (data: Date) =>
+  [
+    data.getFullYear(),
+    String(data.getMonth() + 1).padStart(2, '0'),
+    String(data.getDate()).padStart(2, '0'),
+  ].join('-');
+
+const hoje = obterDataLocal(new Date());
+const mesAtual = hoje.slice(0, 7);
+
+const obterInicioMes = (mes: string) => `${mes}-01`;
+
+const obterFimMes = (mes: string) => {
+  const [ano, numeroMes] = mes.split('-').map(Number);
+  return obterDataLocal(new Date(ano, numeroMes, 0));
+};
 
 const formatarMoeda = (valor: number) =>
   valor.toLocaleString('pt-BR', {
@@ -82,16 +62,43 @@ const formatarMoeda = (valor: number) =>
 const formatarData = (data: string) => {
   if (!data) return '-';
 
-  const [ano, mes, dia] = data.split('-');
+  const [ano, mes, dia] = data.slice(0, 10).split('-');
   return `${dia}/${mes}/${ano}`;
 };
 
 const obterMes = (data: string) => data.slice(0, 7);
 
-const mesAtual = dataHoje.slice(0, 7);
+async function requisicao<T>(
+  url: string,
+  options?: RequestInit,
+): Promise<T> {
+  const resposta = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  });
+
+  if (!resposta.ok) {
+    const mensagem = await resposta.text();
+
+    throw new Error(
+      mensagem || `Erro na requisição (${resposta.status}).`,
+    );
+  }
+
+  if (resposta.status === 204) {
+    return undefined as T;
+  }
+
+  return resposta.json() as Promise<T>;
+}
 
 export default function Despesas() {
-  const [despesas, setDespesas] = useState<Despesa[]>(despesasIniciais);
+  const [despesas, setDespesas] = useState<Despesa[]>([]);
+  const [despesasVisiveis, setDespesasVisiveis] = useState<Despesa[]>([]);
+
   const [busca, setBusca] = useState('');
   const [categoriaFiltro, setCategoriaFiltro] = useState('TODAS');
   const [mesFiltro, setMesFiltro] = useState('ATUAL');
@@ -101,22 +108,153 @@ export default function Despesas() {
   const [categoria, setCategoria] =
     useState<CategoriaDespesa>('MATERIAIS');
   const [valor, setValor] = useState('');
-  const [dataDespesa, setDataDespesa] = useState(dataHoje);
+  const [dataDespesa, setDataDespesa] = useState(hoje);
   const [observacao, setObservacao] = useState('');
 
-  const despesasFiltradas = useMemo(() => {
-    return despesas.filter((despesa) => {
-      const texto = busca.trim().toLowerCase();
+  const [totalMes, setTotalMes] = useState(0);
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState('');
+  const [aviso, setAviso] = useState('');
 
+  // GET /despesas
+  // Carrega todos os registros para alimentar os cartões de resumo.
+  const carregarDespesas = useCallback(async () => {
+    try {
+      setCarregando(true);
+      setErro('');
+
+      const dados = await requisicao<Despesa[]>(API_URL);
+
+      setDespesas(dados);
+      setDespesasVisiveis(dados);
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível carregar as despesas.',
+      );
+    } finally {
+      setCarregando(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void carregarDespesas();
+  }, [carregarDespesas]);
+
+  // GET /despesas/categoria
+  // GET /despesas/periodo
+  // A API fornece os registros do filtro principal selecionado.
+  useEffect(() => {
+    let ativo = true;
+
+    async function buscarComFiltro() {
+      try {
+        setErro('');
+
+        let url = API_URL;
+
+        if (categoriaFiltro !== 'TODAS') {
+          const parametros = new URLSearchParams({
+            categoria: categoriaFiltro,
+          });
+
+          url = `${API_URL}/categoria?${parametros.toString()}`;
+        } else if (mesFiltro === 'ATUAL') {
+          const parametros = new URLSearchParams({
+            inicio: obterInicioMes(mesAtual),
+            fim: obterFimMes(mesAtual),
+          });
+
+          url = `${API_URL}/periodo?${parametros.toString()}`;
+        } else if (mesFiltro !== 'TODOS') {
+          const parametros = new URLSearchParams({
+            inicio: obterInicioMes(mesFiltro),
+            fim: obterFimMes(mesFiltro),
+          });
+
+          url = `${API_URL}/periodo?${parametros.toString()}`;
+        }
+
+        const dados = await requisicao<Despesa[]>(url);
+
+        if (ativo) {
+          setDespesasVisiveis(dados);
+        }
+      } catch (error) {
+        if (ativo) {
+          setErro(
+            error instanceof Error
+              ? error.message
+              : 'Não foi possível aplicar os filtros.',
+          );
+        }
+      }
+    }
+
+    void buscarComFiltro();
+
+    return () => {
+      ativo = false;
+    };
+  }, [categoriaFiltro, mesFiltro]);
+
+  // GET /despesas/total/periodo
+  // O cartão mensal utiliza o total calculado pelo backend.
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarTotalMes() {
+      try {
+        const parametros = new URLSearchParams({
+          inicio: obterInicioMes(mesAtual),
+          fim: obterFimMes(mesAtual),
+        });
+
+        const total = await requisicao<number>(
+          `${API_URL}/total/periodo?${parametros.toString()}`,
+        );
+
+        if (ativo) {
+          setTotalMes(Number(total) || 0);
+        }
+      } catch {
+        if (ativo) {
+          // Alternativa caso o endpoint de total falhe.
+          setTotalMes(
+            despesas
+              .filter(
+                (despesa) =>
+                  obterMes(despesa.dataDespesa) === mesAtual,
+              )
+              .reduce(
+                (soma, despesa) => soma + Number(despesa.valor),
+                0,
+              ),
+          );
+        }
+      }
+    }
+
+    void carregarTotalMes();
+
+    return () => {
+      ativo = false;
+    };
+  }, [despesas]);
+
+  // A busca textual complementa os filtros do backend.
+  const despesasFiltradas = useMemo(() => {
+    const texto = busca.trim().toLowerCase();
+
+    return despesasVisiveis.filter((despesa) => {
       const correspondeBusca =
         despesa.descricao.toLowerCase().includes(texto) ||
-        despesa.observacao.toLowerCase().includes(texto);
-
-      const correspondeCategoria =
-        categoriaFiltro === 'TODAS' ||
-        despesa.categoria === categoriaFiltro;
+        (despesa.observacao ?? '').toLowerCase().includes(texto);
 
       const correspondeMes =
+        categoriaFiltro !== 'TODAS' ||
         mesFiltro === 'TODOS' ||
         (mesFiltro === 'ATUAL' &&
           obterMes(despesa.dataDespesa) === mesAtual) ||
@@ -124,37 +262,48 @@ export default function Despesas() {
           mesFiltro !== 'TODOS' &&
           obterMes(despesa.dataDespesa) === mesFiltro);
 
-      return (
-        correspondeBusca &&
-        correspondeCategoria &&
-        correspondeMes
-      );
+      return correspondeBusca && correspondeMes;
     });
-  }, [despesas, busca, categoriaFiltro, mesFiltro]);
+  }, [despesasVisiveis, busca, categoriaFiltro, mesFiltro]);
 
-  const despesasDoMes = despesas.filter(
-    (despesa) => obterMes(despesa.dataDespesa) === mesAtual
+  const despesasDoMes = useMemo(
+    () =>
+      despesas.filter(
+        (despesa) => obterMes(despesa.dataDespesa) === mesAtual,
+      ),
+    [despesas],
   );
 
-  const totalMes = despesasDoMes.reduce(
-    (total, despesa) => total + despesa.valor,
-    0
+  const totalGeral = useMemo(
+    () =>
+      despesas.reduce(
+        (total, despesa) => total + Number(despesa.valor),
+        0,
+      ),
+    [despesas],
   );
 
-  const totalGeral = despesas.reduce(
-    (total, despesa) => total + despesa.valor,
-    0
+  // Disponibiliza os meses existentes nos registros.
+  const mesesDisponiveis = useMemo(
+    () =>
+      Array.from(
+        new Set(despesas.map((despesa) => obterMes(despesa.dataDespesa))),
+      ).sort((a, b) => b.localeCompare(a)),
+    [despesas],
   );
 
   const limparFormulario = () => {
     setDescricao('');
     setCategoria('MATERIAIS');
     setValor('');
-    setDataDespesa(dataHoje);
+    setDataDespesa(hoje);
     setObservacao('');
   };
 
-  const cadastrarDespesa = (event: React.FormEvent<HTMLFormElement>) => {
+  // POST /despesas
+  const cadastrarDespesa = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
 
     const valorNumerico = Number(valor.replace(',', '.'));
@@ -165,12 +314,11 @@ export default function Despesas() {
       !Number.isFinite(valorNumerico) ||
       valorNumerico <= 0
     ) {
-      alert('Preencha a descrição, a data e um valor maior que zero.');
+      setErro('Informe a descrição, a data e um valor maior que zero.');
       return;
     }
 
-    const novaDespesa: Despesa = {
-      id: Date.now(),
+    const novaDespesa: DespesaRequest = {
       descricao: descricao.trim(),
       categoria,
       valor: valorNumerico,
@@ -178,21 +326,59 @@ export default function Despesas() {
       observacao: observacao.trim(),
     };
 
-    setDespesas((atuais) => [novaDespesa, ...atuais]);
-    limparFormulario();
-    setFormAberto(false);
+    try {
+      setSalvando(true);
+      setErro('');
+      setAviso('');
+
+      await requisicao<Despesa>(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(novaDespesa),
+      });
+
+      limparFormulario();
+      setFormAberto(false);
+
+      await carregarDespesas();
+
+      setAviso('Despesa cadastrada com sucesso.');
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível cadastrar a despesa.',
+      );
+    } finally {
+      setSalvando(false);
+    }
   };
 
-  const excluirDespesa = (id: number) => {
+  // DELETE /despesas/{id}
+  const excluirDespesa = async (id: number) => {
     const confirmar = window.confirm(
-      'Deseja realmente excluir esta despesa?'
+      'Deseja realmente excluir esta despesa?',
     );
 
     if (!confirmar) return;
 
-    setDespesas((atuais) =>
-      atuais.filter((despesa) => despesa.id !== id)
-    );
+    try {
+      setErro('');
+      setAviso('');
+
+      await requisicao<void>(`${API_URL}/${id}`, {
+        method: 'DELETE',
+      });
+
+      await carregarDespesas();
+
+      setAviso('Despesa excluída com sucesso.');
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível excluir a despesa.',
+      );
+    }
   };
 
   const nomeCategoria = (value: CategoriaDespesa) =>
@@ -214,7 +400,11 @@ export default function Despesas() {
           <button
             type="button"
             className="expenses-primary-button"
-            onClick={() => setFormAberto((aberto) => !aberto)}
+            onClick={() => {
+              setErro('');
+              setAviso('');
+              setFormAberto((aberto) => !aberto);
+            }}
           >
             <span className="expenses-button-symbol" aria-hidden="true">
               +
@@ -222,6 +412,18 @@ export default function Despesas() {
             Nova despesa
           </button>
         </div>
+
+        {erro && (
+          <div className="expenses-message expenses-error" role="alert">
+            {erro}
+          </div>
+        )}
+
+        {aviso && (
+          <div className="expenses-message expenses-success" role="status">
+            {aviso}
+          </div>
+        )}
 
         <section className="expenses-summary">
           <article className="expenses-summary-card">
@@ -231,7 +433,7 @@ export default function Despesas() {
             <div>
               <span>Total deste mês</span>
               <strong>{formatarMoeda(totalMes)}</strong>
-              <small>Despesas registradas no mês atual</small>
+              <small>Calculado pelo backend</small>
             </div>
           </article>
 
@@ -272,6 +474,7 @@ export default function Despesas() {
                 onClick={() => {
                   setFormAberto(false);
                   limparFormulario();
+                  setErro('');
                 }}
                 aria-label="Fechar formulário"
               >
@@ -347,16 +550,22 @@ export default function Despesas() {
                 <button
                   type="button"
                   className="expenses-secondary-button"
+                  disabled={salvando}
                   onClick={() => {
                     limparFormulario();
                     setFormAberto(false);
+                    setErro('');
                   }}
                 >
                   Cancelar
                 </button>
 
-                <button type="submit" className="expenses-primary-button">
-                  Salvar despesa
+                <button
+                  type="submit"
+                  className="expenses-primary-button"
+                  disabled={salvando}
+                >
+                  {salvando ? 'Salvando...' : 'Salvar despesa'}
                 </button>
               </div>
             </form>
@@ -410,6 +619,13 @@ export default function Despesas() {
             >
               <option value="ATUAL">Mês atual</option>
               <option value="TODOS">Todos os meses</option>
+              {mesesDisponiveis
+                .filter((mes) => mes !== mesAtual)
+                .map((mes) => (
+                  <option key={mes} value={mes}>
+                    {mes.split('-').reverse().join('/')}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -426,74 +642,90 @@ export default function Despesas() {
               </thead>
 
               <tbody>
-                {despesasFiltradas.map((despesa) => (
-                  <tr key={despesa.id}>
-                    <td>
-                      <div className="expenses-description-cell">
-                        <span
-                          className="expenses-row-icon"
-                          aria-hidden="true"
-                        >
-                          ▤
-                        </span>
-                        <div>
-                          <strong>{despesa.descricao}</strong>
-                          {despesa.observacao && (
-                            <small>{despesa.observacao}</small>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`expenses-category expenses-category-${despesa.categoria.toLowerCase()}`}
-                      >
-                        {nomeCategoria(despesa.categoria)}
-                      </span>
-                    </td>
-
-                    <td>{formatarData(despesa.dataDespesa)}</td>
-
-                    <td className="expenses-value">
-                      {formatarMoeda(despesa.valor)}
-                    </td>
-
-                    <td>
-                      <button
-                        type="button"
-                        className="expenses-delete-button"
-                        onClick={() => excluirDespesa(despesa.id)}
-                        aria-label={`Excluir despesa ${despesa.descricao}`}
-                        title="Excluir despesa"
-                      >
-                        ×
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-
-                {despesasFiltradas.length === 0 && (
+                {carregando ? (
                   <tr>
                     <td colSpan={5} className="expenses-empty">
-                      <span aria-hidden="true">▤</span>
-                      <strong>Nenhuma despesa encontrada</strong>
-                      <p>
-                        Tente alterar os filtros ou cadastre uma nova despesa.
-                      </p>
+                      Carregando despesas...
                     </td>
                   </tr>
+                ) : (
+                  <>
+                    {despesasFiltradas.map((despesa) => (
+                      <tr key={despesa.id}>
+                        <td>
+                          <div className="expenses-description-cell">
+                            <span
+                              className="expenses-row-icon"
+                              aria-hidden="true"
+                            >
+                              ▤
+                            </span>
+                            <div>
+                              <strong>{despesa.descricao}</strong>
+                              {despesa.observacao && (
+                                <small>{despesa.observacao}</small>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        <td>
+                          <span
+                            className={`expenses-category expenses-category-${despesa.categoria.toLowerCase()}`}
+                          >
+                            {nomeCategoria(despesa.categoria)}
+                          </span>
+                        </td>
+
+                        <td>{formatarData(despesa.dataDespesa)}</td>
+
+                        <td>
+                          <div className="expenses-value-cell">
+                            <span
+                              className="expenses-value-arrow"
+                              aria-hidden="true"
+                            >
+                              ↓
+                            </span>
+
+                            <strong className="expenses-value">
+                              − {formatarMoeda(Number(despesa.valor))}
+                            </strong>
+                          </div>
+                        </td>
+
+                        <td>
+                          <button
+                            type="button"
+                            className="expenses-delete-button"
+                            onClick={() => void excluirDespesa(despesa.id)}
+                            aria-label={`Excluir despesa ${despesa.descricao}`}
+                            title="Excluir despesa"
+                          >
+                            ×
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {despesasFiltradas.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="expenses-empty">
+                          <span aria-hidden="true">▤</span>
+                          <strong>Nenhuma despesa encontrada</strong>
+                          <p>
+                            Tente alterar os filtros ou cadastre uma nova
+                            despesa.
+                          </p>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 )}
               </tbody>
             </table>
           </div>
         </section>
-
-        <p className="expenses-demo-note">
-          Os dados desta página são apenas demonstrativos e ficam na memória
-          do navegador. Nenhuma informação é enviada ao backend ou salva
-          permanentemente.
-        </p>
       </div>
     </ModuleLayout>
   );

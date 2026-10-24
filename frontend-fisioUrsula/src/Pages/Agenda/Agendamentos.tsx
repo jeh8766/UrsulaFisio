@@ -1,16 +1,10 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import ModuleLayout from '../ModuleLayout/ModuleLayout';
 import './Agendamentos.css';
 
 type TipoAgendamento = 'AVALIACAO' | 'ATENDIMENTO';
-
-type StatusAgendamento =
-  | 'CANCELADO'
-  | 'CONFIRMADO'
-  | 'PENDENTE'
-  | 'REMARCADO'
-  | 'REALIZADO';
-
+type StatusAgendamento = 'CANCELADO_PACIENTE' | 'CANCELADO_FISIOTERAPEUTA' | 'CONFIRMADO' | 'PENDENTE' | 'REMARCADO';
+type Paciente = { id: number; nome: string };
 type Agendamento = {
   id: number;
   data: string;
@@ -18,27 +12,20 @@ type Agendamento = {
   horaFim: string;
   tipoAgendamento: TipoAgendamento;
   statusAgendamento: StatusAgendamento;
-  paciente?: {
-    id?: number;
-    nome?: string;
-  };
+  paciente?: Paciente;
 };
 
-const API_URL = 'http://localhost:8080/agendamentos';
+const API_AGENDAMENTOS = 'http://localhost:8080/agendamentos';
+const API_PACIENTES = 'http://localhost:8080/pacientes';
 
 function obterDataAtual() {
-  const hoje = new Date();
-
-  const ano = hoje.getFullYear();
-  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-  const dia = String(hoje.getDate()).padStart(2, '0');
-
-  return `${ano}-${mes}-${dia}`;
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 function formatarData(data: string) {
-  const [ano, mes, dia] = data.split('-');
-  return `${dia}/${mes}/${ano}`;
+  const [a, m, d] = data.split('-');
+  return `${d}/${m}/${a}`;
 }
 
 function formatarTipo(tipo: TipoAgendamento) {
@@ -47,129 +34,147 @@ function formatarTipo(tipo: TipoAgendamento) {
 
 function formatarStatus(status: StatusAgendamento) {
   const nomes: Record<StatusAgendamento, string> = {
-    CANCELADO: 'Cancelado',
+    CANCELADO_PACIENTE: 'Cancelado pelo paciente',
+    CANCELADO_FISIOTERAPEUTA: 'Cancelado pela fisioterapeuta',
     CONFIRMADO: 'Confirmado',
     PENDENTE: 'Pendente',
-    REMARCADO: 'Remarcado',
-    REALIZADO: 'Realizado',
+    REMARCADO: 'Remarcado'
   };
+  return nomes[status] ?? status;
+}
 
-  return nomes[status];
+function normalizarPaciente(v: any): Paciente | null {
+  const id = Number(v?.id ?? v?.pacienteId ?? v?.idPaciente);
+  const nome = String(v?.nome ?? v?.nomePaciente ?? '').trim();
+  return Number.isInteger(id) && id > 0 && nome ? { id, nome } : null;
 }
 
 export default function Agendamentos() {
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
-
   const [pacienteId, setPacienteId] = useState('');
+  const [buscaPaciente, setBuscaPaciente] = useState('');
+  const [pacientesEncontrados, setPacientesEncontrados] = useState<Paciente[]>([]);
+  const [pacienteSelecionado, setPacienteSelecionado] = useState<Paciente | null>(null);
+  const [carregandoPacientes, setCarregandoPacientes] = useState(false);
+  const [erroBuscaPaciente, setErroBuscaPaciente] = useState('');
   const [data, setData] = useState('');
   const [horaInicio, setHoraInicio] = useState('');
   const [horaFim, setHoraFim] = useState('');
-  const [tipoAgendamento, setTipoAgendamento] =
-    useState<TipoAgendamento>('AVALIACAO');
-
+  const [tipoAgendamento, setTipoAgendamento] = useState<TipoAgendamento>('AVALIACAO');
   const [busca, setBusca] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('TODOS');
   const [filtroStatus, setFiltroStatus] = useState('TODOS');
-
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
-
   const hoje = obterDataAtual();
+
+  useEffect(() => {
+    const termo = buscaPaciente.trim();
+    if (!termo || pacienteSelecionado?.nome === termo) {
+      setPacientesEncontrados([]);
+      setCarregandoPacientes(false);
+      setErroBuscaPaciente('');
+      return;
+    }
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      try {
+        setCarregandoPacientes(true);
+        setErroBuscaPaciente('');
+        const r = await fetch(`${API_PACIENTES}?nome=${encodeURIComponent(termo)}&ativo=true`, { signal: controller.signal });
+        if (!r.ok) throw new Error(`Não foi possível pesquisar pacientes (${r.status}).`);
+        const dados: unknown = await r.json();
+        setPacientesEncontrados((Array.isArray(dados) ? dados : []).map(normalizarPaciente).filter((x): x is Paciente => x !== null));
+      } catch (e) {
+        if (e instanceof Error && e.name === 'AbortError') return;
+        setPacientesEncontrados([]);
+        setErroBuscaPaciente(e instanceof Error ? e.message : 'Erro ao carregar pacientes.');
+      } finally {
+        if (!controller.signal.aborted) setCarregandoPacientes(false);
+      }
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [buscaPaciente, pacienteSelecionado]);
+
+  function selecionarPaciente(p: Paciente) {
+    setPacienteSelecionado(p);
+    setPacienteId(String(p.id));
+    setBuscaPaciente(p.nome);
+    setPacientesEncontrados([]);
+    setErroBuscaPaciente('');
+  }
+
+  function limparPaciente() {
+    setPacienteSelecionado(null);
+    setPacienteId('');
+    setBuscaPaciente('');
+    setPacientesEncontrados([]);
+    setErroBuscaPaciente('');
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     setErro('');
     setSucesso('');
-
-    if (!pacienteId || !data || !horaInicio || !horaFim) {
-      setErro('Preencha todos os campos obrigatórios.');
+    if (!pacienteSelecionado || !pacienteId || !data || !horaInicio || !horaFim) {
+      setErro('Selecione um paciente da lista e preencha todos os campos obrigatórios.');
       return;
     }
-
-    if (!Number.isInteger(Number(pacienteId)) || Number(pacienteId) < 1) {
-      setErro('Informe um ID de paciente válido.');
-      return;
-    }
-
     if (horaInicio >= horaFim) {
       setErro('O horário de início deve ser anterior ao horário de término.');
       return;
     }
-
     try {
       setSalvando(true);
-
-      const resposta = await fetch(
-        `${API_URL}/${encodeURIComponent(pacienteId)}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            data,
-            horaInicio,
-            horaFim,
-            tipoAgendamento,
-          }),
-        }
-      );
-
-      if (!resposta.ok) {
-        const mensagem = await resposta.text();
-
-        throw new Error(
-          mensagem ||
-            `Não foi possível criar o agendamento. Erro ${resposta.status}.`
-        );
+      const rota = tipoAgendamento === 'AVALIACAO' ? 'avaliacao' : 'atendimento';
+      const r = await fetch(`${API_AGENDAMENTOS}/${rota}/${encodeURIComponent(pacienteId)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data, horaInicio, horaFim })
+      });
+      if (!r.ok) {
+        const msg = await r.text();
+        throw new Error(msg || `Não foi possível criar o agendamento. Erro ${r.status}.`);
       }
-
-      const agendamentoSalvo: Agendamento = await resposta.json();
-
-      setAgendamentos((atuais) => [
-        agendamentoSalvo,
-        ...atuais,
-      ]);
-
-      setPacienteId('');
+      const dto = await r.json();
+      const salvo: Agendamento = {
+        id: Number(dto.id),
+        data: dto.data ?? data,
+        horaInicio: dto.horaInicio ?? horaInicio,
+        horaFim: dto.horaFim ?? horaFim,
+        tipoAgendamento: dto.tipoAgendamento ?? tipoAgendamento,
+        statusAgendamento: dto.statusAgendamento ?? 'PENDENTE',
+        paciente: normalizarPaciente(dto.paciente) ?? pacienteSelecionado
+      };
+      setAgendamentos(xs => [salvo, ...xs]);
+      limparPaciente();
       setData('');
       setHoraInicio('');
       setHoraFim('');
       setTipoAgendamento('AVALIACAO');
       setMostrarFormulario(false);
-
       setSucesso('Agendamento criado com sucesso!');
-    } catch (error) {
-      setErro(
-        error instanceof Error
-          ? error.message
-          : 'Não foi possível criar o agendamento. Tente novamente.'
-      );
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Não foi possível criar o agendamento. Tente novamente.');
     } finally {
       setSalvando(false);
     }
   }
 
-  const agendamentosFiltrados = agendamentos.filter((item) => {
-    const nomePaciente = item.paciente?.nome ?? '';
-    const idPaciente = String(item.paciente?.id ?? '');
-
-    const correspondeBusca =
-      nomePaciente.toLowerCase().includes(busca.toLowerCase()) ||
-      idPaciente.includes(busca) ||
-      String(item.id).includes(busca);
-
-    const correspondeTipo =
-      filtroTipo === 'TODOS' || item.tipoAgendamento === filtroTipo;
-
-    const correspondeStatus =
-      filtroStatus === 'TODOS' ||
-      item.statusAgendamento === filtroStatus;
-
-    return correspondeBusca && correspondeTipo && correspondeStatus;
+  const filtrados = agendamentos.filter(a => {
+    const nome = a.paciente?.nome ?? '';
+    const idPaciente = String(a.paciente?.id ?? '');
+    const termo = busca.toLowerCase();
+    return (
+      (nome.toLowerCase().includes(termo) || idPaciente.includes(busca) || String(a.id).includes(busca)) &&
+      (filtroTipo === 'TODOS' || a.tipoAgendamento === filtroTipo) &&
+      (filtroStatus === 'TODOS' || a.statusAgendamento === filtroStatus)
+    );
   });
 
   return (
@@ -188,34 +193,20 @@ export default function Agendamentos() {
               <span>Registros nesta sessão</span>
             </div>
           </article>
-
           <article className="agenda-stat-card">
             <span className="agenda-stat-icon pending">◷</span>
             <div>
               <small>Avaliações</small>
-              <strong>
-                {
-                  agendamentos.filter(
-                    (item) => item.tipoAgendamento === 'AVALIACAO'
-                  ).length
-                }
-              </strong>
-              <span>Avaliações agendadas</span>
+              <strong>{agendamentos.filter(a => a.tipoAgendamento === 'AVALIACAO').length}</strong>
+              <span>Avaliações nesta sessão</span>
             </div>
           </article>
-
           <article className="agenda-stat-card">
             <span className="agenda-stat-icon confirmed">✓</span>
             <div>
               <small>Atendimentos</small>
-              <strong>
-                {
-                  agendamentos.filter(
-                    (item) => item.tipoAgendamento === 'ATENDIMENTO'
-                  ).length
-                }
-              </strong>
-              <span>Atendimentos agendados</span>
+              <strong>{agendamentos.filter(a => a.tipoAgendamento === 'ATENDIMENTO').length}</strong>
+              <span>Atendimentos nesta sessão</span>
             </div>
           </article>
         </div>
@@ -224,16 +215,13 @@ export default function Agendamentos() {
           <div className="agenda-panel-heading">
             <div>
               <h2>Agenda da clínica</h2>
-              <p>
-                Consulte os horários e cadastre avaliações ou atendimentos.
-              </p>
+              <p>Consulte os horários e cadastre avaliações ou atendimentos.</p>
             </div>
-
             <button
               type="button"
               className="agenda-primary-button"
               onClick={() => {
-                setMostrarFormulario((atual) => !atual);
+                setMostrarFormulario(x => !x);
                 setErro('');
                 setSucesso('');
               }}
@@ -242,17 +230,8 @@ export default function Agendamentos() {
             </button>
           </div>
 
-          {erro && (
-            <div className="agenda-message error" role="alert">
-              {erro}
-            </div>
-          )}
-
-          {sucesso && (
-            <div className="agenda-message success" role="status">
-              {sucesso}
-            </div>
-          )}
+          {erro && <div className="agenda-message error" role="alert">{erro}</div>}
+          {sucesso && <div className="agenda-message success" role="status">{sucesso}</div>}
 
           {mostrarFormulario && (
             <form className="agenda-form" onSubmit={handleSubmit}>
@@ -260,7 +239,7 @@ export default function Agendamentos() {
                 <span>01</span>
                 <div>
                   <h3>Novo agendamento</h3>
-                  <p>Preencha os dados para reservar um horário.</p>
+                  <p>Pesquise pelo nome e selecione o paciente correto.</p>
                 </div>
               </div>
 
@@ -269,11 +248,7 @@ export default function Agendamentos() {
                   Tipo de agendamento *
                   <select
                     value={tipoAgendamento}
-                    onChange={(e) =>
-                      setTipoAgendamento(
-                        e.target.value as TipoAgendamento
-                      )
-                    }
+                    onChange={e => setTipoAgendamento(e.target.value as TipoAgendamento)}
                     required
                   >
                     <option value="AVALIACAO">Avaliação</option>
@@ -281,42 +256,73 @@ export default function Agendamentos() {
                   </select>
                 </label>
 
-                <label>
-                  ID do paciente *
-                  <input
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={pacienteId}
-                    onChange={(e) => setPacienteId(e.target.value)}
-                    placeholder="Ex.: 1"
-                    required
-                  />
-                  <small>
-                    Informe o ID de um paciente já cadastrado.
-                  </small>
-                </label>
+                <div className="agenda-patient-field">
+                  <label htmlFor="busca-paciente">Paciente *</label>
+                  <div className="agenda-patient-input-row">
+                    <input
+                      id="busca-paciente"
+                      type="search"
+                      autoComplete="off"
+                      value={buscaPaciente}
+                      onChange={e => {
+                        setBuscaPaciente(e.target.value);
+                        setPacienteSelecionado(null);
+                        setPacienteId('');
+                      }}
+                      placeholder="Digite o nome do paciente..."
+                      required
+                      aria-autocomplete="list"
+                      aria-expanded={pacientesEncontrados.length > 0}
+                    />
+                    {pacienteSelecionado && (
+                      <button
+                        type="button"
+                        className="agenda-clear-patient"
+                        onClick={limparPaciente}
+                        title="Trocar paciente"
+                        aria-label="Trocar paciente"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                  {carregandoPacientes && <small className="agenda-patient-hint">Pesquisando pacientes...</small>}
+                  {erroBuscaPaciente && <small className="agenda-patient-error" role="alert">{erroBuscaPaciente}</small>}
+                  {!carregandoPacientes && buscaPaciente.trim() && !pacienteSelecionado && pacientesEncontrados.length === 0 && !erroBuscaPaciente && (
+                    <small className="agenda-patient-hint">
+                      Nenhum paciente encontrado. Confira o nome ou cadastre o paciente primeiro.
+                    </small>
+                  )}
+                  {pacientesEncontrados.length > 0 && !pacienteSelecionado && (
+                    <ul className="agenda-patient-results" role="listbox" aria-label="Pacientes encontrados">
+                      {pacientesEncontrados.map(p => (
+                        <li key={p.id}>
+                          <button
+                            type="button"
+                            role="option"
+                            aria-selected={false}
+                            onClick={() => selecionarPaciente(p)}
+                          >
+                            <span>{p.nome}</span>
+                            <small>Selecionar</small>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {pacienteSelecionado && (
+                    <small className="agenda-patient-selected">✓ Selecionado: {pacienteSelecionado.nome}</small>
+                  )}
+                </div>
 
                 <label>
                   Data *
-                  <input
-                    type="date"
-                    min={hoje}
-                    value={data}
-                    onChange={(e) => setData(e.target.value)}
-                    required
-                  />
+                  <input type="date" min={hoje} value={data} onChange={e => setData(e.target.value)} required />
                 </label>
-                
 
                 <label>
                   Hora de início *
-                  <input
-                    type="time"
-                    value={horaInicio}
-                    onChange={(e) => setHoraInicio(e.target.value)}
-                    required
-                  />
+                  <input type="time" value={horaInicio} onChange={e => setHoraInicio(e.target.value)} required />
                 </label>
 
                 <label>
@@ -325,20 +331,15 @@ export default function Agendamentos() {
                     type="time"
                     min={horaInicio || undefined}
                     value={horaFim}
-                    onChange={(e) => setHoraFim(e.target.value)}
+                    onChange={e => setHoraFim(e.target.value)}
                     required
                   />
                 </label>
               </div>
 
               <div className="agenda-form-footer">
-                <span className="agenda-form-required-note">* Campos obrigatórios</span>
-
-                <button
-                  type="submit"
-                  className="agenda-primary-button"
-                  disabled={salvando}
-                >
+                <span className="agenda-form-required-note">Campos obrigatórios</span>
+                <button type="submit" className="agenda-primary-button" disabled={salvando}>
                   {salvando ? 'Salvando...' : 'Salvar agendamento'}
                 </button>
               </div>
@@ -351,17 +352,14 @@ export default function Agendamentos() {
               <input
                 type="search"
                 value={busca}
-                onChange={(e) => setBusca(e.target.value)}
+                onChange={e => setBusca(e.target.value)}
                 placeholder="Buscar por paciente, ID ou agendamento..."
               />
             </label>
 
             <label className="agenda-filter">
               <span>Tipo</span>
-              <select
-                value={filtroTipo}
-                onChange={(e) => setFiltroTipo(e.target.value)}
-              >
+              <select value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)}>
                 <option value="TODOS">Todos</option>
                 <option value="AVALIACAO">Avaliações</option>
                 <option value="ATENDIMENTO">Atendimentos</option>
@@ -370,52 +368,36 @@ export default function Agendamentos() {
 
             <label className="agenda-filter">
               <span>Status</span>
-              <select
-                value={filtroStatus}
-                onChange={(e) => setFiltroStatus(e.target.value)}
-              >
+              <select value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}>
                 <option value="TODOS">Todos</option>
                 <option value="PENDENTE">Pendente</option>
                 <option value="CONFIRMADO">Confirmado</option>
                 <option value="REMARCADO">Remarcado</option>
-                <option value="REALIZADO">Realizado</option>
-                <option value="CANCELADO">Cancelado</option>
+                <option value="CANCELADO_PACIENTE">Cancelado pelo paciente</option>
+                <option value="CANCELADO_FISIOTERAPEUTA">Cancelado pela fisioterapeuta</option>
               </select>
             </label>
           </div>
 
           <div className="agenda-list">
-            {agendamentosFiltrados.length > 0 ? (
-              agendamentosFiltrados
+            {filtrados.length > 0 ? (
+              filtrados
                 .slice()
-                .sort((a, b) =>
-                  `${a.data}T${a.horaInicio}`.localeCompare(
-                    `${b.data}T${b.horaInicio}`
-                  )
-                )
-                .map((item) => (
-                  <article className="agenda-appointment" key={item.id}>
+                .sort((a, b) => `${a.data}T${a.horaInicio}`.localeCompare(`${b.data}T${b.horaInicio}`))
+                .map(a => (
+                  <article className="agenda-appointment" key={a.id}>
                     <div className="agenda-time">
-                      <strong>{item.horaInicio.slice(0, 5)}</strong>
-                      <span>até {item.horaFim.slice(0, 5)}</span>
+                      <strong>{a.horaInicio.slice(0, 5)}</strong>
+                      <span>até {a.horaFim.slice(0, 5)}</span>
                     </div>
-
                     <div className="agenda-appointment-info">
-                      <strong>
-                        {item.paciente?.nome ||
-                          `Paciente #${item.paciente?.id ?? '—'}`}
-                      </strong>
-
+                      <strong>{a.paciente?.nome ?? 'Paciente'}</strong>
                       <span>
-                        {formatarData(item.data)} ·{' '}
-                        {formatarTipo(item.tipoAgendamento)} · #{item.id}
+                        {formatarData(a.data)} · {formatarTipo(a.tipoAgendamento)} · #{a.id}
                       </span>
                     </div>
-
-                    <span
-                      className={`agenda-status ${item.statusAgendamento.toLowerCase()}`}
-                    >
-                      {formatarStatus(item.statusAgendamento)}
+                    <span className={`agenda-status ${a.statusAgendamento.toLowerCase()}`}>
+                      {formatarStatus(a.statusAgendamento)}
                     </span>
                   </article>
                 ))
@@ -428,13 +410,8 @@ export default function Agendamentos() {
                     ? 'Crie um agendamento para começar a organizar a agenda.'
                     : 'Tente alterar a busca ou os filtros selecionados.'}
                 </p>
-
                 {agendamentos.length === 0 && (
-                  <button
-                    type="button"
-                    className="agenda-secondary-button"
-                    onClick={() => setMostrarFormulario(true)}
-                  >
+                  <button type="button" className="agenda-secondary-button" onClick={() => setMostrarFormulario(true)}>
                     + Novo agendamento
                   </button>
                 )}
@@ -443,8 +420,7 @@ export default function Agendamentos() {
           </div>
 
           <div className="agenda-footer">
-            Exibindo <strong>{agendamentosFiltrados.length}</strong> de{' '}
-            <strong>{agendamentos.length}</strong> agendamentos
+            Exibindo <strong>{filtrados.length}</strong> de <strong>{agendamentos.length}</strong> agendamentos
             <span>Registros recebidos nesta sessão.</span>
           </div>
         </section>
