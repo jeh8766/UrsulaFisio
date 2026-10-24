@@ -7,7 +7,7 @@ import com.fisioUrsula.api.pacientes.paciente.dtos.PacienteResumoResponseDTO;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 
-public record CriarAgendamentoAtendimentoResponseDTO(
+public record   CriarAgendamentoAtendimentoResponseDTO(
         Long id,
         LocalDate data,
         LocalTime horaInicio,
