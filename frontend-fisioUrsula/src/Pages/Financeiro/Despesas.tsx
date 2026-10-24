@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import ModuleLayout from '../ModuleLayout/ModuleLayout';
 import './Despesas.css';
@@ -26,7 +27,13 @@ type DespesaRequest = {
   observacao: string;
 };
 
+type RespostaCsrf = {
+  headerName: string;
+  token: string;
+};
+
 const API_URL = 'http://localhost:8080/despesas';
+const API_CSRF_URL = 'http://localhost:8080/csrf';
 
 const categorias: { value: CategoriaDespesa; label: string }[] = [
   { value: 'MATERIAIS', label: 'Materiais' },
@@ -68,16 +75,74 @@ const formatarData = (data: string) => {
 
 const obterMes = (data: string) => data.slice(0, 7);
 
+/**
+ * Busca o token CSRF associado à sessão do Spring Security.
+ * Deve ser chamado antes de POST, PUT, PATCH ou DELETE.
+ */
+async function obterTokenCsrf(): Promise<RespostaCsrf> {
+  const respostaCsrf = await fetch(API_CSRF_URL, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!respostaCsrf.ok) {
+    throw new Error(
+      `Não foi possível obter o token CSRF (${respostaCsrf.status}).`,
+    );
+  }
+
+  const csrf: RespostaCsrf = await respostaCsrf.json();
+
+  if (!csrf.headerName || !csrf.token) {
+    throw new Error(
+      'O backend não retornou um token CSRF válido. Verifique o endpoint /csrf.',
+    );
+  }
+
+  return csrf;
+}
+
+/**
+ * Função central das requisições à API.
+ * GET não precisa enviar token CSRF.
+ * POST, PUT, PATCH e DELETE obtêm e enviam o token automaticamente.
+ */
 async function requisicao<T>(
   url: string,
   options?: RequestInit,
 ): Promise<T> {
+  const metodo = (options?.method ?? 'GET').toUpperCase();
+
+  const metodosQueExigemCsrf = [
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+  ];
+
+  const headers = new Headers(options?.headers);
+
+  if (options?.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  if (!headers.has('Accept')) {
+    headers.set('Accept', 'application/json');
+  }
+
+  if (metodosQueExigemCsrf.includes(metodo)) {
+    const csrf = await obterTokenCsrf();
+    headers.set(csrf.headerName, csrf.token);
+  }
+
   const resposta = await fetch(url, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+    method: metodo,
+    credentials: 'include',
+    headers,
   });
 
   if (!resposta.ok) {
@@ -92,7 +157,18 @@ async function requisicao<T>(
     return undefined as T;
   }
 
-  return resposta.json() as Promise<T>;
+  // Algumas respostas de sucesso podem não possuir corpo.
+  if (resposta.status === 205) {
+    return undefined as T;
+  }
+
+  const texto = await resposta.text();
+
+  if (!texto.trim()) {
+    return undefined as T;
+  }
+
+  return JSON.parse(texto) as T;
 }
 
 export default function Despesas() {
@@ -118,7 +194,6 @@ export default function Despesas() {
   const [aviso, setAviso] = useState('');
 
   // GET /despesas
-  // Carrega todos os registros para alimentar os cartões de resumo.
   const carregarDespesas = useCallback(async () => {
     try {
       setCarregando(true);
@@ -143,9 +218,7 @@ export default function Despesas() {
     void carregarDespesas();
   }, [carregarDespesas]);
 
-  // GET /despesas/categoria
-  // GET /despesas/periodo
-  // A API fornece os registros do filtro principal selecionado.
+  // GET /despesas/categoria e GET /despesas/periodo
   useEffect(() => {
     let ativo = true;
 
@@ -201,7 +274,6 @@ export default function Despesas() {
   }, [categoriaFiltro, mesFiltro]);
 
   // GET /despesas/total/periodo
-  // O cartão mensal utiliza o total calculado pelo backend.
   useEffect(() => {
     let ativo = true;
 
@@ -221,7 +293,6 @@ export default function Despesas() {
         }
       } catch {
         if (ativo) {
-          // Alternativa caso o endpoint de total falhe.
           setTotalMes(
             despesas
               .filter(
@@ -244,7 +315,6 @@ export default function Despesas() {
     };
   }, [despesas]);
 
-  // A busca textual complementa os filtros do backend.
   const despesasFiltradas = useMemo(() => {
     const texto = busca.trim().toLowerCase();
 
@@ -283,7 +353,6 @@ export default function Despesas() {
     [despesas],
   );
 
-  // Disponibiliza os meses existentes nos registros.
   const mesesDisponiveis = useMemo(
     () =>
       Array.from(
@@ -301,6 +370,7 @@ export default function Despesas() {
   };
 
   // POST /despesas
+  // A função requisicao obtém e envia o token CSRF automaticamente.
   const cadastrarDespesa = async (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
@@ -354,6 +424,7 @@ export default function Despesas() {
   };
 
   // DELETE /despesas/{id}
+  // A função requisicao obtém e envia o token CSRF automaticamente.
   const excluirDespesa = async (id: number) => {
     const confirmar = window.confirm(
       'Deseja realmente excluir esta despesa?',
@@ -687,7 +758,6 @@ export default function Despesas() {
                             >
                               ↓
                             </span>
-
                             <strong className="expenses-value">
                               − {formatarMoeda(Number(despesa.valor))}
                             </strong>
