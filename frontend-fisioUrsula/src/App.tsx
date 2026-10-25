@@ -1,4 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+
 import Login from "./Pages/Login/Login";
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import Agenda from "./Pages/Agenda/Agenda";
@@ -12,12 +14,15 @@ import Despesas from "./Pages/Financeiro/Despesas";
 import "./App.css";
 import Agendamentos from "./Pages/Agenda/Agendamentos";
 
-
-
-
-
 function NotFound() {
-  return <main className="not-found"><span>404</span><h1>Página não encontrada</h1><p>Esse endereço não existe no VittaFisio.</p><a href="/dashboard">Ir para a página inicial</a></main>;
+  return (
+    <main className="not-found">
+      <span>404</span>
+      <h1>Página não encontrada</h1>
+      <p>Esse endereço não existe no VittaFisio.</p>
+      <a href="/dashboard">Ir para a página inicial</a>
+    </main>
+  );
 }
 
 export default function App() {
@@ -25,23 +30,37 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/agenda" element={<Agenda />} />
-        <Route path="/prontuarios" element={<Prontuario />} />
-        <Route path="/financeiro" element={<Financeiro />} />
-        <Route path="/paciente" element={<Paciente />} />
-        <Route path="/cadastro-paciente" element={<CadastroPaciente />} />
-        <Route path="/atendimento" element={<Atendimento />} />
-        <Route path="/despesas" element={<Despesas />} />
-        <Route path="/modulo/:modulo" element={<ModuleLayout title="Módulo" subtitle="Área de trabalho do módulo selecionado." eyebrow="MÓDULO EM DESENVOLVIMENTO"><p>Conteúdo do módulo em desenvolvimento.</p></ModuleLayout>} />
-        <Route path="/agendamento" element={<Agendamentos />} />
 
-        
+        <Route path="/login" element={<Login />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/agenda" element={<Agenda />} />
+          <Route path="/prontuarios" element={<Prontuario />} />
+          <Route path="/financeiro" element={<Financeiro />} />
+          <Route path="/paciente" element={<Paciente />} />
+          <Route path="/cadastro-paciente" element={<CadastroPaciente />} />
+          <Route path="/atendimento" element={<Atendimento />} />
+          <Route path="/despesas" element={<Despesas />} />
+
+          <Route
+            path="/modulo/:modulo"
+            element={
+              <ModuleLayout
+                title="Módulo"
+                subtitle="Área de trabalho do módulo selecionado."
+                eyebrow="MÓDULO EM DESENVOLVIMENTO"
+              >
+                <p>Conteúdo do módulo em desenvolvimento.</p>
+              </ModuleLayout>
+            }
+          />
+
+          <Route path="/agendamento" element={<Agendamentos />} />
+        </Route>
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
 }
-
-
