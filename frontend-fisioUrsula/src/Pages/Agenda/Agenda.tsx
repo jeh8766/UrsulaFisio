@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ModuleLayout from '../ModuleLayout/ModuleLayout';
@@ -36,7 +35,29 @@ type AgendamentoApi = {
   statusAgendamento: StatusAgendamento;
 };
 
+// Estrutura retornada por GET /pacientes/{id}.
+type PacienteDetalhado = {
+  id: number;
+  nome: string;
+  dataNascimento: string;
+  idade: number;
+  telefone: string;
+  cep: string;
+  estado: string;
+  cidade: string;
+  bairro: string;
+  rua: string;
+  numero: number;
+  complemento: string | null;
+  nomeResponsavel?: string | null;
+  faixaEtaria?: string;
+  vinculo?: string;
+  ativo?: boolean;
+  comorbidades?: string[];
+};
+
 const API_AGENDAMENTOS = 'http://localhost:8080/agendamentos';
+const API_PACIENTES = 'http://localhost:8080/pacientes';
 
 function dataAtualISO(): string {
   const hoje = new Date();
@@ -108,6 +129,27 @@ function normalizarAgendamento(dado: AgendamentoApi): Agendamento {
   };
 }
 
+function gerarLinkWaze(paciente: PacienteDetalhado): string {
+  const endereco = [
+    paciente.rua,
+    paciente.numero,
+    paciente.bairro,
+    paciente.cidade,
+    paciente.estado,
+    paciente.cep,
+    paciente.complemento,
+  ]
+    .filter(
+      (parte) =>
+        parte !== null &&
+        parte !== undefined &&
+        String(parte).trim() !== '',
+    )
+    .join(', ');
+
+  return `https://waze.com/ul?q=${encodeURIComponent(endereco)}&navigate=yes`;
+}
+
 export default function Agenda() {
   const navigate = useNavigate();
 
@@ -117,6 +159,13 @@ export default function Agenda() {
   const [view, setView] = useState<'Dia' | 'Semana'>('Dia');
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
+
+  const [agendamentoSelecionado, setAgendamentoSelecionado] =
+    useState<Agendamento | null>(null);
+  const [pacienteDetalhado, setPacienteDetalhado] =
+    useState<PacienteDetalhado | null>(null);
+  const [carregandoPaciente, setCarregandoPaciente] = useState(false);
+  const [erroPaciente, setErroPaciente] = useState('');
 
   const diasDaSemana = useMemo(() => {
     const selecionada = new Date(`${dataSelecionada}T12:00:00`);
@@ -146,7 +195,6 @@ export default function Agenda() {
 
         const inicio = diasDaSemana[0].data;
         const fim = diasDaSemana[6].data;
-
         const parametros = new URLSearchParams({ inicio, fim });
 
         const resposta = await fetch(
@@ -201,6 +249,46 @@ export default function Agenda() {
 
     return () => controller.abort();
   }, [diasDaSemana, tentativa]);
+
+  async function abrirDetalhes(item: Agendamento) {
+    setAgendamentoSelecionado(item);
+    setPacienteDetalhado(null);
+    setErroPaciente('');
+    setCarregandoPaciente(true);
+
+    try {
+      const resposta = await fetch(`${API_PACIENTES}/${item.pacienteId}`, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!resposta.ok) {
+        throw new Error(
+          `Não foi possível carregar os dados do paciente. Erro ${resposta.status}.`,
+        );
+      }
+
+      const paciente: PacienteDetalhado = await resposta.json();
+      setPacienteDetalhado(paciente);
+    } catch (e) {
+      setErroPaciente(
+        e instanceof Error
+          ? e.message
+          : 'Erro ao carregar os dados do paciente.',
+      );
+    } finally {
+      setCarregandoPaciente(false);
+    }
+  }
+
+  function fecharDetalhes() {
+    setAgendamentoSelecionado(null);
+    setPacienteDetalhado(null);
+    setErroPaciente('');
+    setCarregandoPaciente(false);
+  }
 
   const agendamentosVisiveis = useMemo(() => {
     const datas =
@@ -374,7 +462,19 @@ export default function Agenda() {
                   <i />
                 </div>
 
-                <div className="agenda-appointment-card">
+                <div
+                  className="agenda-appointment-card agenda-appointment-clickable"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Ver detalhes de ${item.nome}`}
+                  onClick={() => abrirDetalhes(item)}
+                  onKeyDown={(evento) => {
+                    if (evento.key === 'Enter' || evento.key === ' ') {
+                      evento.preventDefault();
+                      abrirDetalhes(item);
+                    }
+                  }}
+                >
                   <div className="agenda-person-avatar">
                     {iniciais(item.nome || 'Paciente')}
                   </div>
@@ -400,6 +500,171 @@ export default function Agenda() {
       <p className="agenda-demo-note">
         Os agendamentos são carregados do banco de dados pela API.
       </p>
+
+      {agendamentoSelecionado && (
+        <div
+          className="agenda-modal-overlay"
+          onClick={fecharDetalhes}
+        >
+          <section
+            className="agenda-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="agenda-modal-title"
+            onClick={(evento) => evento.stopPropagation()}
+          >
+            <header className="agenda-modal-header">
+              <div>
+                <span className="agenda-modal-eyebrow">
+                  DETALHES DO AGENDAMENTO
+                </span>
+                <h2 id="agenda-modal-title">
+                  {agendamentoSelecionado.nome}
+                </h2>
+                <p>
+                  {nomeTipo(agendamentoSelecionado.tipoAgendamento)}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="agenda-modal-close"
+                onClick={fecharDetalhes}
+                aria-label="Fechar modal"
+              >
+                ×
+              </button>
+            </header>
+
+            {carregandoPaciente ? (
+              <p className="agenda-modal-message">
+                Carregando dados do paciente...
+              </p>
+            ) : erroPaciente ? (
+              <div className="agenda-modal-error" role="alert">
+                <p>{erroPaciente}</p>
+                <button
+                  type="button"
+                  onClick={() => abrirDetalhes(agendamentoSelecionado)}
+                >
+                  Tentar novamente
+                </button>
+              </div>
+            ) : pacienteDetalhado ? (
+              <>
+                <div className="agenda-modal-section">
+                  <h3>Informações do paciente</h3>
+
+                  <div className="agenda-modal-grid">
+                    <div className="agenda-modal-field">
+                      <span>Nome completo</span>
+                      <strong>{pacienteDetalhado.nome}</strong>
+                    </div>
+
+                    <div className="agenda-modal-field">
+                      <span>Telefone</span>
+                      <strong>{pacienteDetalhado.telefone}</strong>
+                    </div>
+
+                    <div className="agenda-modal-field">
+                      <span>Data de nascimento</span>
+                      <strong>
+                        {pacienteDetalhado.dataNascimento
+                          ? new Date(
+                              `${pacienteDetalhado.dataNascimento}T12:00:00`,
+                            ).toLocaleDateString('pt-BR')
+                          : 'Não informado'}
+                      </strong>
+                    </div>
+
+                    <div className="agenda-modal-field">
+                      <span>Idade</span>
+                      <strong>
+                        {pacienteDetalhado.idade != null
+                          ? `${pacienteDetalhado.idade} anos`
+                          : 'Não informada'}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="agenda-modal-section">
+                  <h3>Informações do agendamento</h3>
+
+                  <div className="agenda-modal-grid">
+                    <div className="agenda-modal-field">
+                      <span>Data</span>
+                      <strong>
+                        {formatarData(agendamentoSelecionado.data)}
+                      </strong>
+                    </div>
+
+                    <div className="agenda-modal-field">
+                      <span>Horário</span>
+                      <strong>
+                        {agendamentoSelecionado.horaInicio} às{' '}
+                        {agendamentoSelecionado.horaFim}
+                      </strong>
+                    </div>
+
+                    <div className="agenda-modal-field">
+                      <span>Status</span>
+                      <strong>
+                        {nomeStatus(
+                          agendamentoSelecionado.statusAgendamento,
+                        )}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="agenda-modal-section">
+                  <h3>Endereço do paciente</h3>
+
+                  <div className="agenda-address-card">
+                    <div className="agenda-address-icon">
+                      <span>⌖</span>
+                    </div>
+
+                    <div className="agenda-address-content">
+                      <strong>
+                        {pacienteDetalhado.rua}, {pacienteDetalhado.numero}
+                      </strong>
+
+                      {pacienteDetalhado.complemento && (
+                        <p>{pacienteDetalhado.complemento}</p>
+                      )}
+
+                      <p>{pacienteDetalhado.bairro}</p>
+                      <p>
+                        {pacienteDetalhado.cidade} - {pacienteDetalhado.estado}
+                      </p>
+                      <p>CEP: {pacienteDetalhado.cep}</p>
+
+                      <a
+                        className="agenda-waze-link"
+                        href={gerarLinkWaze(pacienteDetalhado)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span>➤</span>
+                        Abrir rota no Waze
+                        <span aria-hidden="true">↗</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : null}
+
+            <footer className="agenda-modal-footer">
+              <button type="button" onClick={fecharDetalhes}>
+                Fechar
+              </button>
+            </footer>
+          </section>
+        </div>
+      )}
     </ModuleLayout>
   );
 }
