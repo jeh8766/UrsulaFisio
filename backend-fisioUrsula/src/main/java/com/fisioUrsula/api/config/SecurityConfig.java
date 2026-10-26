@@ -11,6 +11,11 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
@@ -21,10 +26,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, OidcUserService oidcUserService)
             throws Exception {
+        HttpSessionCsrfTokenRepository repositorioCsrf = new HttpSessionCsrfTokenRepository();
 
-        http.authorizeHttpRequests(auth -> auth
-                // .anyRequest().authenticated())
-                .anyRequest().permitAll())
+        repositorioCsrf.setHeaderName("X-CSRF-TOKEN");
+
+        http.csrf(csrf -> csrf
+                .csrfTokenRepository(repositorioCsrf)
+                .csrfTokenRequestHandler(
+                        new CsrfTokenRequestAttributeHandler()))
+                .cors(cors -> cors
+                        .configurationSource(corsConfigurationSource()))
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo
                         .oidcUserService(oidcUserService))
                         .defaultSuccessUrl("http://localhost:5173/dashboard", true))
@@ -37,6 +50,26 @@ public class SecurityConfig {
                                 jakarta.servlet.http.HttpServletResponse.SC_NO_CONTENT)));
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuracao = new CorsConfiguration();
+
+        configuracao.setAllowedOrigins(List.of("http://localhost:5173"));
+
+        configuracao.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+
+        configuracao.setAllowedHeaders(List.of("Content-Type", "X-CSRF-TOKEN"));
+
+        configuracao.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource origem = new UrlBasedCorsConfigurationSource();
+
+        origem.registerCorsConfiguration("/**", configuracao);
+
+        return origem;
     }
 
     @Bean

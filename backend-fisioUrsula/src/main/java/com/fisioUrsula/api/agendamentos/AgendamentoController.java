@@ -1,22 +1,16 @@
 package com.fisioUrsula.api.agendamentos;
 
+import com.fisioUrsula.api.agendamentos.dtos.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
-import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoResponseDTO;
-import com.fisioUrsula.api.agendamentos.dtos.AlterarStatusAgendamentoRequestDTO;
-import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoRequestDTO;
-import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoResponseDTO;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
@@ -49,6 +43,18 @@ public class AgendamentoController {
 
         agendamentoService.alterarStatusAgendamento(id, dto.statusAgendamento());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    @GetMapping
+    public List<AgendamentoAgendaResponseDTO> listarPorPeriodo(
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate inicio,
+
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate fim
+    ) {
+        return agendamentoService.listarPorPeriodo(inicio, fim);
     }
 
 }

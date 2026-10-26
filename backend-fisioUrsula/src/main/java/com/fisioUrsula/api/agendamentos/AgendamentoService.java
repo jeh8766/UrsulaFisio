@@ -3,12 +3,9 @@ package com.fisioUrsula.api.agendamentos;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fisioUrsula.api.agendamentos.dtos.*;
 import org.springframework.stereotype.Service;
 
-import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
-import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoResponseDTO;
-import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoRequestDTO;
-import com.fisioUrsula.api.agendamentos.dtos.CriarAgendamentoAtendimentoResponseDTO;
 import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
 import com.fisioUrsula.api.atendimentos.atendimento.AtendimentoRepository;
 import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
@@ -34,6 +31,49 @@ public class AgendamentoService {
     private final AvaliacaoRepository avaliacaoRepository;
     private final AtendimentoRepository atendimentoRepository;
 
+
+
+
+    public List<AgendamentoAgendaResponseDTO> listarPorPeriodo(
+            LocalDate inicio,
+            LocalDate fim
+    ) {
+        if (inicio == null || fim == null) {
+            throw new IllegalArgumentException(
+                    "A data inicial e a data final são obrigatórias."
+            );
+        }
+
+        if (inicio.isAfter(fim)) {
+            throw new IllegalArgumentException(
+                    "A data inicial não pode ser posterior à data final."
+            );
+        }
+
+        return agendamentoRepository
+                .findByDataBetweenOrderByDataAscHoraInicioAsc(inicio, fim)
+                .stream()
+                .map(agendamento -> {
+                    PacienteResumoResponseDTO pacienteDTO =
+                            new PacienteResumoResponseDTO(
+                                    agendamento.getPaciente()
+                            );
+
+                    return new AgendamentoAgendaResponseDTO(
+                            agendamento.getId(),
+                            pacienteDTO.id(),
+                            pacienteDTO.nome(),
+                            agendamento.getData(),
+                            agendamento.getHoraInicio(),
+                            agendamento.getHoraFim(),
+                            agendamento.getTipoAgendamento(),
+                            agendamento.getStatusAgendamento()
+                    );
+                })
+                .toList();
+    }
+
+
     @Transactional
     public AgendarAvaliacaoResponseDTO AgendarAvaliacao(Long pacienteId, AgendarAvaliacaoRequestDTO dto) {
 
@@ -46,7 +86,7 @@ public class AgendamentoService {
 
         boolean existeConflito = agendamentoRepository.existeConflito(
                 dto.data(), dto.horaInicio(), dto.horaFim(),
-                List.of(StatusAgendamento.CANCELADO_FISIOTERAPEUTA, StatusAgendamento.CANCELADO_PACIENTE));
+                List.of(StatusAgendamento.CANCELADO));
 
         if (existeConflito) {
             throw new RegistroDuplicadoException("Já existe um agendamento nesse intervalo de horário.");
@@ -75,7 +115,7 @@ public class AgendamentoService {
 
         boolean existeConflito = agendamentoRepository.existeConflito(criarAgendamentoAtendimentoRequestDTO.data(),
                 criarAgendamentoAtendimentoRequestDTO.horaInicio(), criarAgendamentoAtendimentoRequestDTO.horaFim(),
-                List.of(StatusAgendamento.CANCELADO_FISIOTERAPEUTA, StatusAgendamento.CANCELADO_PACIENTE));
+                List.of(StatusAgendamento.CANCELADO));
 
         if (existeConflito) {
             throw new RegistroDuplicadoException("Já existe um agendamento nesse intervalo de horário.");
@@ -113,8 +153,7 @@ public class AgendamentoService {
 
         agendamento.setStatusAgendamento(novoStatus);
 
-        if (novoStatus == StatusAgendamento.CANCELADO_FISIOTERAPEUTA
-                || novoStatus == StatusAgendamento.CANCELADO_PACIENTE) {
+        if (novoStatus == StatusAgendamento.CANCELADO) {
             agendamento.setDataCancelamento(LocalDate.now());
             return;
         }

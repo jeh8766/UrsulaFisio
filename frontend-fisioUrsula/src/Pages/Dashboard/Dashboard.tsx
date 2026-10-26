@@ -112,7 +112,7 @@ export default function Dashboard() {
           <section className="dashboard-heading">
             <div>
               <p className="dashboard-eyebrow">SEGUNDA-FEIRA, 12 DE OUTUBRO</p>
-              <h1>Bom dia, Fisioterapeuta <span>✳</span></h1>
+              <h1>Bom dia, Fisioterapeuta</h1>
               <p className="heading-description">Aqui está o resumo da sua clínica para hoje.</p>
             </div>
             <NavLink to="/agenda" className="primary-action"><Icon name="plus" size={18} /> Novo agendamento</NavLink>

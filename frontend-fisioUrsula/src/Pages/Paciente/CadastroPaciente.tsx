@@ -20,16 +20,23 @@ export type CadastroPacienteData = {
 };
 
 type CadastroPacienteProps = {
-  
-  onCadastrar?: (paciente: CadastroPacienteData) => void | Promise<void>;
+  onCadastrar?: (
+    paciente: CadastroPacienteData
+  ) => void | Promise<void>;
+};
+
+type RespostaCsrf = {
+  headerName: string;
+  token: string;
 };
 
 const API_PACIENTES_URL = 'http://localhost:8080/pacientes';
+const API_CSRF_URL = 'http://localhost:8080/csrf';
 
 const initialForm: CadastroPacienteData = {
   nome: '',
   dataNascimento: '',
-  vinculo: 'PARTICULAR' ,
+  vinculo: 'PARTICULAR',
   nomeResponsavel: '',
   telefone: '',
   cep: '',
@@ -40,6 +47,32 @@ const initialForm: CadastroPacienteData = {
   numero: 0,
   complemento: '',
 };
+
+async function obterTokenCsrf(): Promise<RespostaCsrf> {
+  const respostaCsrf = await fetch(API_CSRF_URL, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!respostaCsrf.ok) {
+    throw new Error(
+      `Não foi possível obter o token CSRF (${respostaCsrf.status}).`,
+    );
+  }
+
+  const csrf: RespostaCsrf = await respostaCsrf.json();
+
+  if (!csrf.headerName || !csrf.token) {
+    throw new Error(
+      'O backend não retornou um token CSRF válido. Verifique o endpoint /csrf.',
+    );
+  }
+
+  return csrf;
+}
 
 export default function CadastroPaciente({
   onCadastrar,
@@ -55,7 +88,7 @@ export default function CadastroPaciente({
 
   function atualizarCampo(
     campo: keyof CadastroPacienteData,
-    valor: string
+    valor: string,
   ) {
     setForm((anterior) => ({
       ...anterior,
@@ -109,7 +142,7 @@ export default function CadastroPaciente({
       return;
     }
 
-    if (form.numero < 1) {
+    if (!Number.isInteger(form.numero) || form.numero < 1) {
       setErro('Informe um número de endereço válido.');
       return;
     }
@@ -132,26 +165,34 @@ export default function CadastroPaciente({
       };
 
       if (onCadastrar) {
-        // Se o componente pai forneceu uma função, ela continua sendo utilizada.
+        // O componente pai continua responsável pelo cadastro.
         await onCadastrar(dadosPaciente);
       } else {
-        // Caso contrário, envia os dados diretamente ao endpoint do Spring Boot.
+        // 1. Obter o token CSRF antes de enviar o POST.
+        const csrf = await obterTokenCsrf();
+
+        // 2. Enviar os dados e o token no cabeçalho.
         const resposta = await fetch(API_PACIENTES_URL, {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
+            [csrf.headerName]: csrf.token,
           },
           body: JSON.stringify(dadosPaciente),
         });
 
         if (!resposta.ok) {
           const corpoErro = await resposta.text();
-          let mensagem = `Erro ${resposta.status}: não foi possível cadastrar o paciente.`;
+
+          let mensagem =
+            `Erro ${resposta.status}: não foi possível cadastrar o paciente.`;
 
           if (corpoErro) {
             try {
               const detalhe = JSON.parse(corpoErro);
+
               mensagem =
                 detalhe.detail ||
                 detalhe.message ||
@@ -159,11 +200,16 @@ export default function CadastroPaciente({
                 detalhe.title ||
                 mensagem;
 
-              // Compatível com respostas de validação que retornam uma lista de erros.
-              if (Array.isArray(detalhe.errors) && detalhe.errors.length > 0) {
+              if (
+                Array.isArray(detalhe.errors) &&
+                detalhe.errors.length > 0
+              ) {
                 mensagem = detalhe.errors
-                  .map((item: { defaultMessage?: string; message?: string }) =>
-                    item.defaultMessage || item.message
+                  .map(
+                    (item: {
+                      defaultMessage?: string;
+                      message?: string;
+                    }) => item.defaultMessage || item.message,
                   )
                   .filter(Boolean)
                   .join(' ');
@@ -182,12 +228,14 @@ export default function CadastroPaciente({
     } catch (e: unknown) {
       if (e instanceof TypeError) {
         setErro(
-          'Não foi possível conectar à API. Confira se o Spring Boot está rodando em http://localhost:8080.'
+          'Não foi possível conectar à API. Confira se o Spring Boot está rodando em http://localhost:8080.',
         );
       } else if (e instanceof Error) {
         setErro(e.message || 'Não foi possível cadastrar o paciente.');
       } else {
-        setErro('Não foi possível cadastrar o paciente. Verifique os dados e tente novamente.');
+        setErro(
+          'Não foi possível cadastrar o paciente. Verifique os dados e tente novamente.',
+        );
       }
     } finally {
       setSalvando(false);
@@ -268,7 +316,10 @@ export default function CadastroPaciente({
                   name="vinculo"
                   value={form.vinculo}
                   onChange={(e) =>
-                    atualizarCampo('vinculo', e.target.value)
+                    atualizarCampo(
+                      'vinculo',
+                      e.target.value,
+                    )
                   }
                   required
                 >
@@ -308,7 +359,7 @@ export default function CadastroPaciente({
                   onChange={(e) =>
                     atualizarCampo(
                       'telefone',
-                      formatarTelefone(e.target.value)
+                      formatarTelefone(e.target.value),
                     )
                   }
                   autoComplete="tel"
@@ -356,38 +407,40 @@ export default function CadastroPaciente({
                   id="estado"
                   name="estado"
                   value={form.estado}
-                  onChange={(e) => atualizarCampo('estado', e.target.value)}
+                  onChange={(e) =>
+                    atualizarCampo('estado', e.target.value)
+                  }
                   autoComplete="address-level1"
                   required
                 >
-                    <option value="">Selecione o estado</option>
-                    <option value="AC">Acre</option>
-                    <option value="AL">Alagoas</option>
-                    <option value="AP">Amapá</option>
-                    <option value="AM">Amazonas</option>
-                    <option value="BA">Bahia</option>
-                    <option value="CE">Ceará</option>
-                <option value="DF">Distrito Federal</option>
-                <option value="ES">Espírito Santo</option>
-                <option value="GO">Goiás</option>
-                <option value="MA">Maranhão</option>
-                <option value="MT">Mato Grosso</option>
-                <option value="MS">Mato Grosso do Sul</option>
-                <option value="MG">Minas Gerais</option>
-                <option value="PA">Pará</option>
-                <option value="PB">Paraíba</option>
-                <option value="PR">Paraná</option>
-                <option value="PE">Pernambuco</option>
-                <option value="PI">Piauí</option>
-                <option value="RJ">Rio de Janeiro</option>
-                <option value="RN">Rio Grande do Norte</option>
-                <option value="RS">Rio Grande do Sul</option>
-                <option value="RO">Rondônia</option>
-                <option value="RR">Roraima</option>
-                <option value="SC">Santa Catarina</option>
-                <option value="SP">São Paulo</option>
-                <option value="SE">Sergipe</option>
-                <option value="TO">Tocantins</option>
+                  <option value="">Selecione o estado</option>
+                  <option value="AC">Acre</option>
+                  <option value="AL">Alagoas</option>
+                  <option value="AP">Amapá</option>
+                  <option value="AM">Amazonas</option>
+                  <option value="BA">Bahia</option>
+                  <option value="CE">Ceará</option>
+                  <option value="DF">Distrito Federal</option>
+                  <option value="ES">Espírito Santo</option>
+                  <option value="GO">Goiás</option>
+                  <option value="MA">Maranhão</option>
+                  <option value="MT">Mato Grosso</option>
+                  <option value="MS">Mato Grosso do Sul</option>
+                  <option value="MG">Minas Gerais</option>
+                  <option value="PA">Pará</option>
+                  <option value="PB">Paraíba</option>
+                  <option value="PR">Paraná</option>
+                  <option value="PE">Pernambuco</option>
+                  <option value="PI">Piauí</option>
+                  <option value="RJ">Rio de Janeiro</option>
+                  <option value="RN">Rio Grande do Norte</option>
+                  <option value="RS">Rio Grande do Sul</option>
+                  <option value="RO">Rondônia</option>
+                  <option value="RR">Roraima</option>
+                  <option value="SC">Santa Catarina</option>
+                  <option value="SP">São Paulo</option>
+                  <option value="SE">Sergipe</option>
+                  <option value="TO">Tocantins</option>
                 </select>
               </div>
 
@@ -401,7 +454,9 @@ export default function CadastroPaciente({
                   type="text"
                   placeholder="Nome da cidade"
                   value={form.cidade}
-                  onChange={(e) => atualizarCampo('cidade', e.target.value)}
+                  onChange={(e) =>
+                    atualizarCampo('cidade', e.target.value)
+                  }
                   autoComplete="address-level2"
                   required
                 />
@@ -417,7 +472,9 @@ export default function CadastroPaciente({
                   type="text"
                   placeholder="Nome do bairro"
                   value={form.bairro}
-                  onChange={(e) => atualizarCampo('bairro', e.target.value)}
+                  onChange={(e) =>
+                    atualizarCampo('bairro', e.target.value)
+                  }
                   autoComplete="address-level3"
                   required
                 />
@@ -433,7 +490,9 @@ export default function CadastroPaciente({
                   type="text"
                   placeholder="Nome da rua ou avenida"
                   value={form.rua}
-                  onChange={(e) => atualizarCampo('rua', e.target.value)}
+                  onChange={(e) =>
+                    atualizarCampo('rua', e.target.value)
+                  }
                   autoComplete="street-address"
                   required
                 />
@@ -451,7 +510,9 @@ export default function CadastroPaciente({
                   step="1"
                   placeholder="123"
                   value={form.numero || ''}
-                  onChange={(e) => atualizarCampo('numero', e.target.value)}
+                  onChange={(e) =>
+                    atualizarCampo('numero', e.target.value)
+                  }
                   required
                 />
               </div>
@@ -464,7 +525,9 @@ export default function CadastroPaciente({
                   type="text"
                   placeholder="Apartamento, bloco, referência (opcional)"
                   value={form.complemento}
-                  onChange={(e) => atualizarCampo('complemento', e.target.value)}
+                  onChange={(e) =>
+                    atualizarCampo('complemento', e.target.value)
+                  }
                   autoComplete="address-line2"
                 />
               </div>
