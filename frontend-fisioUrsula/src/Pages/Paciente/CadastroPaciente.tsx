@@ -7,7 +7,7 @@ import './CadastroPaciente.css';
 export type CadastroPacienteData = {
   nome: string;
   dataNascimento: string;
-  vinculo: 'PARTICULAR' | 'CONVENIO';
+  vinculo: 'PARTICULAR' | 'CLINICA';
   nomeResponsavel: string;
   telefone: string;
   cep: string;
@@ -16,6 +16,7 @@ export type CadastroPacienteData = {
   bairro: string;
   rua: string;
   numero: number;
+  complemento: string;
 };
 
 type CadastroPacienteProps = {
@@ -23,6 +24,14 @@ type CadastroPacienteProps = {
     paciente: CadastroPacienteData
   ) => void | Promise<void>;
 };
+
+type RespostaCsrf = {
+  headerName: string;
+  token: string;
+};
+
+const API_PACIENTES_URL = 'http://localhost:8080/pacientes';
+const API_CSRF_URL = 'http://localhost:8080/csrf';
 
 const initialForm: CadastroPacienteData = {
   nome: '',
@@ -36,7 +45,34 @@ const initialForm: CadastroPacienteData = {
   bairro: '',
   rua: '',
   numero: 0,
+  complemento: '',
 };
+
+async function obterTokenCsrf(): Promise<RespostaCsrf> {
+  const respostaCsrf = await fetch(API_CSRF_URL, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!respostaCsrf.ok) {
+    throw new Error(
+      `Não foi possível obter o token CSRF (${respostaCsrf.status}).`,
+    );
+  }
+
+  const csrf: RespostaCsrf = await respostaCsrf.json();
+
+  if (!csrf.headerName || !csrf.token) {
+    throw new Error(
+      'O backend não retornou um token CSRF válido. Verifique o endpoint /csrf.',
+    );
+  }
+
+  return csrf;
+}
 
 export default function CadastroPaciente({
   onCadastrar,
@@ -52,7 +88,7 @@ export default function CadastroPaciente({
 
   function atualizarCampo(
     campo: keyof CadastroPacienteData,
-    valor: string
+    valor: string,
   ) {
     setForm((anterior) => ({
       ...anterior,
@@ -106,22 +142,15 @@ export default function CadastroPaciente({
       return;
     }
 
-    if (form.numero < 1) {
+    if (!Number.isInteger(form.numero) || form.numero < 1) {
       setErro('Informe um número de endereço válido.');
-      return;
-    }
-
-    if (!onCadastrar) {
-      setErro(
-        'O formulário está pronto, mas ainda precisa ser conectado à API de cadastro.'
-      );
       return;
     }
 
     try {
       setSalvando(true);
 
-      await onCadastrar({
+      const dadosPaciente: CadastroPacienteData = {
         ...form,
         nome: form.nome.trim(),
         nomeResponsavel: form.nomeResponsavel.trim(),
@@ -132,14 +161,82 @@ export default function CadastroPaciente({
         bairro: form.bairro.trim(),
         rua: form.rua.trim(),
         numero: Number(form.numero),
-      });
+        complemento: form.complemento.trim(),
+      };
+
+      if (onCadastrar) {
+        // O componente pai continua responsável pelo cadastro.
+        await onCadastrar(dadosPaciente);
+      } else {
+        // 1. Obter o token CSRF antes de enviar o POST.
+        const csrf = await obterTokenCsrf();
+
+        // 2. Enviar os dados e o token no cabeçalho.
+        const resposta = await fetch(API_PACIENTES_URL, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            [csrf.headerName]: csrf.token,
+          },
+          body: JSON.stringify(dadosPaciente),
+        });
+
+        if (!resposta.ok) {
+          const corpoErro = await resposta.text();
+
+          let mensagem =
+            `Erro ${resposta.status}: não foi possível cadastrar o paciente.`;
+
+          if (corpoErro) {
+            try {
+              const detalhe = JSON.parse(corpoErro);
+
+              mensagem =
+                detalhe.detail ||
+                detalhe.message ||
+                detalhe.mensagem ||
+                detalhe.title ||
+                mensagem;
+
+              if (
+                Array.isArray(detalhe.errors) &&
+                detalhe.errors.length > 0
+              ) {
+                mensagem = detalhe.errors
+                  .map(
+                    (item: {
+                      defaultMessage?: string;
+                      message?: string;
+                    }) => item.defaultMessage || item.message,
+                  )
+                  .filter(Boolean)
+                  .join(' ');
+              }
+            } catch {
+              mensagem = corpoErro;
+            }
+          }
+
+          throw new Error(mensagem);
+        }
+      }
 
       setSucesso(true);
       setForm(initialForm);
-    } catch {
-      setErro(
-        'Não foi possível cadastrar o paciente. Verifique os dados e tente novamente.'
-      );
+    } catch (e: unknown) {
+      if (e instanceof TypeError) {
+        setErro(
+          'Não foi possível conectar à API. Confira se o Spring Boot está rodando em http://localhost:8080.',
+        );
+      } else if (e instanceof Error) {
+        setErro(e.message || 'Não foi possível cadastrar o paciente.');
+      } else {
+        setErro(
+          'Não foi possível cadastrar o paciente. Verifique os dados e tente novamente.',
+        );
+      }
     } finally {
       setSalvando(false);
     }
@@ -201,6 +298,7 @@ export default function CadastroPaciente({
                   name="dataNascimento"
                   type="date"
                   value={form.dataNascimento}
+                  max={new Date().toISOString().slice(0, 10)}
                   onChange={(e) =>
                     atualizarCampo('dataNascimento', e.target.value)
                   }
@@ -218,12 +316,15 @@ export default function CadastroPaciente({
                   name="vinculo"
                   value={form.vinculo}
                   onChange={(e) =>
-                    atualizarCampo('vinculo', e.target.value)
+                    atualizarCampo(
+                      'vinculo',
+                      e.target.value,
+                    )
                   }
                   required
                 >
                   <option value="PARTICULAR">Particular</option>
-                  <option value="CONVENIO">Convênio</option>
+                  <option value="CLINICA">Convênio</option>
                 </select>
               </div>
 
@@ -258,7 +359,7 @@ export default function CadastroPaciente({
                   onChange={(e) =>
                     atualizarCampo(
                       'telefone',
-                      formatarTelefone(e.target.value)
+                      formatarTelefone(e.target.value),
                     )
                   }
                   autoComplete="tel"
@@ -302,22 +403,45 @@ export default function CadastroPaciente({
                 <label htmlFor="estado">
                   Estado (UF) <span>*</span>
                 </label>
-                <input
+                <select
                   id="estado"
                   name="estado"
-                  type="text"
-                  placeholder="PB"
                   value={form.estado}
                   onChange={(e) =>
-                    atualizarCampo(
-                      'estado',
-                      e.target.value.replace(/[^a-z]/gi, '').slice(0, 2).toUpperCase()
-                    )
+                    atualizarCampo('estado', e.target.value)
                   }
                   autoComplete="address-level1"
-                  maxLength={2}
                   required
-                />
+                >
+                  <option value="">Selecione o estado</option>
+                  <option value="AC">Acre</option>
+                  <option value="AL">Alagoas</option>
+                  <option value="AP">Amapá</option>
+                  <option value="AM">Amazonas</option>
+                  <option value="BA">Bahia</option>
+                  <option value="CE">Ceará</option>
+                  <option value="DF">Distrito Federal</option>
+                  <option value="ES">Espírito Santo</option>
+                  <option value="GO">Goiás</option>
+                  <option value="MA">Maranhão</option>
+                  <option value="MT">Mato Grosso</option>
+                  <option value="MS">Mato Grosso do Sul</option>
+                  <option value="MG">Minas Gerais</option>
+                  <option value="PA">Pará</option>
+                  <option value="PB">Paraíba</option>
+                  <option value="PR">Paraná</option>
+                  <option value="PE">Pernambuco</option>
+                  <option value="PI">Piauí</option>
+                  <option value="RJ">Rio de Janeiro</option>
+                  <option value="RN">Rio Grande do Norte</option>
+                  <option value="RS">Rio Grande do Sul</option>
+                  <option value="RO">Rondônia</option>
+                  <option value="RR">Roraima</option>
+                  <option value="SC">Santa Catarina</option>
+                  <option value="SP">São Paulo</option>
+                  <option value="SE">Sergipe</option>
+                  <option value="TO">Tocantins</option>
+                </select>
               </div>
 
               <div className="cadastro-field">
@@ -330,7 +454,9 @@ export default function CadastroPaciente({
                   type="text"
                   placeholder="Nome da cidade"
                   value={form.cidade}
-                  onChange={(e) => atualizarCampo('cidade', e.target.value)}
+                  onChange={(e) =>
+                    atualizarCampo('cidade', e.target.value)
+                  }
                   autoComplete="address-level2"
                   required
                 />
@@ -346,7 +472,9 @@ export default function CadastroPaciente({
                   type="text"
                   placeholder="Nome do bairro"
                   value={form.bairro}
-                  onChange={(e) => atualizarCampo('bairro', e.target.value)}
+                  onChange={(e) =>
+                    atualizarCampo('bairro', e.target.value)
+                  }
                   autoComplete="address-level3"
                   required
                 />
@@ -362,7 +490,9 @@ export default function CadastroPaciente({
                   type="text"
                   placeholder="Nome da rua ou avenida"
                   value={form.rua}
-                  onChange={(e) => atualizarCampo('rua', e.target.value)}
+                  onChange={(e) =>
+                    atualizarCampo('rua', e.target.value)
+                  }
                   autoComplete="street-address"
                   required
                 />
@@ -380,8 +510,25 @@ export default function CadastroPaciente({
                   step="1"
                   placeholder="123"
                   value={form.numero || ''}
-                  onChange={(e) => atualizarCampo('numero', e.target.value)}
+                  onChange={(e) =>
+                    atualizarCampo('numero', e.target.value)
+                  }
                   required
+                />
+              </div>
+
+              <div className="cadastro-field field-full">
+                <label htmlFor="complemento">Complemento</label>
+                <input
+                  id="complemento"
+                  name="complemento"
+                  type="text"
+                  placeholder="Apartamento, bloco, referência (opcional)"
+                  value={form.complemento}
+                  onChange={(e) =>
+                    atualizarCampo('complemento', e.target.value)
+                  }
+                  autoComplete="address-line2"
                 />
               </div>
             </div>

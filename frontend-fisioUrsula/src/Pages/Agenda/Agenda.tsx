@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ModuleLayout from '../ModuleLayout/ModuleLayout';
 import './Agenda.css';
@@ -23,29 +23,61 @@ type Agendamento = {
   statusAgendamento: StatusAgendamento;
 };
 
-const hoje = new Date();
+// Estrutura retornada pelo AgendamentoAgendaResponseDTO do backend.
+type AgendamentoApi = {
+  id: number;
+  pacienteId: number;
+  nome: string;
+  data: string;
+  horaInicio: string;
+  horaFim: string;
+  tipoAgendamento: TipoAgendamento;
+  statusAgendamento: StatusAgendamento;
+};
 
-function dataISO(dia: number, mes: number, ano: number): string {
-  return `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-}
+// Estrutura retornada por GET /pacientes/{id}.
+type PacienteDetalhado = {
+  id: number;
+  nome: string;
+  dataNascimento: string;
+  idade: number;
+  telefone: string;
+  cep: string;
+  estado: string;
+  cidade: string;
+  bairro: string;
+  rua: string;
+  numero: number;
+  complemento: string | null;
+  nomeResponsavel?: string | null;
+  faixaEtaria?: string;
+  vinculo?: string;
+  ativo?: boolean;
+  comorbidades?: string[];
+};
+
+const API_AGENDAMENTOS = 'http://localhost:8080/agendamentos';
+const API_PACIENTES = 'http://localhost:8080/pacientes';
 
 function dataAtualISO(): string {
-  return dataISO(
-    hoje.getDate(),
-    hoje.getMonth() + 1,
+  const hoje = new Date();
+
+  return [
     hoje.getFullYear(),
-  );
+    String(hoje.getMonth() + 1).padStart(2, '0'),
+    String(hoje.getDate()).padStart(2, '0'),
+  ].join('-');
 }
 
 function adicionarDias(data: string, quantidade: number): string {
   const novaData = new Date(`${data}T12:00:00`);
   novaData.setDate(novaData.getDate() + quantidade);
 
-  return dataISO(
-    novaData.getDate(),
-    novaData.getMonth() + 1,
+  return [
     novaData.getFullYear(),
-  );
+    String(novaData.getMonth() + 1).padStart(2, '0'),
+    String(novaData.getDate()).padStart(2, '0'),
+  ].join('-');
 }
 
 function formatarData(data: string): string {
@@ -61,7 +93,7 @@ function iniciais(nome: string): string {
     .trim()
     .split(/\s+/)
     .slice(0, 2)
-    .map((parte) => parte[0])
+    .map((parte) => parte[0] ?? '')
     .join('')
     .toUpperCase();
 }
@@ -84,68 +116,57 @@ function nomeStatus(status: StatusAgendamento): string {
   return nomes[status];
 }
 
-const initialAppointments: Agendamento[] = [
-  {
-    id: 1,
-    data: dataAtualISO(),
-    horaInicio: '08:00',
-    horaFim: '08:50',
-    nome: 'Mariana Costa',
-    pacienteId: 1,
-    tipoAgendamento: 'AVALIACAO',
-    statusAgendamento: 'CONFIRMADO',
-  },
-  {
-    id: 2,
-    data: dataAtualISO(),
-    horaInicio: '09:00',
-    horaFim: '09:45',
-    nome: 'Rafael Oliveira',
-    pacienteId: 2,
-    tipoAgendamento: 'ATENDIMENTO',
-    statusAgendamento: 'CONFIRMADO',
-  },
-  {
-    id: 3,
-    data: dataAtualISO(),
-    horaInicio: '10:00',
-    horaFim: '10:40',
-    nome: 'Camila Ferreira',
-    pacienteId: 3,
-    tipoAgendamento: 'ATENDIMENTO',
-    statusAgendamento: 'PENDENTE',
-  },
-  {
-    id: 4,
-    data: dataAtualISO(),
-    horaInicio: '11:00',
-    horaFim: '11:45',
-    nome: 'Beatriz Almeida',
-    pacienteId: 4,
-    tipoAgendamento: 'AVALIACAO',
-    statusAgendamento: 'CONFIRMADO',
-  },
-  {
-    id: 5,
-    data: dataAtualISO(),
-    horaInicio: '14:00',
-    horaFim: '14:50',
-    nome: 'João Pedro Santos',
-    pacienteId: 5,
-    tipoAgendamento: 'ATENDIMENTO',
-    statusAgendamento: 'REALIZADO',
-  },
-];
+function normalizarAgendamento(dado: AgendamentoApi): Agendamento {
+  return {
+    id: dado.id,
+    data: dado.data,
+    horaInicio: dado.horaInicio.slice(0, 5),
+    horaFim: dado.horaFim.slice(0, 5),
+    nome: dado.nome,
+    pacienteId: dado.pacienteId,
+    tipoAgendamento: dado.tipoAgendamento,
+    statusAgendamento: dado.statusAgendamento,
+  };
+}
+
+function gerarLinkWaze(paciente: PacienteDetalhado): string {
+  const endereco = [
+    paciente.rua,
+    paciente.numero,
+    paciente.bairro,
+    paciente.cidade,
+    paciente.estado,
+    paciente.cep,
+    paciente.complemento,
+  ]
+    .filter(
+      (parte) =>
+        parte !== null &&
+        parte !== undefined &&
+        String(parte).trim() !== '',
+    )
+    .join(', ');
+
+  return `https://waze.com/ul?q=${encodeURIComponent(endereco)}&navigate=yes`;
+}
 
 export default function Agenda() {
   const navigate = useNavigate();
-  const [agendamentos, setAgendamentos] =
-    useState<Agendamento[]>(initialAppointments);
 
-  const [dataSelecionada, setDataSelecionada] =
-    useState(dataAtualISO());
-
+  const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+  const [tentativa, setTentativa] = useState(0);
+  const [dataSelecionada, setDataSelecionada] = useState(dataAtualISO());
   const [view, setView] = useState<'Dia' | 'Semana'>('Dia');
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState('');
+
+  const [agendamentoSelecionado, setAgendamentoSelecionado] =
+    useState<Agendamento | null>(null);
+  const [pacienteDetalhado, setPacienteDetalhado] =
+    useState<PacienteDetalhado | null>(null);
+  const [carregandoPaciente, setCarregandoPaciente] = useState(false);
+  const [erroPaciente, setErroPaciente] = useState('');
+
   const diasDaSemana = useMemo(() => {
     const selecionada = new Date(`${dataSelecionada}T12:00:00`);
     const diaSemana = selecionada.getDay();
@@ -164,10 +185,116 @@ export default function Agenda() {
     });
   }, [dataSelecionada]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function carregarAgendamentos() {
+      try {
+        setCarregando(true);
+        setErro('');
+
+        const inicio = diasDaSemana[0].data;
+        const fim = diasDaSemana[6].data;
+        const parametros = new URLSearchParams({ inicio, fim });
+
+        const resposta = await fetch(
+          `${API_AGENDAMENTOS}?${parametros.toString()}`,
+          {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+            signal: controller.signal,
+          },
+        );
+
+        if (!resposta.ok) {
+          throw new Error(
+            `Não foi possível carregar os agendamentos. Erro ${resposta.status}.`,
+          );
+        }
+
+        const dados: unknown = await resposta.json();
+
+        if (!Array.isArray(dados)) {
+          throw new Error(
+            'A API retornou um formato inesperado para os agendamentos.',
+          );
+        }
+
+        const lista = (dados as AgendamentoApi[]).map(
+          normalizarAgendamento,
+        );
+
+        setAgendamentos(lista);
+      } catch (e) {
+        if (e instanceof Error && e.name === 'AbortError') {
+          return;
+        }
+
+        setAgendamentos([]);
+        setErro(
+          e instanceof Error
+            ? e.message
+            : 'Ocorreu um erro ao carregar a agenda.',
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setCarregando(false);
+        }
+      }
+    }
+
+    carregarAgendamentos();
+
+    return () => controller.abort();
+  }, [diasDaSemana, tentativa]);
+
+  async function abrirDetalhes(item: Agendamento) {
+    setAgendamentoSelecionado(item);
+    setPacienteDetalhado(null);
+    setErroPaciente('');
+    setCarregandoPaciente(true);
+
+    try {
+      const resposta = await fetch(`${API_PACIENTES}/${item.pacienteId}`, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!resposta.ok) {
+        throw new Error(
+          `Não foi possível carregar os dados do paciente. Erro ${resposta.status}.`,
+        );
+      }
+
+      const paciente: PacienteDetalhado = await resposta.json();
+      setPacienteDetalhado(paciente);
+    } catch (e) {
+      setErroPaciente(
+        e instanceof Error
+          ? e.message
+          : 'Erro ao carregar os dados do paciente.',
+      );
+    } finally {
+      setCarregandoPaciente(false);
+    }
+  }
+
+  function fecharDetalhes() {
+    setAgendamentoSelecionado(null);
+    setPacienteDetalhado(null);
+    setErroPaciente('');
+    setCarregandoPaciente(false);
+  }
+
   const agendamentosVisiveis = useMemo(() => {
-    const datas = view === 'Dia'
-      ? [dataSelecionada]
-      : diasDaSemana.map((dia) => dia.data);
+    const datas =
+      view === 'Dia'
+        ? [dataSelecionada]
+        : diasDaSemana.map((dia) => dia.data);
 
     return agendamentos
       .filter((item) => datas.includes(item.data))
@@ -184,16 +311,6 @@ export default function Agenda() {
     (item) => item.statusAgendamento !== 'CANCELADO',
   );
 
-  function atualizarStatus(id: number, status: StatusAgendamento) {
-    setAgendamentos((atuais) =>
-      atuais.map((item) =>
-        item.id === id
-          ? { ...item, statusAgendamento: status }
-          : item,
-      ),
-    );
-  }
-
   return (
     <ModuleLayout
       title="Agenda"
@@ -201,7 +318,7 @@ export default function Agenda() {
       eyebrow="ORGANIZAÇÃO DE ATENDIMENTOS"
     >
       <div className="agenda-summary">
-        <div>
+        <div className="agenda-summary-card">
           <span className="agenda-summary-icon">▦</span>
           <div>
             <small>Agendamentos</small>
@@ -209,22 +326,30 @@ export default function Agenda() {
           </div>
         </div>
 
-        <div>
+        <div className="agenda-summary-card">
           <span className="agenda-summary-icon mint">✓</span>
           <div>
             <small>Avaliações</small>
             <strong>
-              {ativos.filter((item) => item.tipoAgendamento === 'AVALIACAO').length}
+              {
+                ativos.filter(
+                  (item) => item.tipoAgendamento === 'AVALIACAO',
+                ).length
+              }
             </strong>
           </div>
         </div>
 
-        <div>
+        <div className="agenda-summary-card">
           <span className="agenda-summary-icon peach">◷</span>
           <div>
             <small>Pendentes</small>
             <strong>
-              {ativos.filter((item) => item.statusAgendamento === 'PENDENTE').length}
+              {
+                ativos.filter(
+                  (item) => item.statusAgendamento === 'PENDENTE',
+                ).length
+              }
             </strong>
           </div>
         </div>
@@ -304,7 +429,20 @@ export default function Agenda() {
           <span>{agendamentosVisiveis.length} horários</span>
         </div>
 
-        {agendamentosVisiveis.length === 0 ? (
+        {carregando ? (
+          <p className="agenda-empty">Carregando agendamentos...</p>
+        ) : erro ? (
+          <div className="agenda-error" role="alert">
+            <p>{erro}</p>
+            <button
+              type="button"
+              className="agenda-primary-button"
+              onClick={() => setTentativa((atual) => atual + 1)}
+            >
+              Tentar novamente
+            </button>
+          </div>
+        ) : agendamentosVisiveis.length === 0 ? (
           <p className="agenda-empty">
             Nenhum agendamento cadastrado neste período.
           </p>
@@ -313,20 +451,36 @@ export default function Agenda() {
             {agendamentosVisiveis.map((item) => (
               <article className="agenda-appointment" key={item.id}>
                 <div className="agenda-time">
-                  {view === 'Semana' && <span>{formatarData(item.data)}</span>}
+                  {view === 'Semana' && (
+                    <span>{formatarData(item.data)}</span>
+                  )}
                   <strong>{item.horaInicio}</strong>
                   <span>até {item.horaFim}</span>
                 </div>
 
-                <div className="agenda-time-line"><i /></div>
+                <div className="agenda-time-line">
+                  <i />
+                </div>
 
-                <div className="agenda-appointment-card">
+                <div
+                  className="agenda-appointment-card agenda-appointment-clickable"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Ver detalhes de ${item.nome}`}
+                  onClick={() => abrirDetalhes(item)}
+                  onKeyDown={(evento) => {
+                    if (evento.key === 'Enter' || evento.key === ' ') {
+                      evento.preventDefault();
+                      abrirDetalhes(item);
+                    }
+                  }}
+                >
                   <div className="agenda-person-avatar">
-                    {iniciais(item.nome)}
+                    {iniciais(item.nome || 'Paciente')}
                   </div>
 
                   <div className="agenda-appointment-info">
-                    <strong>{item.nome}</strong>
+                    <strong>{item.nome || 'Paciente sem nome'}</strong>
                     <span>{nomeTipo(item.tipoAgendamento)}</span>
                     <small>Paciente #{item.pacienteId}</small>
                   </div>
@@ -336,23 +490,6 @@ export default function Agenda() {
                   >
                     {nomeStatus(item.statusAgendamento)}
                   </span>
-
-                  <select
-                    aria-label={`Alterar status de ${item.nome}`}
-                    value={item.statusAgendamento}
-                    onChange={(evento) =>
-                      atualizarStatus(
-                        item.id,
-                        evento.target.value as StatusAgendamento,
-                      )
-                    }
-                  >
-                    <option value="PENDENTE">Pendente</option>
-                    <option value="CONFIRMADO">Confirmado</option>
-                    <option value="CANCELADO">Cancelado</option>
-                    <option value="REMARCADO">Remarcado</option>
-                    <option value="REALIZADO">Realizado</option>
-                  </select>
                 </div>
               </article>
             ))}
@@ -361,9 +498,173 @@ export default function Agenda() {
       </section>
 
       <p className="agenda-demo-note">
-        Modo de demonstração: os dados são fictícios e as alterações ficam
-        somente nesta página. Nada é enviado ao backend ou salvo no banco.
+        Os agendamentos são carregados do banco de dados pela API.
       </p>
+
+      {agendamentoSelecionado && (
+        <div
+          className="agenda-modal-overlay"
+          onClick={fecharDetalhes}
+        >
+          <section
+            className="agenda-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="agenda-modal-title"
+            onClick={(evento) => evento.stopPropagation()}
+          >
+            <header className="agenda-modal-header">
+              <div>
+                <span className="agenda-modal-eyebrow">
+                  DETALHES DO AGENDAMENTO
+                </span>
+                <h2 id="agenda-modal-title">
+                  {agendamentoSelecionado.nome}
+                </h2>
+                <p>
+                  {nomeTipo(agendamentoSelecionado.tipoAgendamento)}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="agenda-modal-close"
+                onClick={fecharDetalhes}
+                aria-label="Fechar modal"
+              >
+                ×
+              </button>
+            </header>
+
+            {carregandoPaciente ? (
+              <p className="agenda-modal-message">
+                Carregando dados do paciente...
+              </p>
+            ) : erroPaciente ? (
+              <div className="agenda-modal-error" role="alert">
+                <p>{erroPaciente}</p>
+                <button
+                  type="button"
+                  onClick={() => abrirDetalhes(agendamentoSelecionado)}
+                >
+                  Tentar novamente
+                </button>
+              </div>
+            ) : pacienteDetalhado ? (
+              <>
+                <div className="agenda-modal-section">
+                  <h3>Informações do paciente</h3>
+
+                  <div className="agenda-modal-grid">
+                    <div className="agenda-modal-field">
+                      <span>Nome completo</span>
+                      <strong>{pacienteDetalhado.nome}</strong>
+                    </div>
+
+                    <div className="agenda-modal-field">
+                      <span>Telefone</span>
+                      <strong>{pacienteDetalhado.telefone}</strong>
+                    </div>
+
+                    <div className="agenda-modal-field">
+                      <span>Data de nascimento</span>
+                      <strong>
+                        {pacienteDetalhado.dataNascimento
+                          ? new Date(
+                              `${pacienteDetalhado.dataNascimento}T12:00:00`,
+                            ).toLocaleDateString('pt-BR')
+                          : 'Não informado'}
+                      </strong>
+                    </div>
+
+                    <div className="agenda-modal-field">
+                      <span>Idade</span>
+                      <strong>
+                        {pacienteDetalhado.idade != null
+                          ? `${pacienteDetalhado.idade} anos`
+                          : 'Não informada'}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="agenda-modal-section">
+                  <h3>Informações do agendamento</h3>
+
+                  <div className="agenda-modal-grid">
+                    <div className="agenda-modal-field">
+                      <span>Data</span>
+                      <strong>
+                        {formatarData(agendamentoSelecionado.data)}
+                      </strong>
+                    </div>
+
+                    <div className="agenda-modal-field">
+                      <span>Horário</span>
+                      <strong>
+                        {agendamentoSelecionado.horaInicio} às{' '}
+                        {agendamentoSelecionado.horaFim}
+                      </strong>
+                    </div>
+
+                    <div className="agenda-modal-field">
+                      <span>Status</span>
+                      <strong>
+                        {nomeStatus(
+                          agendamentoSelecionado.statusAgendamento,
+                        )}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="agenda-modal-section">
+                  <h3>Endereço do paciente</h3>
+
+                  <div className="agenda-address-card">
+                    <div className="agenda-address-icon">
+                      <span>⌖</span>
+                    </div>
+
+                    <div className="agenda-address-content">
+                      <strong>
+                        {pacienteDetalhado.rua}, {pacienteDetalhado.numero}
+                      </strong>
+
+                      {pacienteDetalhado.complemento && (
+                        <p>{pacienteDetalhado.complemento}</p>
+                      )}
+
+                      <p>{pacienteDetalhado.bairro}</p>
+                      <p>
+                        {pacienteDetalhado.cidade} - {pacienteDetalhado.estado}
+                      </p>
+                      <p>CEP: {pacienteDetalhado.cep}</p>
+
+                      <a
+                        className="agenda-waze-link"
+                        href={gerarLinkWaze(pacienteDetalhado)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span>➤</span>
+                        Abrir rota no Waze
+                        <span aria-hidden="true">↗</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : null}
+
+            <footer className="agenda-modal-footer">
+              <button type="button" onClick={fecharDetalhes}>
+                Fechar
+              </button>
+            </footer>
+          </section>
+        </div>
+      )}
     </ModuleLayout>
   );
 }

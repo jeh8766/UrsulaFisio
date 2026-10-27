@@ -72,4 +72,9 @@ public class ExercicioService {
         return exercicioRepository.findById(id)
                 .orElseThrow(() -> new RegistroNaoEncontradoException("Exercício não encontrado."));
     }
+    @Transactional
+    public void ativarExercicio(Long id) {
+            Exercicio exercicio = buscarEntidade(id);
+            exercicio.setAtivo(true);
+    }
 }

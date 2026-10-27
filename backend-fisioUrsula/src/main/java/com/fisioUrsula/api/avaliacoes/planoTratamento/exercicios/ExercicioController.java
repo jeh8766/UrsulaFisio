@@ -63,4 +63,9 @@ public class ExercicioController {
         exercicioService.inativarExercicio(id);
         return ResponseEntity.noContent().build();
     }
+    @PatchMapping("/{id}/ativar")
+    public ResponseEntity<Void> ativarExercicio(@PathVariable long id) {
+        exercicioService.ativarExercicio(id);
+        return ResponseEntity.noContent().build();
+    }
 }

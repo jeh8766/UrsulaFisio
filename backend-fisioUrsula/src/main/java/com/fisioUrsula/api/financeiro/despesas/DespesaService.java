@@ -21,14 +21,40 @@ public class DespesaService {
     private final DespesaRepository despesaRepository;
 
     @Transactional
-    public DetalharDespesaResponseDTO cadastrar(CadastrarDespesaRequestDTO dto) {
+    public DetalharDespesaResponseDTO registrarDespesa(CadastrarDespesaRequestDTO dto) {
         Despesa despesa = new Despesa(dto);
         return new DetalharDespesaResponseDTO(despesaRepository.save(despesa));
     }
 
     @Transactional(readOnly = true)
-    public List<DetalharDespesaResponseDTO> listar(CategoriaDespesa categoria, LocalDate inicio,
-                                                   LocalDate fim, String busca) {
+    public List<DetalharDespesaResponseDTO> listarDespesas() {
+        return listarDespesasPorFiltro(null, null, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DetalharDespesaResponseDTO> listarDespesasPorPeriodo(LocalDate inicio, LocalDate fim) {
+        validarPeriodo(inicio, fim);
+        return listarDespesasPorFiltro(null, inicio, fim, null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DetalharDespesaResponseDTO> listarDespesasPorCategoria(CategoriaDespesa categoria) {
+        return listarDespesasPorFiltro(categoria, null, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal calcularTotalDespesasPorPeriodo(LocalDate inicio, LocalDate fim) {
+        validarPeriodo(inicio, fim);
+        return calcularTotalPorFiltro(null, inicio, fim);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal calcularTotalDespesasPorCategoria(CategoriaDespesa categoria) {
+        return calcularTotalPorFiltro(categoria, null, null);
+    }
+
+    private List<DetalharDespesaResponseDTO> listarDespesasPorFiltro(CategoriaDespesa categoria, LocalDate inicio,
+                                                                      LocalDate fim, String busca) {
         validarPeriodo(inicio, fim);
         String termo = (busca == null || busca.isBlank()) ? null : busca.trim();
         return despesaRepository.filtrar(categoria, inicio, fim, termo)
@@ -37,9 +63,7 @@ public class DespesaService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
-    public BigDecimal calcularTotal(CategoriaDespesa categoria, LocalDate inicio, LocalDate fim) {
-        validarPeriodo(inicio, fim);
+    private BigDecimal calcularTotalPorFiltro(CategoriaDespesa categoria, LocalDate inicio, LocalDate fim) {
         BigDecimal total = despesaRepository.somarValores(categoria, inicio, fim);
         return total != null ? total : BigDecimal.ZERO;
     }
@@ -57,7 +81,7 @@ public class DespesaService {
     }
 
     @Transactional
-    public void excluir(Long id) {
+    public void excluirDespesa(Long id) {
         Despesa despesa = buscarEntidade(id);
         despesaRepository.delete(despesa);
     }
