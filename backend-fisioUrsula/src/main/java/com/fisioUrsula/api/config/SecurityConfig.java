@@ -31,15 +31,15 @@ public class SecurityConfig {
         repositorioCsrf.setHeaderName("X-CSRF-TOKEN");
 
         http.csrf(csrf -> csrf
-                .csrfTokenRepository(repositorioCsrf)
-                .csrfTokenRequestHandler(
-                        new CsrfTokenRequestAttributeHandler()))
+                        .csrfTokenRepository(repositorioCsrf)
+                        .csrfTokenRequestHandler(
+                                new CsrfTokenRequestAttributeHandler()))
                 .cors(cors -> cors
                         .configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll())
                 .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo
-                        .oidcUserService(oidcUserService))
+                                .oidcUserService(oidcUserService))
                         .defaultSuccessUrl("http://localhost:5173/dashboard", true))
                 .logout(logout -> logout
                         .logoutUrl("/logout")

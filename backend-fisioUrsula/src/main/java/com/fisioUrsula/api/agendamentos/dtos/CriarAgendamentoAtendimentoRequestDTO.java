@@ -10,6 +10,5 @@ public record CriarAgendamentoAtendimentoRequestDTO(
                 @NotNull LocalDate data,
                 @NotNull LocalTime horaInicio,
                 @NotNull LocalTime horaFim
-// PlanoTratamento planoTratamento
 ) {
 }
