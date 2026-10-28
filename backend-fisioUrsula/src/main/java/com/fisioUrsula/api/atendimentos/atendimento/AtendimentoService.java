@@ -13,6 +13,7 @@ import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -134,6 +135,16 @@ public class AtendimentoService {
                 .map(DetalharAtendimentoResponseDTO::new)
                 .toList();
     }
+
+    public List<DetalharAtendimentoResponseDTO> listarAtendimentosPorData(LocalDate dataInicio, LocalDate dataFim){
+
+        return atendimentoRepository.findByAgendamento_DataBetween(dataInicio,dataFim)
+                .stream()
+                .map(DetalharAtendimentoResponseDTO::new)
+                .toList();
+    }
+
+
 
 
 }

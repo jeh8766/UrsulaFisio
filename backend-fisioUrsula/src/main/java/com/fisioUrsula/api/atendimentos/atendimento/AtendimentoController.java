@@ -3,11 +3,13 @@ package com.fisioUrsula.api.atendimentos.atendimento;
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -54,7 +56,7 @@ public class AtendimentoController {
     }
 
     @PatchMapping("/{id}/atualizar")
-    public ResponseEntity<DetalharAtendimentoResponseDTO> atualizarAtendimento(@PathVariable Long id, @Valid @RequestBody AtualizarAtendimentoRequestDTO dto){
+    public ResponseEntity<DetalharAtendimentoResponseDTO> atualizarAtendimento(@PathVariable Long id, @Valid @RequestBody AtualizarAtendimentoRequestDTO dto) {
 
         DetalharAtendimentoResponseDTO detalharAtendimentoResponseDTO = atendimentoService.atualizarAtendimento(id, dto);
 
@@ -62,12 +64,18 @@ public class AtendimentoController {
     }
 
     @GetMapping("/paciente/{pacienteId}")
-    public ResponseEntity<List<DetalharAtendimentoResponseDTO>> listarAtendimentoPorPaciente (@PathVariable Long pacienteId){
+    public ResponseEntity<List<DetalharAtendimentoResponseDTO>> listarAtendimentoPorPaciente(@PathVariable Long pacienteId) {
 
         return ResponseEntity.ok().body(atendimentoService.listarAtendimentoPorPaciente(pacienteId));
     }
 
+    @GetMapping("/data")
+    public ResponseEntity<List<DetalharAtendimentoResponseDTO>> listarAtendimentosPorData(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+                                                                                          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim){
+        List<DetalharAtendimentoResponseDTO> atendimentos = atendimentoService.listarAtendimentosPorData(dataInicio, dataFim);
 
+        return ResponseEntity.ok(atendimentos);
+    }
 
 
 }
