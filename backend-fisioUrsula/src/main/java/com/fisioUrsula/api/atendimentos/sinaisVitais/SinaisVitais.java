@@ -39,10 +39,10 @@ public class SinaisVitais implements Serializable {
     private Double saturacao;
 
     @Column(nullable = false, length = 15)
-    private int frequenciaCardiaca;
+    private Integer frequenciaCardiaca;
 
     @Column(nullable = false, length = 15)
-    private int frequenciaRespiratoria;    
+    private Integer frequenciaRespiratoria;
 
     @OneToOne(mappedBy = "sinaisVitais", cascade = CascadeType.ALL, orphanRemoval = true)
     private Atendimento atendimento;
