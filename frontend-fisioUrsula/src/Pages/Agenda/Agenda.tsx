@@ -156,7 +156,7 @@ export default function Agenda() {
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [tentativa, setTentativa] = useState(0);
   const [dataSelecionada, setDataSelecionada] = useState(dataAtualISO());
-  const [view, setView] = useState<'Dia' | 'Semana'>('Dia');
+  const [view, setView] = useState<'Dia' | 'Semana' | 'Mês'>('Dia');
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
 
@@ -181,9 +181,96 @@ export default function Agenda() {
         data: dataDia,
         numero: dataObj.getDate(),
         nome: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'][indice],
+        pertenceAoMes: true,
       };
     });
   }, [dataSelecionada]);
+
+  // Gera uma grade mensal completa, começando na segunda-feira e
+  // terminando no domingo. Pode incluir dias dos meses vizinhos.
+  const diasDoMes = useMemo(() => {
+    const selecionada = new Date(`${dataSelecionada}T12:00:00`);
+    const primeiroDia = new Date(
+      selecionada.getFullYear(),
+      selecionada.getMonth(),
+      1,
+      12,
+    );
+    const ultimoDia = new Date(
+      selecionada.getFullYear(),
+      selecionada.getMonth() + 1,
+      0,
+      12,
+    );
+    const diaSemanaInicio = primeiroDia.getDay();
+    const deslocamentoInicio = diaSemanaInicio === 0 ? 6 : diaSemanaInicio - 1;
+    const inicioGrade = adicionarDias(
+      [
+        primeiroDia.getFullYear(),
+        String(primeiroDia.getMonth() + 1).padStart(2, '0'),
+        String(primeiroDia.getDate()).padStart(2, '0'),
+      ].join('-'),
+      -deslocamentoInicio,
+    );
+    const diaSemanaFim = ultimoDia.getDay();
+    const deslocamentoFim = diaSemanaFim === 0 ? 0 : 7 - diaSemanaFim;
+    const fimMesISO = [
+      ultimoDia.getFullYear(),
+      String(ultimoDia.getMonth() + 1).padStart(2, '0'),
+      String(ultimoDia.getDate()).padStart(2, '0'),
+    ].join('-');
+    const fimGrade = adicionarDias(fimMesISO, deslocamentoFim);
+    const quantidadeDias = Math.round(
+      (new Date(`${fimGrade}T12:00:00`).getTime() -
+        new Date(`${inicioGrade}T12:00:00`).getTime()) /
+        86400000,
+    ) + 1;
+
+    return Array.from({ length: quantidadeDias }, (_, indice) => {
+      const dataDia = adicionarDias(inicioGrade, indice);
+      const dataObj = new Date(`${dataDia}T12:00:00`);
+      const pertenceAoMes = dataObj.getMonth() === selecionada.getMonth();
+
+      return {
+        data: dataDia,
+        numero: dataObj.getDate(),
+        nome: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'][indice % 7],
+        pertenceAoMes,
+      };
+    });
+  }, [dataSelecionada]);
+
+  const periodoConsulta = useMemo(() => {
+    if (view === 'Mês') {
+      const selecionada = new Date(`${dataSelecionada}T12:00:00`);
+      const inicio = [
+        selecionada.getFullYear(),
+        String(selecionada.getMonth() + 1).padStart(2, '0'),
+        '01',
+      ].join('-');
+      const ultimoDia = new Date(
+        selecionada.getFullYear(),
+        selecionada.getMonth() + 1,
+        0,
+        12,
+      );
+      const fim = [
+        ultimoDia.getFullYear(),
+        String(ultimoDia.getMonth() + 1).padStart(2, '0'),
+        String(ultimoDia.getDate()).padStart(2, '0'),
+      ].join('-');
+      return { inicio, fim };
+    }
+
+    if (view === 'Semana') {
+      return {
+        inicio: diasDaSemana[0].data,
+        fim: diasDaSemana[6].data,
+      };
+    }
+
+    return { inicio: dataSelecionada, fim: dataSelecionada };
+  }, [dataSelecionada, diasDaSemana, view]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -193,9 +280,7 @@ export default function Agenda() {
         setCarregando(true);
         setErro('');
 
-        const inicio = diasDaSemana[0].data;
-        const fim = diasDaSemana[6].data;
-        const parametros = new URLSearchParams({ inicio, fim });
+        const parametros = new URLSearchParams(periodoConsulta);
 
         const resposta = await fetch(
           `${API_AGENDAMENTOS}?${parametros.toString()}`,
@@ -248,7 +333,7 @@ export default function Agenda() {
     carregarAgendamentos();
 
     return () => controller.abort();
-  }, [diasDaSemana, tentativa]);
+  }, [periodoConsulta, tentativa]);
 
   async function abrirDetalhes(item: Agendamento) {
     setAgendamentoSelecionado(item);
@@ -291,13 +376,11 @@ export default function Agenda() {
   }
 
   const agendamentosVisiveis = useMemo(() => {
-    const datas =
-      view === 'Dia'
-        ? [dataSelecionada]
-        : diasDaSemana.map((dia) => dia.data);
-
     return agendamentos
-      .filter((item) => datas.includes(item.data))
+      .filter((item) => {
+        if (view === 'Dia') return item.data === dataSelecionada;
+        return item.data >= periodoConsulta.inicio && item.data <= periodoConsulta.fim;
+      })
       .sort((a, b) => {
         const comparacaoData = a.data.localeCompare(b.data);
 
@@ -305,7 +388,7 @@ export default function Agenda() {
           ? comparacaoData
           : a.horaInicio.localeCompare(b.horaInicio);
       });
-  }, [agendamentos, dataSelecionada, diasDaSemana, view]);
+  }, [agendamentos, dataSelecionada, periodoConsulta, view]);
 
   const ativos = agendamentosVisiveis.filter(
     (item) => item.statusAgendamento !== 'CANCELADO',
@@ -390,41 +473,86 @@ export default function Agenda() {
             >
               Semana
             </button>
+            <button
+              type="button"
+              className={view === 'Mês' ? 'selected' : ''}
+              onClick={() => setView('Mês')}
+            >
+              Mês
+            </button>
           </div>
         </div>
 
-        <div className="agenda-week-strip">
-          {diasDaSemana.map((dia) => (
-            <button
-              type="button"
-              key={dia.data}
-              className={`agenda-day ${
-                dataSelecionada === dia.data ? 'selected' : ''
-              }`}
-              onClick={() => setDataSelecionada(dia.data)}
-            >
-              <span>{dia.nome}</span>
-              <strong>{dia.numero}</strong>
-              <i
-                className={
-                  agendamentos.some(
-                    (item) =>
-                      item.data === dia.data &&
-                      item.statusAgendamento !== 'CANCELADO',
-                  )
-                    ? 'has-events'
-                    : ''
-                }
-              />
-            </button>
-          ))}
-        </div>
+        {view === 'Mês' ? (
+          <div className="agenda-month-calendar">
+            <div className="agenda-month-weekdays" aria-hidden="true">
+              {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map((dia) => (
+                <span key={dia}>{dia}</span>
+              ))}
+            </div>
+            <div className="agenda-month-grid">
+              {diasDoMes.map((dia) => (
+                <button
+                  type="button"
+                  key={dia.data}
+                  aria-label={`Selecionar ${formatarData(dia.data)}`}
+                  className={`agenda-day agenda-month-day ${
+                    dataSelecionada === dia.data ? 'selected' : ''
+                  } ${!dia.pertenceAoMes ? 'outside-month' : ''}`}
+                  onClick={() => setDataSelecionada(dia.data)}
+                >
+                  <strong>{dia.numero}</strong>
+                  <i
+                    className={
+                      agendamentos.some(
+                        (item) =>
+                          item.data === dia.data &&
+                          item.statusAgendamento !== 'CANCELADO',
+                      )
+                        ? 'has-events'
+                        : ''
+                    }
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="agenda-week-strip">
+            {diasDaSemana.map((dia) => (
+              <button
+                type="button"
+                key={dia.data}
+                className={`agenda-day ${
+                  dataSelecionada === dia.data ? 'selected' : ''
+                }`}
+                onClick={() => setDataSelecionada(dia.data)}
+              >
+                <span>{dia.nome}</span>
+                <strong>{dia.numero}</strong>
+                <i
+                  className={
+                    agendamentos.some(
+                      (item) =>
+                        item.data === dia.data &&
+                        item.statusAgendamento !== 'CANCELADO',
+                    )
+                      ? 'has-events'
+                      : ''
+                  }
+                />
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="agenda-list-heading">
           <h3>
             {view === 'Dia'
               ? `Agendamentos de ${formatarData(dataSelecionada)}`
-              : 'Agendamentos da semana'}
+              : view === 'Semana'
+                ? 'Agendamentos da semana'
+                : 'Agendamentos do mês'}
           </h3>
           <span>{agendamentosVisiveis.length} horários</span>
         </div>
@@ -451,7 +579,7 @@ export default function Agenda() {
             {agendamentosVisiveis.map((item) => (
               <article className="agenda-appointment" key={item.id}>
                 <div className="agenda-time">
-                  {view === 'Semana' && (
+                  {view !== 'Dia' && (
                     <span>{formatarData(item.data)}</span>
                   )}
                   <strong>{item.horaInicio}</strong>

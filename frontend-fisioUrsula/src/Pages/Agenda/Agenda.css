@@ -568,3 +568,82 @@
   color: #718078;
   font-size: 12px;
 }
+
+/* Calendário mensal */
+.agenda-month-calendar {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.agenda-month-weekdays,
+.agenda-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.agenda-month-weekdays {
+  margin-bottom: 0.5rem;
+}
+
+.agenda-month-weekdays span {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  padding: 0.5rem 0;
+}
+
+.agenda-month-day {
+  width: 100%;
+  min-width: 0;
+  min-height: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 0.25rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.agenda-month-day strong {
+  font-size: 0.95rem;
+}
+
+.agenda-month-day.outside-month {
+  opacity: 0.4;
+}
+
+.agenda-month-day.selected {
+  border-color: #45866a;
+  background-color: #e4f1e9;
+  color: #245b43;
+}
+
+.agenda-month-day i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.agenda-month-day i.has-events {
+  background-color: #45866a;
+}
+
+@media (max-width: 600px) {
+  .agenda-month-weekdays,
+  .agenda-month-grid {
+    gap: 0.2rem;
+  }
+
+  .agenda-month-day {
+    min-height: 52px;
+    padding: 0.5rem 0.1rem;
+  }
+
+  .agenda-month-day strong {
+    font-size: 0.8rem;
+  }
+}
