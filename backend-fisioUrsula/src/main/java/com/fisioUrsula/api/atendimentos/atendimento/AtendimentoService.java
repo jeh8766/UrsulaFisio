@@ -42,7 +42,7 @@ public class AtendimentoService {
         }
 
         SinaisVitais sinaisVitais = sinaisVitaisRepository.findById(criarAtendimentoRequestDTO.sinaisVitaisId())
-                .orElseThrow(() -> new RuntimeException("Id não existe!"));
+                .orElseThrow(() -> new RuntimeException("Id de sinais vitais não existe!"));
         atendimento.setSinaisVitais(sinaisVitais);
 
         Atendimento atendimentoSalvo = atendimentoRepository.save(atendimento);
