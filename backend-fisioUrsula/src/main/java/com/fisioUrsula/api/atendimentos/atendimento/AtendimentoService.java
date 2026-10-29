@@ -138,6 +138,14 @@ public class AtendimentoService {
 
     public List<DetalharAtendimentoResponseDTO> listarAtendimentosPorData(LocalDate dataInicio, LocalDate dataFim){
 
+        if (dataInicio == null || dataFim == null){
+            throw new IllegalArgumentException("A data de inicio e a data final são obrigatorias!");
+        }
+
+        if (dataInicio.isAfter(dataFim)){
+            throw new IllegalArgumentException("Data de inicio não pode ser depois da data final!");
+        }
+
         return atendimentoRepository.findByAgendamento_DataBetween(dataInicio,dataFim)
                 .stream()
                 .map(DetalharAtendimentoResponseDTO::new)
