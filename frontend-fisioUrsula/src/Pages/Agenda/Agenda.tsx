@@ -375,6 +375,14 @@ export default function Agenda() {
     setCarregandoPaciente(false);
   }
 
+  function editarAgendamentoSelecionado() {
+    if (!agendamentoSelecionado) return;
+
+    const id = agendamentoSelecionado.id;
+    fecharDetalhes();
+    navigate(`/editar-agendamento?id=${encodeURIComponent(String(id))}`);
+  }
+
   const agendamentosVisiveis = useMemo(() => {
     return agendamentos
       .filter((item) => {
@@ -786,6 +794,17 @@ export default function Agenda() {
             ) : null}
 
             <footer className="agenda-modal-footer">
+              {agendamentoSelecionado &&
+                agendamentoSelecionado.statusAgendamento !== 'CANCELADO' && (
+                  <button
+                    type="button"
+                    className="agenda-primary-button"
+                    onClick={editarAgendamentoSelecionado}
+                  >
+                    Editar agendamento
+                  </button>
+                )}
+
               <button type="button" onClick={fecharDetalhes}>
                 Fechar
               </button>

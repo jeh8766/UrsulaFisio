@@ -27,6 +27,16 @@ public class AgendamentoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(agendamentoAvaliacao);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<AgendamentoAgendaResponseDTO> atualizarAgendamento(
+            @PathVariable Long id,
+            @Valid @RequestBody AtualizarAgendamentoRequestDTO dto
+    ) {
+        AgendamentoAgendaResponseDTO atualizado =
+                agendamentoService.atualizarAgendamento(id, dto);
+        return ResponseEntity.ok(atualizado);
+    }
+
     @PostMapping("/atendimento/{pacienteId}")
     public ResponseEntity<CriarAgendamentoAtendimentoResponseDTO> criarAgendamentoAtendimento(
             @PathVariable Long pacienteId,
@@ -44,6 +54,17 @@ public class AgendamentoController {
         agendamentoService.alterarStatusAgendamento(id, dto.statusAgendamento());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AgendamentoAgendaResponseDTO> buscarPorId(
+            @PathVariable Long id
+    ) {
+        AgendamentoAgendaResponseDTO agendamento =
+                agendamentoService.buscarPorId(id);
+
+        return ResponseEntity.ok(agendamento);
+    }
+
     @GetMapping
     public List<AgendamentoAgendaResponseDTO> listarPorPeriodo(
             @RequestParam

@@ -11,6 +11,7 @@ import CadastroPaciente from "./Pages/Paciente/CadastroPaciente";
 import Atendimento from "./Pages/Prontuario/Atendimento";
 import Paciente from "./Pages/Paciente/Paciente";
 import Despesas from "./Pages/Financeiro/Despesas";
+import EditarAgendamento from "./Pages/Agenda/EditarAgendamento";
 import "./App.css";
 import Agendamentos from "./Pages/Agenda/Agendamentos";
 
@@ -57,6 +58,7 @@ export default function App() {
           />
 
           <Route path="/agendamento" element={<Agendamentos />} />
+          <Route path="/editar-agendamento" element={<EditarAgendamento />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />
