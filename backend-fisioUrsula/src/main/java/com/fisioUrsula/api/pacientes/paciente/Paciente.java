@@ -61,7 +61,7 @@ public class Paciente implements Serializable {
     private String nomeResponsavel;
 
     @Column(nullable = false, length = 20)
-    private String telefone;    
+    private String telefone;
 
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;

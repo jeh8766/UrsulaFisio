@@ -13,6 +13,7 @@ import Paciente from "./Pages/Paciente/Paciente";
 import Despesas from "./Pages/Financeiro/Despesas";
 import EditarAgendamento from "./Pages/Agenda/EditarAgendamento";
 import CadastroComorbidade from "./Pages/Paciente/CadastroComorbidade";
+import AssociarComorbidade from "./Pages/Paciente/AssociarComorbidade";
 import "./App.css";
 import Agendamentos from "./Pages/Agenda/Agendamentos";
 
@@ -45,6 +46,8 @@ export default function App() {
           <Route path="/atendimento" element={<Atendimento />} />
           <Route path="/despesas" element={<Despesas />} />
           <Route path="/cadastro-comorbidade" element={<CadastroComorbidade />} />
+          <Route path="/pacientes/:pacienteId/comorbidades" element={<AssociarComorbidade />}
+/>
           <Route
             path="/modulo/:modulo"
             element={

@@ -1,44 +1,8 @@
+
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { ReactNode } from 'react';
 import ModuleLayout from '../ModuleLayout/ModuleLayout';
 import './Paciente.css';
-
-type IconName = 'grid' | 'users' | 'calendar' | 'clipboard' | 'wallet' | 'settings' | 'search' | 'bell' | 'arrow' | 'clock' | 'check' | 'plus' | 'more' | 'trend' | 'activity';
-
-function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: '0 0 24 24',
-    fill: 'none',
-    stroke: 'currentColor',
-    strokeWidth: 1.8,
-    strokeLinecap: 'round' as const,
-    strokeLinejoin: 'round' as const,
-    'aria-hidden': true as const,
-  };
-
-  const paths: Record<IconName, ReactNode> = {
-    grid: <><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></>,
-    users: <><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="10" cy="7" r="4" /><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></>,
-    calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></>,
-    clipboard: <><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4.5V3h6v1.5M9 11h6M9 15h6" /></>,
-    wallet: <><rect x="3" y="5" width="18" height="15" rx="2" /><path d="M3 9h18M16 14h.01M7 5V3h10v2" /></>,
-    settings: <><circle cx="12" cy="12" r="3" /><path d="m19.4 15 .1.1 1.1.9-1.1 1.9-1.4-.5a8 8 0 0 1-1.6.9l-.3 1.5h-2.2l-.3-1.5a8 8 0 0 1-1.7-.9l-1.4.5-1.1-1.9 1.1-.9a7 7 0 0 1 0-1.9l-1.1-.9 1.1-1.9 1.4.5a8 8 0 0 1 1.7-.9l.3-1.5h2.2l.3 1.5a8 8 0 0 1 1.6.9l1.4-.5 1.1 1.9-1.1.9a7 7 0 0 1-.1 1.8Z" /></>,
-    search: <><circle cx="10.8" cy="10.8" r="6.8" /><path d="m16 16 4.5 4.5" /></>,
-    bell: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></>,
-    arrow: <><path d="M5 12h14M13 6l6 6-6 6" /></>,
-    clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
-    check: <path d="m5 12 4 4L19 6" />,
-    plus: <><path d="M12 5v14M5 12h14" /></>,
-    more: <><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></>,
-    trend: <><path d="m3 17 6-6 4 4 8-9" /><path d="M15 6h6v6" /></>,
-    activity: <><path d="M3 12h4l3-8 4 16 3-8h4" /></>,
-  };
-
-  return <svg {...common}>{paths[name]}</svg>;
-}
 
 type Patient = {
   id: number;
@@ -46,7 +10,6 @@ type Patient = {
   initials: string;
   condition: string;
   phone: string;
-  lastVisit: string;
   status: 'Ativo' | 'Inativo';
   color: string;
 };
@@ -59,6 +22,27 @@ type ApiPatient = {
   vinculo: string;
   telefone: string;
   ativo: boolean;
+  comorbidades: string[];
+};
+
+type PatientDetails = {
+  id: number;
+  nome: string;
+  dataNascimento: string;
+  idade: number;
+  faixaEtaria: string;
+  vinculo: string;
+  nomeResponsavel: string | null;
+  telefone: string;
+  criadoEm: string;
+  ativo: boolean;
+  cep: string;
+  estado: string;
+  cidade: string;
+  bairro: string;
+  rua: string;
+  numero: number;
+  complemento: string | null;
   comorbidades: string[];
 };
 
@@ -83,26 +67,15 @@ function mapPatient(patient: ApiPatient): Patient {
     id,
     name,
     initials: getInitials(name),
-
     condition:
-      Array.isArray(patient.comorbidades) &&
-      patient.comorbidades.length > 0
+      patient.comorbidades?.length > 0
         ? patient.comorbidades.join(', ')
-        : 'Não informado',
-
+        : 'Nenhuma comorbidade',
     phone: patient.telefone || 'Não informado',
-
-    lastVisit: 'Não informado',
-
     status: patient.ativo ? 'Ativo' : 'Inativo',
-
-    color: [
-      'sage',
-      'blue',
-      'rose',
-      'sand',
-      'lavender',
-    ][Math.abs(id) % 5],
+    color: ['sage', 'blue', 'rose', 'sand', 'lavender'][
+      Math.abs(id) % 5
+    ],
   };
 }
 
@@ -112,7 +85,6 @@ async function buscarPacientes(
   signal: AbortSignal
 ): Promise<Patient[]> {
   const params = new URLSearchParams();
-
   params.set('ativo', String(ativo));
 
   if (nome.trim()) {
@@ -123,28 +95,42 @@ async function buscarPacientes(
     `${API_URL}/pacientes?${params.toString()}`,
     {
       method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
+      headers: { Accept: 'application/json' },
+      credentials: 'include',
       signal,
     }
   );
 
   if (!response.ok) {
-    throw new Error(
-      `Não foi possível consultar os pacientes. Erro HTTP ${response.status}.`
-    );
+    throw new Error(`Erro HTTP ${response.status} ao consultar pacientes.`);
   }
 
   const data: unknown = await response.json();
 
   if (!Array.isArray(data)) {
-    throw new Error(
-      'A resposta da API não contém uma lista válida de pacientes.'
-    );
+    throw new Error('A API não retornou uma lista válida de pacientes.');
   }
 
   return (data as ApiPatient[]).map(mapPatient);
+}
+
+function formatarData(data?: string | null): string {
+  if (!data) return 'Não informado';
+
+  const partes = data.split('T')[0].split('-');
+
+  if (partes.length !== 3) return data;
+
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+function formatarDataHora(data?: string | null): string {
+  if (!data) return 'Não informado';
+
+  return new Date(data).toLocaleString('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  });
 }
 
 export default function Pacientes() {
@@ -152,13 +138,16 @@ export default function Pacientes() {
 
   const [patients, setPatients] = useState<Patient[]>([]);
   const [search, setSearch] = useState('');
-
-  const [filter, setFilter] = useState<
-    'Todos' | 'Ativo' | 'Inativo'
-  >('Todos');
+  const [filter, setFilter] = useState<'Todos' | 'Ativo' | 'Inativo'>('Todos');
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [patientDetails, setPatientDetails] =
+    useState<PatientDetails | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [detailsError, setDetailsError] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -172,25 +161,17 @@ export default function Pacientes() {
 
         if (filter === 'Todos') {
           const [ativos, inativos] = await Promise.all([
-            buscarPacientes(
-              search,
-              true,
-              controller.signal
-            ),
-            buscarPacientes(
-              search,
-              false,
-              controller.signal
-            ),
+            buscarPacientes(search, true, controller.signal),
+            buscarPacientes(search, false, controller.signal),
           ]);
 
-          const pacientesUnicos = new Map<number, Patient>();
+          const unicos = new Map<number, Patient>();
 
           [...ativos, ...inativos].forEach((patient) => {
-            pacientesUnicos.set(patient.id, patient);
+            unicos.set(patient.id, patient);
           });
 
-          resultado = Array.from(pacientesUnicos.values());
+          resultado = Array.from(unicos.values());
         } else {
           resultado = await buscarPacientes(
             search,
@@ -199,22 +180,17 @@ export default function Pacientes() {
           );
         }
 
-        if (controller.signal.aborted) {
-          return;
+        if (!controller.signal.aborted) {
+          setPatients(resultado);
         }
-
-        setPatients(resultado);
       } catch (err) {
-        if (controller.signal.aborted) {
-          return;
-        }
+        if (controller.signal.aborted) return;
 
         setPatients([]);
-
         setError(
           err instanceof Error
             ? err.message
-            : 'Ocorreu um erro ao carregar os pacientes.'
+            : 'Erro ao carregar pacientes.'
         );
       } finally {
         if (!controller.signal.aborted) {
@@ -229,17 +205,85 @@ export default function Pacientes() {
     };
   }, [search, filter]);
 
+  // Busca os dados completos sempre que um paciente é selecionado.
+  useEffect(() => {
+    if (!selectedPatient) {
+      setPatientDetails(null);
+      setDetailsError('');
+      return;
+    }
+
+    const controller = new AbortController();
+
+    async function carregarDetalhes() {
+      setLoadingDetails(true);
+      setDetailsError('');
+      setPatientDetails(null);
+
+      try {
+        const response = await fetch(
+          `${API_URL}/pacientes/${selectedPatient!.id}`,
+          {
+            method: 'GET',
+            headers: { Accept: 'application/json' },
+            credentials: 'include',
+            signal: controller.signal,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Não foi possível carregar os detalhes. Erro HTTP ${response.status}.`
+          );
+        }
+
+        const data: PatientDetails = await response.json();
+
+        if (!controller.signal.aborted) {
+          setPatientDetails(data);
+        }
+      } catch (err) {
+        if (controller.signal.aborted) return;
+
+        setDetailsError(
+          err instanceof Error
+            ? err.message
+            : 'Erro ao carregar os detalhes do paciente.'
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingDetails(false);
+        }
+      }
+    }
+
+    carregarDetalhes();
+
+    return () => controller.abort();
+  }, [selectedPatient]);
+
+  // Permite fechar o modal com a tecla Escape.
+  useEffect(() => {
+    if (!selectedPatient) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setSelectedPatient(null);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedPatient]);
+
   const filtered = useMemo(() => {
     const termo = search.trim().toLocaleLowerCase('pt-BR');
 
     return patients.filter((patient) => {
       const correspondeBusca =
-        patient.name
-          .toLocaleLowerCase('pt-BR')
-          .includes(termo) ||
-        patient.condition
-          .toLocaleLowerCase('pt-BR')
-          .includes(termo);
+        patient.name.toLocaleLowerCase('pt-BR').includes(termo) ||
+        patient.condition.toLocaleLowerCase('pt-BR').includes(termo);
 
       const correspondeStatus =
         filter === 'Todos' || patient.status === filter;
@@ -256,6 +300,19 @@ export default function Pacientes() {
     (patient) => patient.status === 'Inativo'
   ).length;
 
+  function abrirDetalhes(patient: Patient) {
+    setSelectedPatient(patient);
+  }
+
+  function abrirAssociacao() {
+    if (!patientDetails) return;
+
+    const pacienteId = patientDetails.id;
+
+    setSelectedPatient(null);
+    navigate(`/pacientes/${pacienteId}/comorbidades`);
+  }
+
   return (
     <ModuleLayout
       title="Pacientes"
@@ -264,10 +321,7 @@ export default function Pacientes() {
     >
       <div className="patients-stats">
         <article className="patient-stat-card">
-          <span className="patient-stat-icon green">
-            <Icon name="users" size={20} />
-          </span>
-
+          <span className="patient-stat-icon green">♧</span>
           <div>
             <small>Total de pacientes</small>
             <strong>{patients.length}</strong>
@@ -276,10 +330,7 @@ export default function Pacientes() {
         </article>
 
         <article className="patient-stat-card">
-          <span className="patient-stat-icon mint">
-            <Icon name="check" size={20} />
-          </span>
-
+          <span className="patient-stat-icon mint">✓</span>
           <div>
             <small>Pacientes ativos</small>
             <strong>{totalAtivos}</strong>
@@ -288,10 +339,7 @@ export default function Pacientes() {
         </article>
 
         <article className="patient-stat-card">
-          <span className="patient-stat-icon peach">
-            <Icon name="grid" size={20} />
-          </span>
-
+          <span className="patient-stat-icon peach">○</span>
           <div>
             <small>Inativos</small>
             <strong>{totalInativos}</strong>
@@ -302,27 +350,26 @@ export default function Pacientes() {
 
       <section className="patients-panel">
         <div className="patients-panel-actions">
-  <button
-    type="button"
-    className="patients-secondary-button"
-    onClick={() => navigate('/cadastro-comorbidade')}
-  >
-    + Nova comorbidade
-  </button>
+          <button
+            type="button"
+            className="patients-secondary-button"
+            onClick={() => navigate('/cadastro-comorbidade')}
+          >
+            + Nova comorbidade
+          </button>
 
-  <button
-    type="button"
-    className="patients-primary-button"
-    onClick={() => navigate('/cadastro-paciente')}
-  >
-    + Novo paciente
-  </button>
-</div>
+          <button
+            type="button"
+            className="patients-primary-button"
+            onClick={() => navigate('/cadastro-paciente')}
+          >
+            + Novo paciente
+          </button>
+        </div>
 
         <div className="patients-toolbar">
           <label className="patient-search">
-            <Icon name="search" size={18} />
-
+            <span>⌕</span>
             <input
               type="search"
               value={search}
@@ -332,23 +379,18 @@ export default function Pacientes() {
             />
           </label>
 
-          <div
-            className="patient-filters"
-            aria-label="Filtrar pacientes"
-          >
-            {(['Todos', 'Ativo', 'Inativo'] as const).map(
-              (item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={filter === item ? 'selected' : ''}
-                  onClick={() => setFilter(item)}
-                  aria-pressed={filter === item}
-                >
-                  {item}
-                </button>
-              )
-            )}
+          <div className="patient-filters" aria-label="Filtrar pacientes">
+            {(['Todos', 'Ativo', 'Inativo'] as const).map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={filter === item ? 'selected' : ''}
+                onClick={() => setFilter(item)}
+                aria-pressed={filter === item}
+              >
+                {item}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -356,10 +398,6 @@ export default function Pacientes() {
           <div className="patients-empty" role="alert">
             <strong>Erro ao carregar pacientes</strong>
             <p>{error}</p>
-            <p>
-              Verifique se o backend está rodando e se a URL da
-              API está correta.
-            </p>
           </div>
         )}
 
@@ -371,7 +409,6 @@ export default function Pacientes() {
                   <th>Paciente</th>
                   <th>Comorbidades</th>
                   <th>Telefone</th>
-                  <th>Última consulta</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -379,29 +416,36 @@ export default function Pacientes() {
               <tbody>
                 {!loading &&
                   filtered.map((patient) => (
-                    <tr key={patient.id}>
+                    <tr
+                      key={patient.id}
+                      className="patient-clickable-row"
+                      onClick={() => abrirDetalhes(patient)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          abrirDetalhes(patient);
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`Ver detalhes de ${patient.name}`}
+                    >
                       <td>
                         <div className="patient-person">
-                          <span
-                            className={`patient-avatar ${patient.color}`}
-                          >
+                          <span className={`patient-avatar ${patient.color}`}>
                             {patient.initials}
                           </span>
-
                           <strong>{patient.name}</strong>
                         </div>
                       </td>
 
                       <td>{patient.condition}</td>
                       <td>{patient.phone}</td>
-                      <td>{patient.lastVisit}</td>
 
                       <td>
                         <span
                           className={`patient-status ${
-                            patient.status === 'Ativo'
-                              ? 'active'
-                              : 'inactive'
+                            patient.status === 'Ativo' ? 'active' : 'inactive'
                           }`}
                         >
                           {patient.status}
@@ -413,9 +457,7 @@ export default function Pacientes() {
             </table>
 
             {loading && (
-              <div className="patients-empty">
-                Carregando pacientes...
-              </div>
+              <div className="patients-empty">Carregando pacientes...</div>
             )}
 
             {!loading && filtered.length === 0 && (
@@ -429,10 +471,188 @@ export default function Pacientes() {
         <div className="patients-table-footer">
           Exibindo <strong>{filtered.length}</strong> de{' '}
           <strong>{patients.length}</strong> pacientes
-
           <span>Dados carregados da API.</span>
         </div>
       </section>
+
+      {/* Modal de detalhes do paciente */}
+      {selectedPatient && (
+        <div
+          className="patient-modal-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setSelectedPatient(null);
+            }
+          }}
+        >
+          <section
+            className="patient-details-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="patient-modal-title"
+          >
+            <header className="patient-modal-header">
+              <div>
+                <span className="patient-modal-eyebrow">
+                  PRONTUÁRIO DO PACIENTE
+                </span>
+                <h2 id="patient-modal-title">Detalhes do paciente</h2>
+              </div>
+
+              <button
+                type="button"
+                className="patient-modal-close"
+                onClick={() => setSelectedPatient(null)}
+                aria-label="Fechar modal"
+              >
+                ×
+              </button>
+            </header>
+
+            {loadingDetails && (
+              <div className="patient-modal-loading">
+                Carregando informações do paciente...
+              </div>
+            )}
+
+            {detailsError && (
+              <div className="patient-modal-error" role="alert">
+                {detailsError}
+              </div>
+            )}
+
+            {patientDetails && (
+              <>
+                <div className="patient-modal-profile">
+                  <span className="patient-modal-avatar">
+                    {getInitials(patientDetails.nome)}
+                  </span>
+
+                  <div>
+                    <h3>{patientDetails.nome}</h3>
+                    <p>
+                      Paciente #{patientDetails.id} ·{' '}
+                      {patientDetails.ativo ? 'Ativo' : 'Inativo'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="patient-details-content">
+                  <section className="patient-detail-section">
+                    <h4>Dados pessoais</h4>
+                    <div className="patient-detail-grid">
+                      <div>
+                        <small>Data de nascimento</small>
+                        <strong>
+                          {formatarData(patientDetails.dataNascimento)}
+                        </strong>
+                      </div>
+                      <div>
+                        <small>Idade</small>
+                        <strong>{patientDetails.idade} anos</strong>
+                      </div>
+                      <div>
+                        <small>Faixa etária</small>
+                        <strong>{patientDetails.faixaEtaria || 'Não informado'}</strong>
+                      </div>
+                      <div>
+                        <small>Vínculo</small>
+                        <strong>{patientDetails.vinculo || 'Não informado'}</strong>
+                      </div>
+                      <div>
+                        <small>Nome do responsável</small>
+                        <strong>{patientDetails.nomeResponsavel || 'Não informado'}</strong>
+                      </div>
+                      <div>
+                        <small>Telefone</small>
+                        <strong>{patientDetails.telefone || 'Não informado'}</strong>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="patient-detail-section">
+                    <h4>Endereço</h4>
+                    <div className="patient-detail-grid">
+                      <div>
+                        <small>CEP</small>
+                        <strong>{patientDetails.cep || 'Não informado'}</strong>
+                      </div>
+                      <div>
+                        <small>Estado</small>
+                        <strong>{patientDetails.estado || 'Não informado'}</strong>
+                      </div>
+                      <div>
+                        <small>Cidade</small>
+                        <strong>{patientDetails.cidade || 'Não informado'}</strong>
+                      </div>
+                      <div>
+                        <small>Bairro</small>
+                        <strong>{patientDetails.bairro || 'Não informado'}</strong>
+                      </div>
+                      <div>
+                        <small>Rua</small>
+                        <strong>{patientDetails.rua || 'Não informado'}</strong>
+                      </div>
+                      <div>
+                        <small>Número</small>
+                        <strong>{patientDetails.numero ?? 'Não informado'}</strong>
+                      </div>
+                      <div className="patient-detail-full">
+                        <small>Complemento</small>
+                        <strong>{patientDetails.complemento || 'Não informado'}</strong>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="patient-detail-section">
+                    <div className="patient-comorbidity-heading">
+                      <h4>Comorbidades associadas</h4>
+                      <span>
+                        {patientDetails.comorbidades?.length || 0}
+                      </span>
+                    </div>
+
+                    {patientDetails.comorbidades?.length > 0 ? (
+                      <div className="patient-comorbidity-list">
+                        {patientDetails.comorbidades.map((item, index) => (
+                          <span key={`${item}-${index}`}>{item}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="patient-no-comorbidity">
+                        Nenhuma comorbidade associada a este paciente.
+                      </p>
+                    )}
+                  </section>
+
+                  <section className="patient-detail-section patient-registration-info">
+                    <small>Data de cadastro</small>
+                    <strong>{formatarDataHora(patientDetails.criadoEm)}</strong>
+                  </section>
+                </div>
+
+                <footer className="patient-modal-footer">
+                  <button
+                    type="button"
+                    className="patient-modal-secondary"
+                    onClick={() => setSelectedPatient(null)}
+                  >
+                    Fechar
+                  </button>
+
+                  <button
+                    type="button"
+                    className="patient-modal-primary"
+                    onClick={abrirAssociacao}
+                  >
+                    + Atribuir comorbidade
+                  </button>
+                </footer>
+              </>
+            )}
+          </section>
+        </div>
+      )}
     </ModuleLayout>
   );
 }

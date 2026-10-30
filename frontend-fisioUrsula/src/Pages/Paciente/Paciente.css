@@ -469,3 +469,317 @@
     flex: 1;
   }
 }
+
+/* =========================================
+   LINHA CLICÁVEL DA TABELA
+========================================= */
+
+.patient-clickable-row {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.patient-clickable-row:hover {
+  background: #f3f7f3;
+}
+
+.patient-clickable-row:focus-visible {
+  outline: 2px solid #75977d;
+  outline-offset: -2px;
+}
+
+/* =========================================
+   MODAL DE DETALHES
+========================================= */
+
+.patient-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(27, 39, 31, 0.48);
+  backdrop-filter: blur(4px);
+}
+
+.patient-details-modal {
+  width: 100%;
+  max-width: 780px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 24px 80px rgba(20, 35, 25, 0.2);
+  animation: patientModalEnter 0.2s ease;
+}
+
+@keyframes patientModalEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.patient-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 26px 30px 20px;
+  border-bottom: 1px solid #edf0ed;
+}
+
+.patient-modal-eyebrow {
+  color: #78927c;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.patient-modal-header h2 {
+  margin: 7px 0 0;
+  color: #26382b;
+  font-size: 22px;
+}
+
+.patient-modal-close {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: #f3f6f3;
+  color: #536357;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.patient-modal-close:hover {
+  background: #e8eee8;
+}
+
+.patient-modal-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 30px;
+  background: #f7faf7;
+}
+
+.patient-modal-avatar {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: #e3eee3;
+  color: #52765a;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.patient-modal-profile h3 {
+  margin: 0 0 5px;
+  color: #26382b;
+  font-size: 18px;
+}
+
+.patient-modal-profile p {
+  margin: 0;
+  color: #7a887c;
+  font-size: 13px;
+}
+
+.patient-details-content {
+  padding: 8px 30px 24px;
+}
+
+.patient-detail-section {
+  padding: 20px 0;
+  border-bottom: 1px solid #edf0ed;
+}
+
+.patient-detail-section h4 {
+  margin: 0 0 17px;
+  color: #354a39;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.patient-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 24px;
+}
+
+.patient-detail-grid > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.patient-detail-grid small,
+.patient-registration-info small {
+  color: #89948b;
+  font-size: 11px;
+}
+
+.patient-detail-grid strong,
+.patient-registration-info strong {
+  color: #354439;
+  font-size: 13px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.patient-detail-full {
+  grid-column: 1 / -1;
+}
+
+.patient-comorbidity-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.patient-comorbidity-heading h4 {
+  margin: 0;
+}
+
+.patient-comorbidity-heading > span {
+  min-width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #eaf1e9;
+  color: #58745c;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.patient-comorbidity-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.patient-comorbidity-list span {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #edf4ed;
+  color: #4e7154;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.patient-no-comorbidity {
+  margin: 0;
+  color: #929c93;
+  font-size: 13px;
+}
+
+.patient-registration-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-bottom: 0;
+}
+
+.patient-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 18px 30px 24px;
+  border-top: 1px solid #edf0ed;
+}
+
+.patient-modal-secondary,
+.patient-modal-primary {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.patient-modal-secondary {
+  border: 1px solid #dfe7df;
+  background: white;
+  color: #607064;
+}
+
+.patient-modal-primary {
+  border: 0;
+  background: #63866a;
+  color: white;
+}
+
+.patient-modal-primary:hover {
+  background: #52745a;
+}
+
+.patient-modal-loading,
+.patient-modal-error {
+  margin: 24px 30px;
+  padding: 16px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.patient-modal-loading {
+  background: #f3f7f3;
+  color: #607064;
+}
+
+.patient-modal-error {
+  background: #fff0ee;
+  color: #a44338;
+}
+
+/* =========================================
+   RESPONSIVIDADE DO MODAL
+========================================= */
+
+@media (max-width: 600px) {
+  .patient-modal-overlay {
+    padding: 10px;
+  }
+
+  .patient-details-modal {
+    max-height: 94vh;
+    border-radius: 15px;
+  }
+
+  .patient-modal-header,
+  .patient-modal-profile {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .patient-details-content {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .patient-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-modal-footer {
+    padding: 16px 18px 20px;
+    flex-direction: column-reverse;
+  }
+
+  .patient-modal-footer button {
+    width: 100%;
+  }
+}
