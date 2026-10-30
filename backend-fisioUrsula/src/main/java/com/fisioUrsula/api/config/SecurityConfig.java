@@ -57,15 +57,22 @@ public class SecurityConfig {
 
         CorsConfiguration configuracao = new CorsConfiguration();
 
-        configuracao.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuracao.setAllowedOrigins(
+                List.of("http://localhost:5173")
+        );
 
-        configuracao.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuracao.setAllowedMethods(
+                List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+        );
 
-        configuracao.setAllowedHeaders(List.of("Content-Type", "X-CSRF-TOKEN"));
+        configuracao.setAllowedHeaders(
+                List.of("Content-Type", "X-CSRF-TOKEN")
+        );
 
         configuracao.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource origem = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource origem =
+                new UrlBasedCorsConfigurationSource();
 
         origem.registerCorsConfiguration("/**", configuracao);
 

@@ -44,7 +44,7 @@ public class SinaisVitais implements Serializable {
     @Column(nullable = false, length = 15)
     private Integer frequenciaRespiratoria;
 
-    @OneToOne(mappedBy = "sinaisVitais", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "sinaisVitais")
     private Atendimento atendimento;
 
 }

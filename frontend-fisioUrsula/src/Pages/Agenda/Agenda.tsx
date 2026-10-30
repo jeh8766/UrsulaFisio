@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ModuleLayout from '../ModuleLayout/ModuleLayout';
@@ -23,7 +24,6 @@ type Agendamento = {
   statusAgendamento: StatusAgendamento;
 };
 
-// Estrutura retornada pelo AgendamentoAgendaResponseDTO do backend.
 type AgendamentoApi = {
   id: number;
   pacienteId: number;
@@ -35,7 +35,6 @@ type AgendamentoApi = {
   statusAgendamento: StatusAgendamento;
 };
 
-// Estrutura retornada por GET /pacientes/{id}.
 type PacienteDetalhado = {
   id: number;
   nome: string;
@@ -54,6 +53,11 @@ type PacienteDetalhado = {
   vinculo?: string;
   ativo?: boolean;
   comorbidades?: string[];
+};
+
+type CsrfTokenResponse = {
+  token: string;
+  headerName: string;
 };
 
 const API_AGENDAMENTOS = 'http://localhost:8080/agendamentos';
@@ -150,22 +154,51 @@ function gerarLinkWaze(paciente: PacienteDetalhado): string {
   return `https://waze.com/ul?q=${encodeURIComponent(endereco)}&navigate=yes`;
 }
 
+async function obterTokenCsrf(): Promise<CsrfTokenResponse> {
+  const resposta = await fetch('http://localhost:8080/csrf', {
+    method: 'GET',
+    credentials: 'include',
+  });
+
+  if (!resposta.ok) {
+    throw new Error('Não foi possível obter o token de segurança.');
+  }
+
+  const csrf: CsrfTokenResponse = await resposta.json();
+
+  if (!csrf.token || !csrf.headerName) {
+    throw new Error('Token CSRF inválido.');
+  }
+
+  return csrf;
+}
+
 export default function Agenda() {
   const navigate = useNavigate();
 
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [tentativa, setTentativa] = useState(0);
   const [dataSelecionada, setDataSelecionada] = useState(dataAtualISO());
-  const [view, setView] = useState<'Dia' | 'Semana' | 'Mês'>('Dia');
+  const [view, setView] = useState<'Dia' | 'Semana'>('Dia');
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
 
   const [agendamentoSelecionado, setAgendamentoSelecionado] =
     useState<Agendamento | null>(null);
+
   const [pacienteDetalhado, setPacienteDetalhado] =
     useState<PacienteDetalhado | null>(null);
+
   const [carregandoPaciente, setCarregandoPaciente] = useState(false);
   const [erroPaciente, setErroPaciente] = useState('');
+
+  // Estados para alteração do status
+  const [novoStatus, setNovoStatus] =
+    useState<StatusAgendamento>('PENDENTE');
+
+  const [salvandoStatus, setSalvandoStatus] = useState(false);
+  const [erroStatus, setErroStatus] = useState('');
+  const [sucessoStatus, setSucessoStatus] = useState('');
 
   const diasDaSemana = useMemo(() => {
     const selecionada = new Date(`${dataSelecionada}T12:00:00`);
@@ -181,96 +214,9 @@ export default function Agenda() {
         data: dataDia,
         numero: dataObj.getDate(),
         nome: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'][indice],
-        pertenceAoMes: true,
       };
     });
   }, [dataSelecionada]);
-
-  // Gera uma grade mensal completa, começando na segunda-feira e
-  // terminando no domingo. Pode incluir dias dos meses vizinhos.
-  const diasDoMes = useMemo(() => {
-    const selecionada = new Date(`${dataSelecionada}T12:00:00`);
-    const primeiroDia = new Date(
-      selecionada.getFullYear(),
-      selecionada.getMonth(),
-      1,
-      12,
-    );
-    const ultimoDia = new Date(
-      selecionada.getFullYear(),
-      selecionada.getMonth() + 1,
-      0,
-      12,
-    );
-    const diaSemanaInicio = primeiroDia.getDay();
-    const deslocamentoInicio = diaSemanaInicio === 0 ? 6 : diaSemanaInicio - 1;
-    const inicioGrade = adicionarDias(
-      [
-        primeiroDia.getFullYear(),
-        String(primeiroDia.getMonth() + 1).padStart(2, '0'),
-        String(primeiroDia.getDate()).padStart(2, '0'),
-      ].join('-'),
-      -deslocamentoInicio,
-    );
-    const diaSemanaFim = ultimoDia.getDay();
-    const deslocamentoFim = diaSemanaFim === 0 ? 0 : 7 - diaSemanaFim;
-    const fimMesISO = [
-      ultimoDia.getFullYear(),
-      String(ultimoDia.getMonth() + 1).padStart(2, '0'),
-      String(ultimoDia.getDate()).padStart(2, '0'),
-    ].join('-');
-    const fimGrade = adicionarDias(fimMesISO, deslocamentoFim);
-    const quantidadeDias = Math.round(
-      (new Date(`${fimGrade}T12:00:00`).getTime() -
-        new Date(`${inicioGrade}T12:00:00`).getTime()) /
-        86400000,
-    ) + 1;
-
-    return Array.from({ length: quantidadeDias }, (_, indice) => {
-      const dataDia = adicionarDias(inicioGrade, indice);
-      const dataObj = new Date(`${dataDia}T12:00:00`);
-      const pertenceAoMes = dataObj.getMonth() === selecionada.getMonth();
-
-      return {
-        data: dataDia,
-        numero: dataObj.getDate(),
-        nome: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'][indice % 7],
-        pertenceAoMes,
-      };
-    });
-  }, [dataSelecionada]);
-
-  const periodoConsulta = useMemo(() => {
-    if (view === 'Mês') {
-      const selecionada = new Date(`${dataSelecionada}T12:00:00`);
-      const inicio = [
-        selecionada.getFullYear(),
-        String(selecionada.getMonth() + 1).padStart(2, '0'),
-        '01',
-      ].join('-');
-      const ultimoDia = new Date(
-        selecionada.getFullYear(),
-        selecionada.getMonth() + 1,
-        0,
-        12,
-      );
-      const fim = [
-        ultimoDia.getFullYear(),
-        String(ultimoDia.getMonth() + 1).padStart(2, '0'),
-        String(ultimoDia.getDate()).padStart(2, '0'),
-      ].join('-');
-      return { inicio, fim };
-    }
-
-    if (view === 'Semana') {
-      return {
-        inicio: diasDaSemana[0].data,
-        fim: diasDaSemana[6].data,
-      };
-    }
-
-    return { inicio: dataSelecionada, fim: dataSelecionada };
-  }, [dataSelecionada, diasDaSemana, view]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -280,7 +226,9 @@ export default function Agenda() {
         setCarregando(true);
         setErro('');
 
-        const parametros = new URLSearchParams(periodoConsulta);
+        const inicio = diasDaSemana[0].data;
+        const fim = diasDaSemana[6].data;
+        const parametros = new URLSearchParams({ inicio, fim });
 
         const resposta = await fetch(
           `${API_AGENDAMENTOS}?${parametros.toString()}`,
@@ -333,10 +281,15 @@ export default function Agenda() {
     carregarAgendamentos();
 
     return () => controller.abort();
-  }, [periodoConsulta, tentativa]);
+  }, [diasDaSemana, tentativa]);
 
   async function abrirDetalhes(item: Agendamento) {
     setAgendamentoSelecionado(item);
+    setNovoStatus(item.statusAgendamento);
+
+    setErroStatus('');
+    setSucessoStatus('');
+
     setPacienteDetalhado(null);
     setErroPaciente('');
     setCarregandoPaciente(true);
@@ -356,6 +309,7 @@ export default function Agenda() {
       }
 
       const paciente: PacienteDetalhado = await resposta.json();
+
       setPacienteDetalhado(paciente);
     } catch (e) {
       setErroPaciente(
@@ -368,27 +322,108 @@ export default function Agenda() {
     }
   }
 
+  // Altera o status do agendamento no backend
+  async function alterarStatusAgendamento() {
+    if (!agendamentoSelecionado) return;
+
+    if (novoStatus === agendamentoSelecionado.statusAgendamento) {
+      setErroStatus('Selecione um status diferente do atual.');
+      return;
+    }
+
+    try {
+      setSalvandoStatus(true);
+      setErroStatus('');
+      setSucessoStatus('');
+
+      const csrf = await obterTokenCsrf();
+
+      const resposta = await fetch(
+        `${API_AGENDAMENTOS}/status/${agendamentoSelecionado.id}`,
+        {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            [csrf.headerName]: csrf.token,
+          },
+          body: JSON.stringify({
+            statusAgendamento: novoStatus,
+          }),
+        },
+      );
+
+      if (!resposta.ok) {
+        let mensagem = 'Não foi possível alterar o status do agendamento.';
+
+        try {
+          const erroApi = await resposta.json();
+
+          mensagem =
+            erroApi.message ||
+            erroApi.mensagem ||
+            erroApi.error ||
+            mensagem;
+        } catch {
+          // A API pode não retornar detalhes em formato JSON.
+        }
+
+        throw new Error(mensagem);
+      }
+
+      // Atualiza o agendamento na lista
+      setAgendamentos((anteriores) =>
+        anteriores.map((item) =>
+          item.id === agendamentoSelecionado.id
+            ? {
+                ...item,
+                statusAgendamento: novoStatus,
+              }
+            : item,
+        ),
+      );
+
+      // Atualiza os dados do modal
+      setAgendamentoSelecionado((anterior) =>
+        anterior
+          ? {
+              ...anterior,
+              statusAgendamento: novoStatus,
+            }
+          : null,
+      );
+
+      setSucessoStatus('Status alterado com sucesso!');
+    } catch (e) {
+      setErroStatus(
+        e instanceof Error
+          ? e.message
+          : 'Erro ao alterar o status do agendamento.',
+      );
+    } finally {
+      setSalvandoStatus(false);
+    }
+  }
+
   function fecharDetalhes() {
     setAgendamentoSelecionado(null);
     setPacienteDetalhado(null);
     setErroPaciente('');
     setCarregandoPaciente(false);
-  }
 
-  function editarAgendamentoSelecionado() {
-    if (!agendamentoSelecionado) return;
-
-    const id = agendamentoSelecionado.id;
-    fecharDetalhes();
-    navigate(`/editar-agendamento?id=${encodeURIComponent(String(id))}`);
+    setErroStatus('');
+    setSucessoStatus('');
+    setSalvandoStatus(false);
   }
 
   const agendamentosVisiveis = useMemo(() => {
+    const datas =
+      view === 'Dia'
+        ? [dataSelecionada]
+        : diasDaSemana.map((dia) => dia.data);
+
     return agendamentos
-      .filter((item) => {
-        if (view === 'Dia') return item.data === dataSelecionada;
-        return item.data >= periodoConsulta.inicio && item.data <= periodoConsulta.fim;
-      })
+      .filter((item) => datas.includes(item.data))
       .sort((a, b) => {
         const comparacaoData = a.data.localeCompare(b.data);
 
@@ -396,7 +431,7 @@ export default function Agenda() {
           ? comparacaoData
           : a.horaInicio.localeCompare(b.horaInicio);
       });
-  }, [agendamentos, dataSelecionada, periodoConsulta, view]);
+  }, [agendamentos, dataSelecionada, diasDaSemana, view]);
 
   const ativos = agendamentosVisiveis.filter(
     (item) => item.statusAgendamento !== 'CANCELADO',
@@ -474,6 +509,7 @@ export default function Agenda() {
             >
               Dia
             </button>
+
             <button
               type="button"
               className={view === 'Semana' ? 'selected' : ''}
@@ -481,87 +517,44 @@ export default function Agenda() {
             >
               Semana
             </button>
-            <button
-              type="button"
-              className={view === 'Mês' ? 'selected' : ''}
-              onClick={() => setView('Mês')}
-            >
-              Mês
-            </button>
           </div>
         </div>
 
-        {view === 'Mês' ? (
-          <div className="agenda-month-calendar">
-            <div className="agenda-month-weekdays" aria-hidden="true">
-              {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map((dia) => (
-                <span key={dia}>{dia}</span>
-              ))}
-            </div>
-            <div className="agenda-month-grid">
-              {diasDoMes.map((dia) => (
-                <button
-                  type="button"
-                  key={dia.data}
-                  aria-label={`Selecionar ${formatarData(dia.data)}`}
-                  className={`agenda-day agenda-month-day ${
-                    dataSelecionada === dia.data ? 'selected' : ''
-                  } ${!dia.pertenceAoMes ? 'outside-month' : ''}`}
-                  onClick={() => setDataSelecionada(dia.data)}
-                >
-                  <strong>{dia.numero}</strong>
-                  <i
-                    className={
-                      agendamentos.some(
-                        (item) =>
-                          item.data === dia.data &&
-                          item.statusAgendamento !== 'CANCELADO',
-                      )
-                        ? 'has-events'
-                        : ''
-                    }
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="agenda-week-strip">
-            {diasDaSemana.map((dia) => (
-              <button
-                type="button"
-                key={dia.data}
-                className={`agenda-day ${
-                  dataSelecionada === dia.data ? 'selected' : ''
-                }`}
-                onClick={() => setDataSelecionada(dia.data)}
-              >
-                <span>{dia.nome}</span>
-                <strong>{dia.numero}</strong>
-                <i
-                  className={
-                    agendamentos.some(
-                      (item) =>
-                        item.data === dia.data &&
-                        item.statusAgendamento !== 'CANCELADO',
-                    )
-                      ? 'has-events'
-                      : ''
-                  }
-                />
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="agenda-week-strip">
+          {diasDaSemana.map((dia) => (
+            <button
+              type="button"
+              key={dia.data}
+              className={`agenda-day ${
+                dataSelecionada === dia.data ? 'selected' : ''
+              }`}
+              onClick={() => setDataSelecionada(dia.data)}
+            >
+              <span>{dia.nome}</span>
+              <strong>{dia.numero}</strong>
+
+              <i
+                className={
+                  agendamentos.some(
+                    (item) =>
+                      item.data === dia.data &&
+                      item.statusAgendamento !== 'CANCELADO',
+                  )
+                    ? 'has-events'
+                    : ''
+                }
+              />
+            </button>
+          ))}
+        </div>
 
         <div className="agenda-list-heading">
           <h3>
             {view === 'Dia'
               ? `Agendamentos de ${formatarData(dataSelecionada)}`
-              : view === 'Semana'
-                ? 'Agendamentos da semana'
-                : 'Agendamentos do mês'}
+              : 'Agendamentos da semana'}
           </h3>
+
           <span>{agendamentosVisiveis.length} horários</span>
         </div>
 
@@ -570,6 +563,7 @@ export default function Agenda() {
         ) : erro ? (
           <div className="agenda-error" role="alert">
             <p>{erro}</p>
+
             <button
               type="button"
               className="agenda-primary-button"
@@ -587,9 +581,10 @@ export default function Agenda() {
             {agendamentosVisiveis.map((item) => (
               <article className="agenda-appointment" key={item.id}>
                 <div className="agenda-time">
-                  {view !== 'Dia' && (
+                  {view === 'Semana' && (
                     <span>{formatarData(item.data)}</span>
                   )}
+
                   <strong>{item.horaInicio}</strong>
                   <span>até {item.horaFim}</span>
                 </div>
@@ -654,9 +649,11 @@ export default function Agenda() {
                 <span className="agenda-modal-eyebrow">
                   DETALHES DO AGENDAMENTO
                 </span>
+
                 <h2 id="agenda-modal-title">
                   {agendamentoSelecionado.nome}
                 </h2>
+
                 <p>
                   {nomeTipo(agendamentoSelecionado.tipoAgendamento)}
                 </p>
@@ -679,6 +676,7 @@ export default function Agenda() {
             ) : erroPaciente ? (
               <div className="agenda-modal-error" role="alert">
                 <p>{erroPaciente}</p>
+
                 <button
                   type="button"
                   onClick={() => abrirDetalhes(agendamentoSelecionado)}
@@ -772,9 +770,11 @@ export default function Agenda() {
                       )}
 
                       <p>{pacienteDetalhado.bairro}</p>
+
                       <p>
                         {pacienteDetalhado.cidade} - {pacienteDetalhado.estado}
                       </p>
+
                       <p>CEP: {pacienteDetalhado.cep}</p>
 
                       <a
@@ -793,19 +793,74 @@ export default function Agenda() {
               </>
             ) : null}
 
-            <footer className="agenda-modal-footer">
-              {agendamentoSelecionado &&
-                agendamentoSelecionado.statusAgendamento !== 'CANCELADO' && (
-                  <button
-                    type="button"
-                    className="agenda-primary-button"
-                    onClick={editarAgendamentoSelecionado}
+            {/* Área de alteração do status */}
+            <div className="agenda-modal-section">
+              <h3>Alterar status do agendamento</h3>
+
+              <div className="agenda-status-editor">
+                <div className="agenda-modal-field">
+                  <span>Status atual</span>
+
+                  <strong>
+                    {nomeStatus(agendamentoSelecionado.statusAgendamento)}
+                  </strong>
+                </div>
+
+                <label className="agenda-modal-field">
+                  <span>Novo status</span>
+
+                  <select
+                    value={novoStatus}
+                    onChange={(evento) => {
+                      setNovoStatus(
+                        evento.target.value as StatusAgendamento,
+                      );
+
+                      setErroStatus('');
+                      setSucessoStatus('');
+                    }}
+                    disabled={salvandoStatus}
                   >
-                    Editar agendamento
-                  </button>
+                    <option value="PENDENTE">Pendente</option>
+                    <option value="CONFIRMADO">Confirmado</option>
+                    <option value="CANCELADO">Cancelado</option>
+                    <option value="REMARCADO">Remarcado</option>
+                    <option value="REALIZADO">Realizado</option>
+                  </select>
+                </label>
+
+                {erroStatus && (
+                  <p className="agenda-status-error" role="alert">
+                    {erroStatus}
+                  </p>
                 )}
 
-              <button type="button" onClick={fecharDetalhes}>
+                {sucessoStatus && (
+                  <p className="agenda-status-success" role="status">
+                    {sucessoStatus}
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  className="agenda-primary-button agenda-status-save"
+                  onClick={alterarStatusAgendamento}
+                  disabled={
+                    salvandoStatus ||
+                    novoStatus ===
+                      agendamentoSelecionado.statusAgendamento
+                  }
+                >
+                  {salvandoStatus ? 'Salvando...' : 'Salvar status'}
+                </button>
+              </div>
+            </div>
+
+            <footer className="agenda-modal-footer">
+              <button
+                type="button"
+                onClick={fecharDetalhes}
+              >
                 Fechar
               </button>
             </footer>

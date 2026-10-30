@@ -15,6 +15,8 @@ import java.time.LocalDate;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("agendamentos")
+@CrossOrigin(origins = "http://localhost:5173")
+
 public class AgendamentoController {
 
     private final AgendamentoService agendamentoService;

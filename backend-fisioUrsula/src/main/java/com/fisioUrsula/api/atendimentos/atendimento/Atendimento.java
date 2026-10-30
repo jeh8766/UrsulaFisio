@@ -1,6 +1,9 @@
+
 package com.fisioUrsula.api.atendimentos.atendimento;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
@@ -17,7 +20,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -30,12 +33,22 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Atendimento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
+
+    @Column(nullable = false)
+    private LocalDate data;
+
+    @Column(nullable = false)
+    private LocalTime horaInicio;
+
+    @Column(nullable = false)
+    private LocalTime horaFim;
 
     @Column(length = 250)
     private String intercorrencia;
@@ -58,6 +71,6 @@ public class Atendimento {
     private Agendamento agendamento;
 
     @OneToOne
-    @JoinColumn(name = "sinais_Vitais_id")
+    @JoinColumn(name = "sinais_vitais_id", unique = true)
     private SinaisVitais sinaisVitais;
 }

@@ -28,13 +28,15 @@ public class SinaisVitaisService {
 
         SinaisVitais sinaisVitaisSalvo = sinaisVitaisRepository.save(sinaisVitais);
 
-        CriarSinaisVitaisResponseDTO criarSinaisVitaisResponseDTO = new CriarSinaisVitaisResponseDTO(
+        CriarSinaisVitaisResponseDTO response = new CriarSinaisVitaisResponseDTO(
+                sinaisVitaisSalvo.getId(),
                 sinaisVitaisSalvo.getPressaoArterial(),
                 sinaisVitaisSalvo.getSaturacao(),
                 sinaisVitaisSalvo.getFrequenciaCardiaca(),
-                sinaisVitaisSalvo.getFrequenciaRespiratoria());
+                sinaisVitaisSalvo.getFrequenciaRespiratoria()
+        );
 
-        return criarSinaisVitaisResponseDTO;
+        return response;
 
     }
 
