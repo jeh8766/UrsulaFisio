@@ -301,22 +301,23 @@ export default function Pacientes() {
       </div>
 
       <section className="patients-panel">
-        <div className="patients-panel-heading">
-          <div>
-            <h2>Lista de pacientes</h2>
-            <p>
-              Consulte e gerencie os cadastros registrados.
-            </p>
-          </div>
+        <div className="patients-panel-actions">
+  <button
+    type="button"
+    className="patients-secondary-button"
+    onClick={() => navigate('/cadastro-comorbidade')}
+  >
+    + Nova comorbidade
+  </button>
 
-          <button
-            type="button"
-            className="patients-primary-button"
-            onClick={() => navigate('/cadastro-paciente')}
-          >
-            + Novo paciente
-          </button>
-        </div>
+  <button
+    type="button"
+    className="patients-primary-button"
+    onClick={() => navigate('/cadastro-paciente')}
+  >
+    + Novo paciente
+  </button>
+</div>
 
         <div className="patients-toolbar">
           <label className="patient-search">

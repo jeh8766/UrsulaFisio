@@ -12,7 +12,7 @@ import com.fisioUrsula.api.pacientes.pacienteComorbidades.dtos.CadastrarComorbid
 import com.fisioUrsula.api.pacientes.pacienteComorbidades.dtos.CadastrarComorbidadeResponseDTO;
 import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
-
+import java.util.List;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -36,7 +36,21 @@ public class PacienteComorbidadeService {
         Comorbidade comorbidadeSalva = comorbidadeRepository.save(comorbidade);
         return new CadastrarComorbidadeResponseDTO(comorbidadeSalva);
     }
+    public List<CadastrarComorbidadeResponseDTO> listarComorbidades(String nome) {
 
+        List<Comorbidade> comorbidades;
+
+        if (nome == null || nome.isBlank()) {
+            comorbidades = comorbidadeRepository.findAll();
+        } else {
+            comorbidades = comorbidadeRepository
+                    .findByNomeContainingIgnoreCase(nome.trim());
+        }
+
+        return comorbidades.stream()
+                .map(CadastrarComorbidadeResponseDTO::new)
+                .toList();
+    }
     @Transactional
     public AtribuirComorbidadeResponseDTO atribuirComorbidade(Long pacienteId, AtribuirComorbidadeRequestDTO dto) {
 

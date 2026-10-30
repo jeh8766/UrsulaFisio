@@ -12,6 +12,7 @@ import Atendimento from "./Pages/Prontuario/Atendimento";
 import Paciente from "./Pages/Paciente/Paciente";
 import Despesas from "./Pages/Financeiro/Despesas";
 import EditarAgendamento from "./Pages/Agenda/EditarAgendamento";
+import CadastroComorbidade from "./Pages/Paciente/CadastroComorbidade";
 import "./App.css";
 import Agendamentos from "./Pages/Agenda/Agendamentos";
 
@@ -43,7 +44,7 @@ export default function App() {
           <Route path="/cadastro-paciente" element={<CadastroPaciente />} />
           <Route path="/atendimento" element={<Atendimento />} />
           <Route path="/despesas" element={<Despesas />} />
-
+          <Route path="/cadastro-comorbidade" element={<CadastroComorbidade />} />
           <Route
             path="/modulo/:modulo"
             element={

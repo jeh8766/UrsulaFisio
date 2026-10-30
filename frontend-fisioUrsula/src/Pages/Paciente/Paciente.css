@@ -430,3 +430,42 @@
     margin: 5px 0 0;
   }
 }
+.patients-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.patients-secondary-button {
+  min-height: 39px;
+  padding: 0 15px;
+  border: 1px solid #dce8df;
+  border-radius: 9px;
+  background: #fff;
+  color: #276349;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.patients-secondary-button:hover {
+  background: #f0f7f1;
+  border-color: #a9c9b2;
+}
+
+@media (max-width: 600px) {
+  .patients-panel-heading {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .patients-panel-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .patients-panel-actions button {
+    flex: 1;
+  }
+}
