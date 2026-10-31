@@ -7,11 +7,10 @@ import './Agenda.css';
 type TipoAgendamento = 'AVALIACAO' | 'ATENDIMENTO';
 
 type StatusAgendamento =
-  | 'PENDENTE'
-  | 'CONFIRMADO'
   | 'CANCELADO'
-  | 'REMARCADO'
-  | 'REALIZADO';
+  | 'CONFIRMADO'
+  | 'PENDENTE'
+  | 'CONCLUIDO';
 
 type Agendamento = {
   id: number;
@@ -110,11 +109,10 @@ function nomeTipo(tipo: TipoAgendamento): string {
 
 function nomeStatus(status: StatusAgendamento): string {
   const nomes: Record<StatusAgendamento, string> = {
-    PENDENTE: 'Pendente',
-    CONFIRMADO: 'Confirmado',
     CANCELADO: 'Cancelado',
-    REMARCADO: 'Remarcado',
-    REALIZADO: 'Realizado',
+    CONFIRMADO: 'Confirmado',
+    PENDENTE: 'Pendente',
+    CONCLUIDO: 'Concluído',
   };
 
   return nomes[status];
@@ -809,24 +807,23 @@ export default function Agenda() {
                 <label className="agenda-modal-field">
                   <span>Novo status</span>
 
-                  <select
-                    value={novoStatus}
-                    onChange={(evento) => {
-                      setNovoStatus(
-                        evento.target.value as StatusAgendamento,
-                      );
+                                  <select
+                  value={novoStatus}
+                  onChange={(evento) => {
+                    setNovoStatus(
+                      evento.target.value as StatusAgendamento,
+                    );
 
-                      setErroStatus('');
-                      setSucessoStatus('');
-                    }}
-                    disabled={salvandoStatus}
-                  >
-                    <option value="PENDENTE">Pendente</option>
-                    <option value="CONFIRMADO">Confirmado</option>
-                    <option value="CANCELADO">Cancelado</option>
-                    <option value="REMARCADO">Remarcado</option>
-                    <option value="REALIZADO">Realizado</option>
-                  </select>
+                    setErroStatus('');
+                    setSucessoStatus('');
+                  }}
+                  disabled={salvandoStatus}
+                >
+                  <option value="PENDENTE">Pendente</option>
+                  <option value="CONFIRMADO">Confirmado</option>
+                  <option value="CANCELADO">Cancelado</option>
+                  <option value="CONCLUIDO">Concluído</option>
+                </select>
                 </label>
 
                 {erroStatus && (

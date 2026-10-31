@@ -145,12 +145,13 @@ export default function Atendimento() {
 
       const dados: AgendamentoOpcao[] = await response.json();
 
-      // Apenas agendamentos do tipo ATENDIMENTO e com status CONFIRMADO
-      const disponiveis = dados.filter(
-        (item) =>
-          item.tipoAgendamento === 'ATENDIMENTO' &&
-          item.statusAgendamento === 'CONFIRMADO'
-      );
+      
+const disponiveis = dados.filter(
+  (item) =>
+    (item.tipoAgendamento === 'ATENDIMENTO' ||
+      item.tipoAgendamento === 'AVALIACAO') &&
+    item.statusAgendamento === 'CONFIRMADO'
+);
 
       setAgendamentos(disponiveis);
       setAgendamentoId('');
@@ -158,7 +159,7 @@ export default function Atendimento() {
 
       if (disponiveis.length === 0) {
         setNotice(
-          'Não existem agendamentos de atendimento confirmados disponíveis para hoje.'
+           'Não existem agendamentos ou avaliações confirmados disponíveis para hoje.'
         );
       }
     } catch (error) {

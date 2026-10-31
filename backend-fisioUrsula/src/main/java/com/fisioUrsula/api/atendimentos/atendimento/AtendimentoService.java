@@ -1,4 +1,3 @@
-
 package com.fisioUrsula.api.atendimentos.atendimento;
 
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.*;
@@ -40,10 +39,12 @@ public class AtendimentoService {
                         "Agendamento não encontrado!"
                 ));
 
-        // 2. Verifica se é um agendamento de atendimento
-        if (agendamento.getTipoAgendamento() != TipoAgendamento.ATENDIMENTO) {
+        // 2. Verifica se é atendimento ou avaliação
+        if (agendamento.getTipoAgendamento() != TipoAgendamento.ATENDIMENTO &&
+                agendamento.getTipoAgendamento() != TipoAgendamento.AVALIACAO) {
+
             throw new IllegalStateException(
-                    "Este agendamento não é do tipo atendimento!"
+                    "Este agendamento não é do tipo atendimento ou avaliação!"
             );
         }
 
@@ -108,7 +109,11 @@ public class AtendimentoService {
         // 8. Salva o atendimento
         Atendimento salvo = atendimentoRepository.save(atendimento);
 
-        // 9. Retorna os dados do atendimento criado
+        // 9. Atualiza o status do agendamento para CONCLUIDO
+        agendamento.setStatusAgendamento(StatusAgendamento.CONCLUIDO);
+        agendamentoRepository.save(agendamento);
+
+        // 10. Retorna os dados do atendimento criado
         return new DetalharAtendimentoResponseDTO(salvo);
     }
 
