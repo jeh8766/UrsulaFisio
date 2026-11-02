@@ -47,7 +47,7 @@ export default function App() {
           <Route path="/despesas" element={<Despesas />} />
           <Route path="/cadastro-comorbidade" element={<CadastroComorbidade />} />
           <Route path="/pacientes/:pacienteId/comorbidades"
- element={<AssociarComorbidade />}
+          element={<AssociarComorbidade />}
 />
           <Route
             path="/modulo/:modulo"

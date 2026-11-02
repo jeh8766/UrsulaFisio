@@ -9,11 +9,12 @@ import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 import com.fisioUrsula.api.shared.enums.TipoAgendamento;
-
+import java.time.LocalDate;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,20 +27,17 @@ public class AtendimentoService {
     private final SinaisVitaisRepository sinaisVitaisRepository;
     private final AgendamentoRepository agendamentoRepository;
 
-    // REALIZAR ATENDIMENTO
     @Transactional
     public DetalharAtendimentoResponseDTO realizarAtendimento(
             Long agendamentoId,
             ConcluirAtendimentoRequestDTO dto
     ) {
 
-        // 1. Busca o agendamento selecionado
         Agendamento agendamento = agendamentoRepository.findById(agendamentoId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Agendamento não encontrado!"
                 ));
 
-        // 2. Verifica se é atendimento ou avaliação
         if (agendamento.getTipoAgendamento() != TipoAgendamento.ATENDIMENTO &&
                 agendamento.getTipoAgendamento() != TipoAgendamento.AVALIACAO) {
 
@@ -48,76 +46,50 @@ public class AtendimentoService {
             );
         }
 
-        // 3. Verifica se o agendamento está confirmado
         if (agendamento.getStatusAgendamento() != StatusAgendamento.CONFIRMADO) {
             throw new IllegalStateException(
                     "Só é possível realizar atendimentos de agendamentos confirmados!"
             );
         }
 
-        // 4. Verifica se já existe um atendimento para esse agendamento
         if (atendimentoRepository.findByAgendamento_Id(agendamentoId).isPresent()) {
             throw new IllegalStateException(
                     "Este agendamento já possui um atendimento registrado!"
             );
         }
 
-        // 5. Busca os sinais vitais pelo ID recebido
         SinaisVitais sinaisVitais = sinaisVitaisRepository.findById(dto.sinaisVitaisId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Registro de sinais vitais não encontrado!"
                 ));
 
-        // 6. Verifica se os sinais vitais já foram utilizados
         if (sinaisVitais.getAtendimento() != null) {
             throw new IllegalStateException(
                     "Estes sinais vitais já estão associados a outro atendimento!"
             );
         }
 
-        // 7. Cria o atendimento
         Atendimento atendimento = new Atendimento();
 
-        // Dados de data e horário vindos do agendamento
         atendimento.setData(agendamento.getData());
         atendimento.setHoraInicio(agendamento.getHoraInicio());
         atendimento.setHoraFim(agendamento.getHoraFim());
-
-        // Associa o atendimento ao agendamento
         atendimento.setAgendamento(agendamento);
-
-        // Associa os sinais vitais ao atendimento
         atendimento.setSinaisVitais(sinaisVitais);
-
-        // Registro clínico do atendimento
         atendimento.setIntercorrencia(dto.intercorrencia());
         atendimento.setEvolucao(dto.evolucao());
-
-        // Informações financeiras
         atendimento.setValor(dto.valor());
         atendimento.setTaxaDeslocamento(dto.taxaDeslocamento());
-
-        // Situação do atendimento
         atendimento.setStatusAtendimento(StatusAtendimento.ATENDIDO);
-
-        // Situação do pagamento
         atendimento.setStatusPagamento(StatusPagamento.PENDENTE);
-
-        // Sincroniza o lado inverso do relacionamento
         sinaisVitais.setAtendimento(atendimento);
-
-        // 8. Salva o atendimento
         Atendimento salvo = atendimentoRepository.save(atendimento);
-
-        // 9. Atualiza o status do agendamento para CONCLUIDO
         agendamento.setStatusAgendamento(StatusAgendamento.CONCLUIDO);
         agendamentoRepository.save(agendamento);
 
-        // 10. Retorna os dados do atendimento criado
         return new DetalharAtendimentoResponseDTO(salvo);
     }
 
-    // DETALHAR ATENDIMENTO
     public DetalharAtendimentoResponseDTO detalharAtendimento(Long id) {
 
         Atendimento atendimento = atendimentoRepository.findById(id)
@@ -128,31 +100,39 @@ public class AtendimentoService {
         return new DetalharAtendimentoResponseDTO(atendimento);
     }
 
-    // REGISTRAR PAGAMENTO
     @Transactional
-    public void registrarPagamento(Long id) {
-
+    public void atualizarStatusPagamento(
+            Long id,
+            StatusPagamento novoStatus
+    ) {
         Atendimento atendimento = atendimentoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Atendimento não encontrado!"
+                        "Atendimento não encontrado."
                 ));
 
-        if (atendimento.getStatusPagamento() == StatusPagamento.PAGO) {
-            throw new IllegalStateException("Atendimento já foi pago!");
+        if (novoStatus == null) {
+            throw new IllegalArgumentException(
+                    "O status do pagamento é obrigatório."
+            );
         }
 
         if (atendimento.getStatusAtendimento() != StatusAtendimento.ATENDIDO) {
             throw new IllegalStateException(
-                    "Não é possível registrar pagamento de um atendimento não realizado!"
+                    "Só é possível alterar o pagamento de um atendimento realizado."
             );
         }
 
-        atendimento.setStatusPagamento(StatusPagamento.PAGO);
+        atendimento.setStatusPagamento(novoStatus);
+
+        if (novoStatus == StatusPagamento.PAGO) {
+            atendimento.setDataPagamento(LocalDate.now());
+        } else {
+            atendimento.setDataPagamento(null);
+        }
 
         atendimentoRepository.save(atendimento);
     }
 
-    // LISTAR ATENDIMENTOS
     public List<ListarAtendimentosResponseDTO> listarAtendimentos() {
 
         return atendimentoRepository.findAll()
@@ -161,7 +141,6 @@ public class AtendimentoService {
                 .toList();
     }
 
-    // ATUALIZAR ATENDIMENTO
     @Transactional
     public DetalharAtendimentoResponseDTO atualizarAtendimento(
             Long id,
@@ -206,7 +185,6 @@ public class AtendimentoService {
                 .toList();
     }
 
-    // LISTAR ATENDIMENTOS POR PERÍODO
     public List<DetalharAtendimentoResponseDTO> listarAtendimentosPorData(
             LocalDate dataInicio,
             LocalDate dataFim

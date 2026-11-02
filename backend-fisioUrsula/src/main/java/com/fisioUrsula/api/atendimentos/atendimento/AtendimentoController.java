@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.fisioUrsula.api.atendimentos.atendimento.dtos.AlterarStatusPagamentoRequestDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,11 +43,14 @@ public class AtendimentoController {
     }
 
     @PatchMapping("/{id}/pagamento")
-    public ResponseEntity<Void> registrarPagamento(
-            @PathVariable Long id
+    public ResponseEntity<Void> atualizarStatusPagamento(
+            @PathVariable Long id,
+            @Valid @RequestBody AlterarStatusPagamentoRequestDTO dto
     ) {
-
-        atendimentoService.registrarPagamento(id);
+        atendimentoService.atualizarStatusPagamento(
+                id,
+                dto.statusPagamento()
+        );
 
         return ResponseEntity.noContent().build();
     }

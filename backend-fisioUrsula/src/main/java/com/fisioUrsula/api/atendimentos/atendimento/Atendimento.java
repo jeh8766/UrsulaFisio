@@ -66,6 +66,9 @@ public class Atendimento {
     @Enumerated(EnumType.STRING)
     private StatusPagamento statusPagamento;
 
+    @Column(name = "data_pagamento")
+    private LocalDate dataPagamento;
+
     @OneToOne
     @JoinColumn(name = "agendamento_id", unique = true)
     private Agendamento agendamento;

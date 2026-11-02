@@ -13,7 +13,7 @@ public record ConcluirAtendimentoRequestDTO(
 
         @NotBlank
         String evolucao,
-
+        
         @NotNull
         @DecimalMin("0.0")
         BigDecimal valor,

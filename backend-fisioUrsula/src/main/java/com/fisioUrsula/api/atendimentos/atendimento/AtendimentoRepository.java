@@ -19,4 +19,8 @@ public interface AtendimentoRepository extends JpaRepository<Atendimento, Long> 
             LocalDate dataInicio,
             LocalDate dataFim
     );
+    List<Atendimento> findByDataPagamentoBetween(
+            LocalDate dataInicio,
+            LocalDate dataFim
+    );
 }

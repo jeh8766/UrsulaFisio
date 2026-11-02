@@ -1,9 +1,10 @@
+
 package com.fisioUrsula.api.atendimentos.atendimento.dtos;
 
 import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
-import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
+import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,7 +31,10 @@ public record ListarAtendimentosResponseDTO(
 
         StatusPagamento statusPagamento,
 
+        TipoAgendamento tipoAgendamento,
+
         Long pacienteId,
+
         String pacienteNome,
 
         Long sinaisVitaisId
@@ -38,18 +42,26 @@ public record ListarAtendimentosResponseDTO(
     public ListarAtendimentosResponseDTO(Atendimento atendimento) {
         this(
                 atendimento.getId(),
+
                 atendimento.getAgendamento().getData(),
+
                 atendimento.getAgendamento().getHoraInicio(),
+
                 atendimento.getAgendamento().getHoraFim(),
 
                 atendimento.getIntercorrencia(),
+
                 atendimento.getEvolucao(),
 
                 atendimento.getValor(),
+
                 atendimento.getTaxaDeslocamento(),
 
                 atendimento.getStatusAtendimento(),
+
                 atendimento.getStatusPagamento(),
+
+                atendimento.getAgendamento().getTipoAgendamento(),
 
                 atendimento.getAgendamento()
                         .getPaciente()
@@ -59,7 +71,9 @@ public record ListarAtendimentosResponseDTO(
                         .getPaciente()
                         .getNome(),
 
-                atendimento.getSinaisVitais().getId()
+                atendimento.getSinaisVitais() != null
+                        ? atendimento.getSinaisVitais().getId()
+                        : null
         );
     }
 }
