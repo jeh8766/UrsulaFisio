@@ -700,3 +700,76 @@
     cursor: not-allowed;
     transform: none;
 }
+
+
+/* Acesso aos relatórios junto aos controles do período */
+.finance-period-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.finance-period-actions label {
+  display: grid;
+  gap: 7px;
+}
+
+.finance-reports-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #d5e4d9;
+  border-radius: 8px;
+  background: #f3f8f4;
+  color: #276349;
+  font: 600 11px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+
+.finance-reports-button:hover {
+  border-color: #a9c9b3;
+  background: #e8f3eb;
+  transform: translateY(-1px);
+}
+
+.finance-reports-button:focus-visible {
+  outline: 2px solid #579378;
+  outline-offset: 2px;
+}
+
+@media (max-width: 850px) {
+  .finance-period-actions {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .finance-period-actions label {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .finance-period-actions label input {
+    width: 100%;
+  }
+
+  .finance-reports-button {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 520px) {
+  .finance-period-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .finance-reports-button {
+    width: 100%;
+  }
+}

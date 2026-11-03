@@ -377,15 +377,27 @@ export default function Financeiro() {
             </p>
           </div>
 
-          <label>
-            <span>Período</span>
-            <input
-              type="month"
-              value={mesSelecionado}
-              onChange={(event) => setMesSelecionado(event.target.value)}
-              aria-label="Selecionar mês do financeiro"
-            />
-          </label>
+          <div className="finance-period-actions">
+            <label>
+              <span>Período</span>
+              <input
+                type="month"
+                value={mesSelecionado}
+                onChange={(event) => setMesSelecionado(event.target.value)}
+                aria-label="Selecionar mês do financeiro"
+              />
+            </label>
+
+            <button
+              className="finance-reports-button"
+              type="button"
+              onClick={() => navigate('/relatorios')}
+              aria-label="Acessar relatórios"
+            >
+              <span aria-hidden="true">▤</span>
+              Relatórios
+            </button>
+          </div>
         </section>
 
         {erro && (
