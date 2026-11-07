@@ -52,4 +52,12 @@ public class DiagnosticoAvaliacao {
     @JoinColumn(name = "avaliacao_id")
     private Avaliacao avaliacao;
 
+    public void ativar() {
+        this.statusDiagnostico = StatusDiagnostico.ATIVO;
+    }
+
+    public void inativar() {
+        this.statusDiagnostico = StatusDiagnostico.INATIVO;
+    }
+
 }
