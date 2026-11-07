@@ -1,16 +1,12 @@
 package com.fisioUrsula.api.avaliacoes.avaliacao;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.fisioUrsula.api.avaliacoes.avaliacao.dto.AtualizarAvaliacaoRequestDTO;
 import com.fisioUrsula.api.avaliacoes.avaliacao.dto.AtualizarAvaliacaoResponseDTO;
@@ -21,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/avaliacoes")
 @RequiredArgsConstructor
 public class AvaliacaoController {
@@ -29,7 +26,7 @@ public class AvaliacaoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<AtualizarAvaliacaoResponseDTO> atualizarAvaliacao(@PathVariable Long id,
-            @Valid @RequestBody AtualizarAvaliacaoRequestDTO dto) {
+                                                                            @Valid @RequestBody AtualizarAvaliacaoRequestDTO dto) {
 
         AtualizarAvaliacaoResponseDTO avaliacaoSalva = avaliacaoService.atualizarAvaliacao(id, dto);
 
@@ -38,7 +35,7 @@ public class AvaliacaoController {
 
     @PatchMapping("atualizarStatus/{id}")
     public ResponseEntity<Void> atualizarStatusAtendimento(@PathVariable Long id,
-            @Valid @RequestBody AtualizarStatusAtendimentoAvaliacaoRequestDTO dto) {
+                                                           @Valid @RequestBody AtualizarStatusAtendimentoAvaliacaoRequestDTO dto) {
 
         avaliacaoService.atualizarStatusAtendimento(id, dto);
 
@@ -48,6 +45,23 @@ public class AvaliacaoController {
     @GetMapping
     public ResponseEntity<List<ListarAvaliacoesResponseDTO>> listarAvaliacoes() {
         return ResponseEntity.ok(avaliacaoService.listarAvaliacoes());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ListarAvaliacoesResponseDTO> buscarAvaliacaoPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(avaliacaoService.buscarAvaliacaoPorId(id));
+    }
+
+    @GetMapping("/paciente/{pacienteId}")
+    public ResponseEntity<List<ListarAvaliacoesResponseDTO>> listarAvaliacoesDePaciente(
+            @PathVariable Long pacienteId) {
+        return ResponseEntity.ok(avaliacaoService.listarAvaliacoesDePaciente(pacienteId));
+    }
+
+    @GetMapping("/data")
+    public ResponseEntity<List<ListarAvaliacoesResponseDTO>> listarAvaliacoesPorData(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
+        return ResponseEntity.ok(avaliacaoService.listarAvaliacoesPorData(data));
     }
 
 }

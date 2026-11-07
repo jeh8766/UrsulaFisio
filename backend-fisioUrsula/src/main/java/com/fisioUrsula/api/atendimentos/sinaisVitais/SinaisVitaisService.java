@@ -2,6 +2,7 @@ package com.fisioUrsula.api.atendimentos.sinaisVitais;
 
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.AtualizarSinaisVitaisRequestDTO;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.DetalharSinaisVitaisResponseDTO;
+import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.CriarSinaisVitaisRequestDTO;
@@ -40,14 +41,14 @@ public class SinaisVitaisService {
 
     public DetalharSinaisVitaisResponseDTO detalharSinaisVitais(Long id) {
 
-        SinaisVitais sinaisVitais = sinaisVitaisRepository.findById(id).orElseThrow(() -> new RuntimeException("Id de sinais vitais nao existe!"));
+        SinaisVitais sinaisVitais = sinaisVitaisRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Id de sinais vitais nao existe!"));
 
         return new DetalharSinaisVitaisResponseDTO(sinaisVitais);
     }
 
     public DetalharSinaisVitaisResponseDTO atualizarSinaisVitais(Long id, AtualizarSinaisVitaisRequestDTO dto) {
 
-        SinaisVitais sinaisVitais = sinaisVitaisRepository.findById(id).orElseThrow(() -> new RuntimeException("Id de sinais vitais nao existe!"));
+        SinaisVitais sinaisVitais = sinaisVitaisRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Id de sinais vitais nao existe!"));
 
         if (dto.pressaoArterial() != null) {
             sinaisVitais.setPressaoArterial(dto.pressaoArterial());
@@ -69,7 +70,7 @@ public class SinaisVitaisService {
 
     public DetalharSinaisVitaisResponseDTO BuscarSinaisVitaisPorAtendimento(Long atendimentoId) {
 
-        SinaisVitais sinaisVitais = sinaisVitaisRepository.findByAtendimentoId(atendimentoId).orElseThrow(() -> new RuntimeException("sinais vitais não encontrado por esse atendimento"));
+        SinaisVitais sinaisVitais = sinaisVitaisRepository.findByAtendimentoId(atendimentoId).orElseThrow(() -> new RegistroNaoEncontradoException("sinais vitais não encontrado por esse atendimento"));
 
         return new DetalharSinaisVitaisResponseDTO(sinaisVitais);
 

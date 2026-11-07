@@ -1,6 +1,8 @@
 package com.fisioUrsula.api.atendimentos.atendimento;
 
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.*;
+import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.fisioUrsula.api.agendamentos.Agendamento;
@@ -20,8 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AtendimentoService {
 
-    public final AtendimentoRepository atendimentoRepository;
-    public final SinaisVitaisRepository sinaisVitaisRepository;
+    private final AtendimentoRepository atendimentoRepository;
+    private final SinaisVitaisRepository sinaisVitaisRepository;
     private final AgendamentoRepository agendamentoRepository;
 
     public CriarAtendimentoResponseDTO criarAtendimento(CriarAtendimentoRequestDTO criarAtendimentoRequestDTO) {
@@ -34,7 +36,7 @@ public class AtendimentoService {
         atendimento.setStatusPagamento(StatusPagamento.PENDENTE);
 
         Agendamento agendamentoAtendimento = agendamentoRepository.findById(criarAtendimentoRequestDTO.agendamentoId())
-                .orElseThrow(() -> new RuntimeException("Id não existe!"));
+                .orElseThrow(() -> new RegistroNaoEncontradoException("Id de agendamento não existe!"));
         atendimento.setAgendamento(agendamentoAtendimento);
 
         if (agendamentoAtendimento.getTipoAgendamento() != TipoAgendamento.ATENDIMENTO) {
@@ -42,7 +44,7 @@ public class AtendimentoService {
         }
 
         SinaisVitais sinaisVitais = sinaisVitaisRepository.findById(criarAtendimentoRequestDTO.sinaisVitaisId())
-                .orElseThrow(() -> new RuntimeException("Id de sinais vitais não existe!"));
+                .orElseThrow(() -> new RegistroNaoEncontradoException("Id de sinais vitais não existe!"));
         atendimento.setSinaisVitais(sinaisVitais);
 
         Atendimento atendimentoSalvo = atendimentoRepository.save(atendimento);
@@ -62,17 +64,17 @@ public class AtendimentoService {
 
     public DetalharAtendimentoResponseDTO detalharAtendimento(Long id) {
 
-        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Atendimento com o Id não existe!"));
+        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Atendimento com o Id não existe!"));
 
         return new DetalharAtendimentoResponseDTO(atendimento);
     }
 
     public DetalharAtendimentoResponseDTO concluirAtendimento(Long id, ConcluirAtendimentoRequestDTO dto) {
 
-        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Atendimento com esse id não existe!"));
+        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Atendimento com esse id não existe!"));
 
         if (atendimento.getStatusAtendimento() == StatusAtendimento.ATENDIDO) {
-            throw new RuntimeException("Esse atendimento ja foi realizado!");
+            throw new IllegalStateException("Esse atendimento ja foi realizado!");
         }
 
         atendimento.setIntercorrencia(dto.intercorrencia());
@@ -87,10 +89,10 @@ public class AtendimentoService {
 
     public void registrarPagamento(Long id) {
 
-        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Atendimento com esse id não existe!"));
+        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Atendimento com esse id não existe!"));
 
         if (atendimento.getStatusPagamento() == StatusPagamento.PAGO) {
-            throw new RuntimeException("Atendimento ja foi pago!");
+            throw new IllegalStateException("Atendimento ja foi pago!");
         }
 
         atendimento.setStatusPagamento(StatusPagamento.PAGO);
@@ -105,7 +107,7 @@ public class AtendimentoService {
 
     public DetalharAtendimentoResponseDTO atualizarAtendimento(Long id, AtualizarAtendimentoRequestDTO dto) {
 
-        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Atendimento com esse id não existe!"));
+        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Atendimento com esse id não existe!"));
 
         if (dto.intercorrencia() != null) {
             atendimento.setIntercorrencia(dto.intercorrencia());
