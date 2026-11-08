@@ -29,7 +29,7 @@ public class ExercicioService {
     }
 
     @Transactional(readOnly = true)
-    public List<DetalharExercicioResponseDTO> listarExercicios(TipoExercicio tipo, boolean ativo) {
+    public List<DetalharExercicioResponseDTO> listarExercicios(TipoExercicio tipo, Boolean ativo) {
         return exercicioRepository.filtrar(null, tipo, ativo)
                 .stream()
                 .map(DetalharExercicioResponseDTO::new)
