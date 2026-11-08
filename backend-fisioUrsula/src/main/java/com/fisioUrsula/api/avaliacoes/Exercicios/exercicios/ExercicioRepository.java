@@ -1,4 +1,4 @@
-package com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios;
+package com.fisioUrsula.api.avaliacoes.Exercicios.exercicios;
 
 import java.util.List;
 

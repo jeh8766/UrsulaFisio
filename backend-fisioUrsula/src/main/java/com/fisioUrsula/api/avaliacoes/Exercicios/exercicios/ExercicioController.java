@@ -1,4 +1,4 @@
-package com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios;
+package com.fisioUrsula.api.avaliacoes.Exercicios.exercicios;
 
 import java.util.List;
 
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios.dtos.CadastrarExercicioRequestDTO;
-import com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios.dtos.DetalharExercicioResponseDTO;
+import com.fisioUrsula.api.avaliacoes.Exercicios.exercicios.dtos.CadastrarExercicioRequestDTO;
+import com.fisioUrsula.api.avaliacoes.Exercicios.exercicios.dtos.DetalharExercicioResponseDTO;
 import com.fisioUrsula.api.shared.enums.TipoExercicio;
 
 import jakarta.validation.Valid;

@@ -1,6 +1,6 @@
-package com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios.dtos;
+package com.fisioUrsula.api.avaliacoes.Exercicios.exercicios.dtos;
 
-import com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios.Exercicio;
+import com.fisioUrsula.api.avaliacoes.Exercicios.exercicios.Exercicio;
 import com.fisioUrsula.api.shared.enums.TipoExercicio;
 
 public record DetalharExercicioResponseDTO(

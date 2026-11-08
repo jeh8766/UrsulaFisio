@@ -1,23 +1,16 @@
 package com.fisioUrsula.api.atendimentos.atendimento;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
+import com.fisioUrsula.api.avaliacoes.Exercicios.AtendimentoExercicio.AtendimentoExercicio;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -28,6 +21,7 @@ import lombok.Setter;
 @Table(name = "atendimentos")
 @Getter
 @Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class Atendimento {
@@ -60,4 +54,9 @@ public class Atendimento {
     @OneToOne
     @JoinColumn(name = "sinais_Vitais_id")
     private SinaisVitais sinaisVitais;
+
+    @OneToMany(mappedBy = "atendimento",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<AtendimentoExercicio> exercicios = new ArrayList<>();
 }

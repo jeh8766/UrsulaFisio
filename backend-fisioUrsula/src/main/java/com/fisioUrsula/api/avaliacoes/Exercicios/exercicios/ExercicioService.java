@@ -1,12 +1,12 @@
-package com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios;
+package com.fisioUrsula.api.avaliacoes.Exercicios.exercicios;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios.dtos.CadastrarExercicioRequestDTO;
-import com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios.dtos.DetalharExercicioResponseDTO;
+import com.fisioUrsula.api.avaliacoes.Exercicios.exercicios.dtos.CadastrarExercicioRequestDTO;
+import com.fisioUrsula.api.avaliacoes.Exercicios.exercicios.dtos.DetalharExercicioResponseDTO;
 import com.fisioUrsula.api.shared.enums.TipoExercicio;
 import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
@@ -65,6 +65,9 @@ public class ExercicioService {
     @Transactional
     public void inativarExercicio(Long id) {
         Exercicio exercicio = buscarEntidade(id);
+        if (!exercicio.isAtivo()) {
+            throw new IllegalStateException("Este exercício já está inativo.");
+        }
         exercicio.setAtivo(false);
     }
 
@@ -75,6 +78,9 @@ public class ExercicioService {
     @Transactional
     public void ativarExercicio(Long id) {
             Exercicio exercicio = buscarEntidade(id);
+            if (exercicio.isAtivo()){
+                throw new IllegalStateException("Este exercício já está ativo.");
+            }
             exercicio.setAtivo(true);
     }
 }
