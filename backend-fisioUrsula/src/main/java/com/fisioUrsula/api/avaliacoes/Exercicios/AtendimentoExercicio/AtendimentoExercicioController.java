@@ -1,11 +1,42 @@
 package com.fisioUrsula.api.avaliacoes.Exercicios.AtendimentoExercicio;
 
+import com.fisioUrsula.api.avaliacoes.Exercicios.AtendimentoExercicio.dtos.AtribuirAtendimentoExercicioResponseDTO;
+import com.fisioUrsula.api.avaliacoes.Exercicios.AtendimentoExercicio.dtos.DetalharAtendimentoExercicioResponseDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/atendimento-exercicio")
 public class AtendimentoExercicioController {
+
+    public final AtendimentoExercicioService atendimentoExercicioService;
+
+    @PostMapping("/{atendimentoId}/{exercicioId}")
+    public ResponseEntity<AtribuirAtendimentoExercicioResponseDTO> atribuirAtendimentoExercicio(@PathVariable Long atendimentoId, @PathVariable Long exercicioId) {
+
+        AtribuirAtendimentoExercicioResponseDTO atribuirAtendimentoExercicioResponseDTO = atendimentoExercicioService.atribuirAtendimentoExercicio(atendimentoId, exercicioId);
+
+        return ResponseEntity.created(HttpStatus.CREATED).body(atribuirAtendimentoExercicioResponseDTO);
+    }
+
+    @GetMapping("/{atendimentoId}")
+    public ResponseEntity<List<DetalharAtendimentoExercicioResponseDTO>> listarExerciciosPorAtendimento(@PathVariable Long atendimentoId) {
+
+        List<DetalharAtendimentoExercicioResponseDTO> detalharAtendimentoExercicioResponseDTO = atendimentoExercicioService.listarExerciciosPorAtendimento(atendimentoId);
+
+        return ResponseEntity.ok(detalharAtendimentoExercicioResponseDTO);
+    }
+
+    @PatchMapping("/{id}/{exercicioId}")
+    public ResponseEntity<AtribuirAtendimentoExercicioResponseDTO> atualizarExercicioDoAtendimento(@PathVariable Long id, @PathVariable Long exercicioId){
+
+        AtribuirAtendimentoExercicioResponseDTO atribuirAtendimentoExercicioResponseDTO = atendimentoExercicioService.atualizarExercicioDoAtendimento(id, exercicioId);
+
+        return ResponseEntity
+    }
 }

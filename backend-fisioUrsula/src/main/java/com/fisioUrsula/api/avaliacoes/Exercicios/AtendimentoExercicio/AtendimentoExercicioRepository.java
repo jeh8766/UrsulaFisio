@@ -9,4 +9,6 @@ public interface AtendimentoExercicioRepository extends JpaRepository<Atendiment
     boolean existsByAtendimento_IdAndExercicio_Id(Long atendimentoID, Long exercicioId);
 
     List<AtendimentoExercicio> findByAtendimento_Id(Long atendimentoId);
+
+    boolean existsByAtendimento_IdAndExercicio_IdAndIdNot(Long atendimentoId, Long exercicioId, Long id);
 }
