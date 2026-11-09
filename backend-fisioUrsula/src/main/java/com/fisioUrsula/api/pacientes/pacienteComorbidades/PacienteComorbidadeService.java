@@ -76,6 +76,9 @@ public class PacienteComorbidadeService {
 
     public List<DetalharPacienteComorbidadeResponseDTO> listarComorbidadesPorPaciente(Long pacienteId) {
 
+        pacienteRepository.findById(pacienteId)
+                .orElseThrow(() -> new RegistroNaoEncontradoException("Paciente não encontrado."));
+
         return pacienteComorbidadeRepository.findByPaciente_id(pacienteId)
                 .stream()
                 .map(DetalharPacienteComorbidadeResponseDTO::new)

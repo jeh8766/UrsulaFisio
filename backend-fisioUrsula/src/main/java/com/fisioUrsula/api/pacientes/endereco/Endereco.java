@@ -59,4 +59,5 @@ public class Endereco implements Serializable {
 
     @OneToOne(mappedBy = "endereco", cascade = CascadeType.ALL, orphanRemoval = true)
     private Paciente paciente;
+
 }
