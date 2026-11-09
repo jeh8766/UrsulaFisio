@@ -14,14 +14,14 @@ import java.util.List;
 @RequestMapping("/atendimento-exercicio")
 public class AtendimentoExercicioController {
 
-    public final AtendimentoExercicioService atendimentoExercicioService;
+    private final AtendimentoExercicioService atendimentoExercicioService;
 
     @PostMapping("/{atendimentoId}/{exercicioId}")
     public ResponseEntity<AtribuirAtendimentoExercicioResponseDTO> atribuirAtendimentoExercicio(@PathVariable Long atendimentoId, @PathVariable Long exercicioId) {
 
         AtribuirAtendimentoExercicioResponseDTO atribuirAtendimentoExercicioResponseDTO = atendimentoExercicioService.atribuirAtendimentoExercicio(atendimentoId, exercicioId);
 
-        return ResponseEntity.created(HttpStatus.CREATED).body(atribuirAtendimentoExercicioResponseDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(atribuirAtendimentoExercicioResponseDTO);
     }
 
     @GetMapping("/{atendimentoId}")
@@ -37,6 +37,14 @@ public class AtendimentoExercicioController {
 
         AtribuirAtendimentoExercicioResponseDTO atribuirAtendimentoExercicioResponseDTO = atendimentoExercicioService.atualizarExercicioDoAtendimento(id, exercicioId);
 
-        return ResponseEntity
+        return ResponseEntity.ok(atribuirAtendimentoExercicioResponseDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> removerExercicioDoAtendimento(@PathVariable Long id){
+
+        atendimentoExercicioService.removerExercicioDoAtendimento(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
