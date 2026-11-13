@@ -7,11 +7,10 @@ public record DetalharExercicioResponseDTO(
         Long id,
         String nome,
         TipoExercicio tipo,
-        String descricao,
-        boolean ativo) {
+        String descricao) {
 
     public DetalharExercicioResponseDTO(Exercicio exercicio) {
         this(exercicio.getId(), exercicio.getNome(), exercicio.getTipoExercicio(),
-                exercicio.getDescricao(), exercicio.isAtivo());
+                exercicio.getDescricao());
     }
 }

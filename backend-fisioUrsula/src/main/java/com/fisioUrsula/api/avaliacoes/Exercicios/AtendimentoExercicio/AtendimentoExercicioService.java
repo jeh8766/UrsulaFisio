@@ -12,15 +12,17 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class AtendimentoExercicioService {
 
-    public final AtendimentoExercicioRepository atendimentoExercicioRepository;
-    public final ExercicioRepository exercicioRepository;
-    public final AtendimentoRepository atendimentoRepository;
+    private final AtendimentoExercicioRepository atendimentoExercicioRepository;
+    private final ExercicioRepository exercicioRepository;
+    private final AtendimentoRepository atendimentoRepository;
 
     @Transactional
     public AtribuirAtendimentoExercicioResponseDTO atribuirAtendimentoExercicio(Long atendimentoId, Long exercicioId) {
@@ -43,6 +45,56 @@ public class AtendimentoExercicioService {
         atendimentoExercicioRepository.save(atendimentoExercicio);
 
         return new AtribuirAtendimentoExercicioResponseDTO(atendimentoExercicio);
+    }
+
+    @Transactional
+    public List<AtribuirAtendimentoExercicioResponseDTO> atribuirVariosExercicios(Long atendimentoId, List<Long> exerciciosIds) {
+
+        Atendimento atendimento = atendimentoRepository.findById(atendimentoId).orElseThrow(() -> new RegistroNaoEncontradoException(
+                "Atendimento com esse id indisponível!"
+        ));
+
+        if (exerciciosIds == null || exerciciosIds.isEmpty()) {
+            return List.of();
+        }
+
+        if (new HashSet<>(exerciciosIds).size() != exerciciosIds.size()) {
+            throw new RegistroDuplicadoException(
+                    "A lista contém exercícios repetidos."
+            );
+        }
+
+        List<Exercicio> exercicios = exercicioRepository.findAllById(exerciciosIds);
+
+        if (exercicios.size() != exerciciosIds.size()) {
+            throw new RegistroNaoEncontradoException("Um ou mais exercícios não foram encontrados.");
+        }
+
+        List<AtendimentoExercicio> associacoes = new ArrayList<>();
+
+        for (Exercicio exercicio : exercicios) {
+
+            if (!exercicio.isAtivo()) {
+                throw new IllegalStateException("Não se pode atribuir exercícios inativos!");
+            }
+
+            if (atendimentoExercicioRepository.existsByAtendimento_IdAndExercicio_Id(atendimentoId, exercicio.getId())) {
+                throw new RegistroDuplicadoException("O exercício " + exercicio.getNome() + " já foi adicionado ao atendimento.");
+            }
+
+            AtendimentoExercicio associacao = new AtendimentoExercicio();
+            associacao.setAtendimento(atendimento);
+            associacao.setExercicio(exercicio);
+
+            associacoes.add(associacao);
+
+        }
+
+        return atendimentoExercicioRepository.saveAll(associacoes)
+                .stream()
+                .map(AtribuirAtendimentoExercicioResponseDTO::new)
+                .toList();
+
     }
 
     @Transactional
@@ -83,7 +135,6 @@ public class AtendimentoExercicioService {
     public void removerExercicioDoAtendimento(Long id) {
 
         AtendimentoExercicio atendimentoExercicio = atendimentoExercicioRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Não existe atendimento exercicio com esse id!"));
-
 
         atendimentoExercicioRepository.delete(atendimentoExercicio);
     }

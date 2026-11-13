@@ -66,7 +66,7 @@ public class PacienteComorbidadeService {
         pacienteComorbidade.setPaciente(paciente);
         pacienteComorbidade.setComorbidade(comorbidade);
         pacienteComorbidade.setDataDiagnostico(dto.dataDiagnostico());
-        pacienteComorbidade.setObservacao(dto.observacoes());
+        pacienteComorbidade.setObservacao(dto.observacao());
         pacienteComorbidade.setStatusDiagnostico(StatusDiagnostico.ATIVO);
 
         PacienteComorbidade pacienteComorbidadeSalvo = pacienteComorbidadeRepository.save(pacienteComorbidade);

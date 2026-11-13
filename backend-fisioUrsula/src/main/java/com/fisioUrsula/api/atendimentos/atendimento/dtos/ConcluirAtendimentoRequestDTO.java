@@ -1,14 +1,12 @@
 package com.fisioUrsula.api.atendimentos.atendimento.dtos;
 
-import jakarta.validation.constraints.NotNull;
+
+
+import java.util.List;
 
 public record ConcluirAtendimentoRequestDTO(
 
         String intercorrencia,
-        @NotNull
-        String evolucao
-) {
-
-
-
-}
+        String evolucao,
+        List<Long> exerciciosIds
+) {}

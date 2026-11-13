@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 public record AtribuirPacienteComorbidadeRequestDTO(
         @NotNull Long comorbidadeId,
         LocalDate dataDiagnostico,
-        String observacoes) {
+        String observacao) {
 
     public AtribuirPacienteComorbidadeRequestDTO(PacienteComorbidade pacienteComorbidade){
         this(

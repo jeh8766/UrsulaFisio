@@ -79,7 +79,6 @@ public class ComorbidadeService {
 
         Comorbidade comorbidade = comorbidadeRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Comorbidade com id não encontrada!"));
 
-
         if (!comorbidade.isAtivo()) {
             throw new IllegalStateException("comorbidade ja esta inativa!");
         }

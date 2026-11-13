@@ -1,8 +1,11 @@
 package com.fisioUrsula.api.atendimentos.atendimento;
 
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.*;
+import com.fisioUrsula.api.avaliacoes.Exercicios.AtendimentoExercicio.AtendimentoExercicioRepository;
+import com.fisioUrsula.api.avaliacoes.Exercicios.AtendimentoExercicio.AtendimentoExercicioService;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import com.fisioUrsula.api.agendamentos.Agendamento;
@@ -25,6 +28,7 @@ public class AtendimentoService {
     private final AtendimentoRepository atendimentoRepository;
     private final SinaisVitaisRepository sinaisVitaisRepository;
     private final AgendamentoRepository agendamentoRepository;
+    private final AtendimentoExercicioService atendimentoExercicioService;
 
     public CriarAtendimentoResponseDTO criarAtendimento(CriarAtendimentoRequestDTO criarAtendimentoRequestDTO) {
 
@@ -69,13 +73,16 @@ public class AtendimentoService {
         return new DetalharAtendimentoResponseDTO(atendimento);
     }
 
-    public DetalharAtendimentoResponseDTO concluirAtendimento(Long id, ConcluirAtendimentoRequestDTO dto) {
+    @Transactional
+    public DetalharAtendimentoResponseDTO concluirAtendimento(Long atendimentoId, ConcluirAtendimentoRequestDTO dto) {
 
-        Atendimento atendimento = atendimentoRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Atendimento com esse id não existe!"));
+        Atendimento atendimento = atendimentoRepository.findById(atendimentoId).orElseThrow(() -> new RegistroNaoEncontradoException("Atendimento com esse id não existe!"));
 
         if (atendimento.getStatusAtendimento() == StatusAtendimento.ATENDIDO) {
             throw new IllegalStateException("Esse atendimento ja foi realizado!");
         }
+
+        atendimentoExercicioService.atribuirVariosExercicios(atendimentoId, dto.exerciciosIds());
 
         atendimento.setIntercorrencia(dto.intercorrencia());
         atendimento.setEvolucao(dto.evolucao());
