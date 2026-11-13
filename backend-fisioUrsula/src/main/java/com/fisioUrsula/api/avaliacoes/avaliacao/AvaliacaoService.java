@@ -60,6 +60,7 @@ public class AvaliacaoService {
     public ListarAvaliacoesResponseDTO buscarAvaliacaoPorId(Long id) {
         Avaliacao avaliacao = avaliacaoRepository.findById(id)
                 .orElseThrow(() -> new RegistroNaoEncontradoException("Avaliação não encontrada."));
+
         return new ListarAvaliacoesResponseDTO(avaliacao);
     }
 

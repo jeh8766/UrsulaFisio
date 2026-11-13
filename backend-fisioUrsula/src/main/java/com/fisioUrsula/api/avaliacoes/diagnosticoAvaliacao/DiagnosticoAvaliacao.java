@@ -3,6 +3,8 @@ package com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao;
 import java.time.LocalDate;
 
 import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
+import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.dto.AtribuirDiagnosticoDTO;
+import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.dto.AtualizarDiagnosticoDaAvaliacaoDTO;
 import com.fisioUrsula.api.avaliacoes.diagnosticos.Diagnostico;
 import com.fisioUrsula.api.shared.enums.StatusDiagnostico;
 
@@ -39,7 +41,7 @@ public class DiagnosticoAvaliacao {
     private LocalDate dataDiagnostico;
 
     @Enumerated(EnumType.STRING)
-    private StatusDiagnostico statusDiagnostico;
+    private StatusDiagnostico status;
 
     @Column(columnDefinition = "TEXT")
     private String observacao;
@@ -51,5 +53,26 @@ public class DiagnosticoAvaliacao {
     @ManyToOne
     @JoinColumn(name = "avaliacao_id")
     private Avaliacao avaliacao;
+
+    public DiagnosticoAvaliacao(AtribuirDiagnosticoDTO dto, Avaliacao avaliacao, Diagnostico diagnostico) {
+        this.dataDiagnostico = dto.dataDiagnostico();
+        this.observacao = dto.observacao();
+        this.status = StatusDiagnostico.ATIVO;
+        this.avaliacao = avaliacao;
+        this.diagnostico = diagnostico;
+    }
+
+    public void atualizar(AtualizarDiagnosticoDaAvaliacaoDTO dto) {
+        this.dataDiagnostico = dto.dataDiagnostico();
+        this.observacao = dto.observacao();
+    }
+
+    public void ativar() {
+        this.status = StatusDiagnostico.ATIVO;
+    }
+
+    public void inativar() {
+        this.status = StatusDiagnostico.INATIVO;
+    }
 
 }

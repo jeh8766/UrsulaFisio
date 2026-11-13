@@ -11,4 +11,6 @@ public class CsrfController {
     public CsrfToken obterToken(CsrfToken csrfToken) {
         return csrfToken;
     }
+
+
 }

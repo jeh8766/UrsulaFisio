@@ -3,6 +3,8 @@ package com.fisioUrsula.api.avaliacoes.diagnosticos;
 import java.util.List;
 
 import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.DiagnosticoAvaliacao;
+import com.fisioUrsula.api.avaliacoes.diagnosticos.dto.AtualizarDiagnosticoDTO;
+import com.fisioUrsula.api.avaliacoes.diagnosticos.dto.CriarDiagnosticoDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +25,7 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
-@AllArgsConstructor 
+@AllArgsConstructor
 public class Diagnostico {
 
     @Id
@@ -41,5 +43,17 @@ public class Diagnostico {
 
     @OneToMany(mappedBy = "diagnostico")
     private List<DiagnosticoAvaliacao> diagnosticos;
+
+    public Diagnostico(CriarDiagnosticoDTO dto) {
+        this.nome = dto.nome();
+        this.descricao = dto.descricao();
+        this.codigoCID = dto.codigoCID();
+    }
+
+    public void atualizar(AtualizarDiagnosticoDTO dto) {
+        this.nome = dto.nome();
+        this.descricao = dto.descricao();
+        this.codigoCID = dto.codigoCID();
+    }
 
 }

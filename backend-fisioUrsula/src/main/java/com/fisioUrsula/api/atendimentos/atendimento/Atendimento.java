@@ -1,9 +1,5 @@
 package com.fisioUrsula.api.atendimentos.atendimento;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
 import com.fisioUrsula.api.avaliacoes.Exercicios.AtendimentoExercicio.AtendimentoExercicio;
@@ -16,6 +12,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "atendimentos")
@@ -52,11 +52,13 @@ public class Atendimento {
     private Agendamento agendamento;
 
     @OneToOne
-    @JoinColumn(name = "sinais_Vitais_id")
+    @JoinColumn(name = "sinais_vitais_id", unique = true)
     private SinaisVitais sinaisVitais;
 
-    @OneToMany(mappedBy = "atendimento",
+    @OneToMany(
+            mappedBy = "atendimento",
             cascade = CascadeType.ALL,
-            orphanRemoval = true)
+            orphanRemoval = true
+    )
     private List<AtendimentoExercicio> exercicios = new ArrayList<>();
 }

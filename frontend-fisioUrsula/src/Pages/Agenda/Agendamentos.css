@@ -890,3 +890,61 @@
     padding: 16px 20px 20px;
   }
 }
+
+/* Alteração de status no modal */
+
+.agenda-status-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  background: #fbfcfa;
+  border: 1px solid #e5ebe5;
+  border-radius: 12px;
+}
+
+.agenda-status-editor .agenda-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agenda-status-editor select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #dce5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #30443a;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.agenda-status-editor select:focus {
+  border-color: #315c45;
+  box-shadow: 0 0 0 3px rgba(49, 92, 69, 0.1);
+}
+
+.agenda-status-save {
+  align-self: flex-start;
+}
+
+.agenda-status-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.agenda-status-error {
+  margin: 0;
+  color: #b42318;
+  font-size: 13px;
+}
+
+.agenda-status-success {
+  margin: 0;
+  color: #237044;
+  font-size: 13px;
+  font-weight: 600;
+}

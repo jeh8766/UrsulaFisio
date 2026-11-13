@@ -8,15 +8,12 @@ import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
 import com.fisioUrsula.api.agendamentos.dtos.*;
-import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
 import com.fisioUrsula.api.atendimentos.atendimento.AtendimentoRepository;
-import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
 import com.fisioUrsula.api.avaliacoes.avaliacao.AvaliacaoRepository;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
 import com.fisioUrsula.api.pacientes.paciente.PacienteRepository;
 import com.fisioUrsula.api.pacientes.paciente.dtos.PacienteResumoResponseDTO;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
-import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 
@@ -30,8 +27,6 @@ public class AgendamentoService {
 
     private final PacienteRepository pacienteRepository;
     private final AgendamentoRepository agendamentoRepository;
-    private final AvaliacaoRepository avaliacaoRepository;
-    private final AtendimentoRepository atendimentoRepository;
 
 
     public List<AgendamentoAgendaResponseDTO> listarPorPeriodo(
@@ -265,7 +260,6 @@ public class AgendamentoService {
         );
     }
 
-
     @Transactional
     public void alterarStatusAgendamento(
             Long id,
@@ -276,50 +270,23 @@ public class AgendamentoService {
                         "Agendamento não encontrado."
                 ));
 
+        if (novoStatus == null) {
+            throw new IllegalArgumentException(
+                    "O novo status do agendamento é obrigatório."
+            );
+        }
+
+        // Altera somente o status do agendamento.
         agendamento.setStatusAgendamento(novoStatus);
 
+        // Atualiza a data de cancelamento quando necessário.
         if (novoStatus == StatusAgendamento.CANCELADO) {
             agendamento.setDataCancelamento(LocalDate.now());
-            return;
-        }
-
-        if (novoStatus != StatusAgendamento.CONFIRMADO) {
-            return;
-        }
-
-        if (agendamento.getTipoAgendamento()
-                == TipoAgendamento.AVALIACAO) {
-
-            if (agendamento.getAvaliacao() != null) {
-                throw new IllegalStateException(
-                        "Este agendamento já possui uma avaliação associada."
-                );
-            }
-
-            Avaliacao avaliacao = new Avaliacao();
-            avaliacao.setAgendamento(agendamento);
-            avaliacao.setStatusAtendimento(StatusAtendimento.AGENDADO);
-            agendamento.setAvaliacao(avaliacao);
-
-            avaliacaoRepository.save(avaliacao);
-            return;
-        }
-
-        if (agendamento.getTipoAgendamento()
-                == TipoAgendamento.ATENDIMENTO) {
-
-            if (agendamento.getAtendimento() != null) {
-                throw new IllegalStateException(
-                        "Este agendamento já possui um atendimento associado."
-                );
-            }
-
-            Atendimento atendimento = new Atendimento();
-            atendimento.setAgendamento(agendamento);
-            atendimento.setStatusAtendimento(StatusAtendimento.AGENDADO);
-            agendamento.setAtendimento(atendimento);
-
-            atendimentoRepository.save(atendimento);
+        } else {
+            agendamento.setDataCancelamento(null);
         }
     }
-}
+
+        }
+
+
