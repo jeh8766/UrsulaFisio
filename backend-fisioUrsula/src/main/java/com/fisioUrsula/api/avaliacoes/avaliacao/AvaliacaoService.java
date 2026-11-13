@@ -14,7 +14,6 @@ import com.fisioUrsula.api.avaliacoes.avaliacao.dto.ListarAvaliacoesResponseDTO;
 import com.fisioUrsula.api.pacientes.paciente.PacienteRepository;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -40,10 +39,8 @@ public class AvaliacaoService {
     @Transactional
     public void atualizarStatusAtendimento(Long id, AtualizarStatusAtendimentoAvaliacaoRequestDTO dto) {
         Avaliacao avaliacao = avaliacaoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada."));
+                .orElseThrow(() -> new RegistroNaoEncontradoException("Avaliação não encontrada."));
 
-        // validar com demandante, se um status atendido pode ser cancelado, reagendado
-        // ou outro
         if (avaliacao.getStatusAtendimento() == StatusAtendimento.ATENDIDO) {
             throw new IllegalStateException("Não é possível alterar o status de uma avaliação já atendida.");
         }

@@ -70,7 +70,7 @@ public class Paciente implements Serializable {
     private boolean ativo = true;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id_endereco")
+    @JoinColumn(name = "id_endereco", unique = true)
     private Endereco endereco;
 
     @OneToMany(mappedBy = "paciente")
@@ -102,6 +102,10 @@ public class Paciente implements Serializable {
         this.vinculo = dto.vinculo();
         this.nomeResponsavel = dto.nomeResponsavel();
         this.telefone = TelefoneUtil.normalizarTelefone(dto.telefone());
+
+        if (this.endereco == null){
+            this.endereco = new Endereco();
+        }
 
         this.endereco.setCep(dto.cep());
         this.endereco.setEstado(dto.estado());
