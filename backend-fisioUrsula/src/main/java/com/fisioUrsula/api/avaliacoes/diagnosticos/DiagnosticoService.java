@@ -34,9 +34,9 @@ public class DiagnosticoService {
 
         List<Diagnostico> diagnosticos;
 
-        if (nome == null || nome.isBlank()){
+        if (nome == null || nome.isBlank()) {
             diagnosticos = diagnosticoRepository.findAll();
-        }else {
+        } else {
             diagnosticos = diagnosticoRepository.findByNomeContainingIgnoreCase(nome.trim());
         }
 
@@ -58,10 +58,10 @@ public class DiagnosticoService {
 
         Diagnostico diagnostico = diagnosticoRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Não existe diagnostico com esse id!"));
 
-        if (dto.nome() != null){
+        if (dto.nome() != null) {
             diagnostico.setNome(dto.nome());
         }
-        if (dto.descricao() != null){
+        if (dto.descricao() != null) {
             diagnostico.setDescricao(dto.descricao());
         }
 
@@ -70,6 +70,5 @@ public class DiagnosticoService {
         return new DetalharDiagnosticoResponseDTO(diagnostico);
 
     }
-
 
 }

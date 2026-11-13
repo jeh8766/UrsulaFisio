@@ -451,3 +451,325 @@
     text-align: left;
   }
 }
+
+/* ==========================================================================
+   7. NOVO LAYOUT DO FINANCEIRO
+   ========================================================================== */
+
+.finance-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Seletor do período */
+
+.finance-period {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding: 15px 18px;
+  border: 1px solid #e7eee8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.finance-period label {
+  color: #52685c;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.finance-period input,
+.finance-period select {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid #dce5df;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  color: #2c463c;
+  font: 11px 'DM Sans', sans-serif;
+}
+
+.finance-period input:focus,
+.finance-period select:focus {
+  border-color: #579378;
+}
+
+/* Cinco indicadores financeiros */
+
+.finance-summary {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.finance-summary article {
+  min-width: 0;
+}
+
+.finance-summary article > strong {
+  font-size: clamp(17px, 1.5vw, 25px);
+  overflow-wrap: anywhere;
+}
+
+/* Variações dos indicadores */
+
+.finance-icon.expenses {
+  background: #fbeae8;
+  color: #b86f67;
+}
+
+.finance-icon.gross {
+  background: #eaf0fb;
+  color: #607eae;
+}
+
+.finance-icon.result {
+  background: #e8f5ec;
+  color: #438163;
+}
+
+/* Mensagens de erro */
+
+.finance-error {
+  padding: 12px 15px;
+  border: 1px solid #f0d2ce;
+  border-radius: 9px;
+  background: #fff4f2;
+  color: #a94f45;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* Estado de carregamento */
+
+.finance-loading {
+  padding: 30px;
+  color: #89978f;
+  text-align: center;
+  font-size: 12px;
+}
+
+/* Resultado operacional */
+
+.finance-amount-result {
+  color: #438163;
+  font-weight: 700;
+}
+
+.finance-amount-result.negative {
+  color: #b86f67;
+}
+
+/* Ajustes na tabela */
+
+.finance-table td {
+  vertical-align: middle;
+}
+
+.finance-table tbody tr:hover {
+  background: #fafcf9;
+}
+
+/* ==========================================================================
+   8. RESPONSIVIDADE ATUALIZADA
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+  .finance-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 850px) {
+  .finance-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .finance-period {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .finance-period input,
+  .finance-period select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 650px) {
+  .finance-page {
+    gap: 14px;
+  }
+
+  .finance-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .finance-summary article {
+    padding: 16px;
+  }
+
+  .finance-summary article > strong {
+    font-size: 22px;
+  }
+
+  .finance-panel {
+    padding: 15px;
+  }
+
+  .finance-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .finance-panel-heading h2 {
+    font-size: 14px;
+  }
+
+  .finance-primary {
+    width: 100%;
+  }
+
+  .finance-toolbar {
+    flex-direction: column;
+  }
+
+  .finance-search {
+    width: 100%;
+  }
+
+  .finance-toolbar > select {
+    width: 100%;
+    max-width: none;
+    height: 39px;
+  }
+
+  .finance-table {
+    min-width: 650px;
+  }
+
+  .finance-table-footer {
+    flex-direction: column;
+  }
+
+  .finance-table-footer span {
+    text-align: left;
+  }
+
+  .finance-form {
+    grid-template-columns: 1fr;
+  }
+}
+/* Botão de alteração do status do pagamento */
+.finance-payment-button {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: #dcfce7;
+    color: #166534;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.finance-payment-button:hover {
+    background-color: #bbf7d0;
+    transform: translateY(-1px);
+}
+
+/* Botão para pagamentos já realizados */
+.finance-payment-button.paid {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.finance-payment-button.paid:hover {
+    background-color: #fde68a;
+}
+
+/* Botão durante o processamento */
+.finance-payment-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* Acesso aos relatórios junto aos controles do período */
+.finance-period-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.finance-period-actions label {
+  display: grid;
+  gap: 7px;
+}
+
+.finance-reports-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #d5e4d9;
+  border-radius: 8px;
+  background: #f3f8f4;
+  color: #276349;
+  font: 600 11px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+
+.finance-reports-button:hover {
+  border-color: #a9c9b3;
+  background: #e8f3eb;
+  transform: translateY(-1px);
+}
+
+.finance-reports-button:focus-visible {
+  outline: 2px solid #579378;
+  outline-offset: 2px;
+}
+
+@media (max-width: 850px) {
+  .finance-period-actions {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .finance-period-actions label {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .finance-period-actions label input {
+    width: 100%;
+  }
+
+  .finance-reports-button {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 520px) {
+  .finance-period-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .finance-reports-button {
+    width: 100%;
+  }
+}
