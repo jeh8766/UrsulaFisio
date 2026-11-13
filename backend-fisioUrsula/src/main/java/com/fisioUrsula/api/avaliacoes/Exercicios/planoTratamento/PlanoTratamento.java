@@ -1,3 +1,11 @@
+/*
+
+#######
+ENTIDADE NAO ESTA SENDO USADA AGORA MAIS PODERA SER USADA EM UMA FEATURE FUTURAMENTE!
+#######
+
+
+
 package com.fisioUrsula.api.avaliacoes.planoTratamento.planoTratamento;
 
 import java.io.Serializable;
@@ -65,3 +73,6 @@ public class PlanoTratamento implements Serializable {
     @OneToMany(mappedBy = "planoTratamento")
     private List<Agendamento> agendamentos;
 }
+
+
+ */

@@ -1,4 +1,4 @@
-package com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios;
+package com.fisioUrsula.api.avaliacoes.Exercicios.exercicios;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public interface ExercicioRepository extends JpaRepository<Exercicio, Long> {
     List<Exercicio> filtrar(
             @Param("nome") String nome,
             @Param("tipo") TipoExercicio tipo,
-            @Param("ativo") boolean ativo);
+            @Param("ativo") Boolean ativo);
 
     boolean existsByNomeIgnoreCase(String nome);
 

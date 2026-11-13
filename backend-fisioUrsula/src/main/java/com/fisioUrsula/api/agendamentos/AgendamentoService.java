@@ -4,6 +4,7 @@ package com.fisioUrsula.api.agendamentos;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
 import com.fisioUrsula.api.agendamentos.dtos.*;
@@ -69,7 +70,7 @@ public class AgendamentoService {
 
     public AgendamentoAgendaResponseDTO buscarPorId(Long id) {
         Agendamento agendamento = agendamentoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Agendamento não encontrado."
                 ));
 
@@ -100,7 +101,7 @@ public class AgendamentoService {
         }
 
         Paciente paciente = pacienteRepository.findById(pacienteId)
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Paciente não encontrado."
                 ));
 
@@ -138,7 +139,7 @@ public class AgendamentoService {
         }
 
         Paciente paciente = pacienteRepository.findById(pacienteId)
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Paciente não encontrado."
                 ));
 
@@ -205,7 +206,7 @@ public class AgendamentoService {
         }
 
         Agendamento agendamento = agendamentoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Agendamento não encontrado."
                 ));
 
@@ -217,7 +218,7 @@ public class AgendamentoService {
         }
 
         Paciente paciente = pacienteRepository.findById(dto.pacienteId())
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Paciente não encontrado."
                 ));
 
@@ -265,7 +266,7 @@ public class AgendamentoService {
             StatusAgendamento novoStatus
     ) {
         Agendamento agendamento = agendamentoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Agendamento não encontrado."
                 ));
 

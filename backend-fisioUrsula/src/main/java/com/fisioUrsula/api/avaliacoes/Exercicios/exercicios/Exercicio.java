@@ -1,10 +1,11 @@
-package com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios;
+package com.fisioUrsula.api.avaliacoes.Exercicios.exercicios;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.fisioUrsula.api.avaliacoes.planoTratamento.exercicios.dtos.CadastrarExercicioRequestDTO;
-import com.fisioUrsula.api.avaliacoes.planoTratamento.planoExercicios.PlanoExercicio;
+import com.fisioUrsula.api.avaliacoes.Exercicios.AtendimentoExercicio.AtendimentoExercicio;
+import com.fisioUrsula.api.avaliacoes.Exercicios.exercicios.dtos.CadastrarExercicioRequestDTO;
 import com.fisioUrsula.api.shared.enums.TipoExercicio;
 
 import jakarta.persistence.Column;
@@ -46,11 +47,11 @@ public class Exercicio implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
-    @Column(columnDefinition = "boolean default true")
+    @Column(nullable = false)
     private boolean ativo = true;
 
     @OneToMany(mappedBy = "exercicio")
-    private List<PlanoExercicio> exercicios;
+    private List<AtendimentoExercicio> atendimentos = new ArrayList<>();
 
     public Exercicio(CadastrarExercicioRequestDTO dto) {
         atualizar(dto);

@@ -3,6 +3,7 @@ package com.fisioUrsula.api.avaliacoes.avaliacao;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,7 @@ public class AvaliacaoService {
     @Transactional
     public AtualizarAvaliacaoResponseDTO atualizarAvaliacao(Long id, AtualizarAvaliacaoRequestDTO dto) {
         Avaliacao avaliacao = avaliacaoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada."));
+                .orElseThrow(() -> new RegistroNaoEncontradoException("Avaliação não encontrada."));
 
         avaliacao.setQueixaPrincipal(dto.queixaPrincipal());
         avaliacao.setObservacao(dto.observacao());
@@ -58,14 +59,15 @@ public class AvaliacaoService {
     @Transactional(readOnly = true)
     public ListarAvaliacoesResponseDTO buscarAvaliacaoPorId(Long id) {
         Avaliacao avaliacao = avaliacaoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada."));
+                .orElseThrow(() -> new RegistroNaoEncontradoException("Avaliação não encontrada."));
+
         return new ListarAvaliacoesResponseDTO(avaliacao);
     }
 
     @Transactional(readOnly = true)
     public List<ListarAvaliacoesResponseDTO> listarAvaliacoesDePaciente(Long pacienteId) {
         if (!pacienteRepository.existsById(pacienteId)) {
-            throw new EntityNotFoundException("Paciente não encontrado.");
+            throw new RegistroNaoEncontradoException("Paciente não encontrado.");
         }
         return avaliacaoRepository.listarPorPaciente(pacienteId)
                 .stream()

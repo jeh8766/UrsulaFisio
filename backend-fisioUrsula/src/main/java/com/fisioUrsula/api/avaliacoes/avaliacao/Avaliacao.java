@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.DiagnosticoAvaliacao;
-import com.fisioUrsula.api.avaliacoes.planoTratamento.planoTratamento.PlanoTratamento;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 
@@ -61,8 +60,5 @@ public class Avaliacao implements Serializable {
 
     @OneToMany(mappedBy = "avaliacao")
     private List<DiagnosticoAvaliacao> diagnosticos;
-
-    @OneToOne(mappedBy = "avaliacao")
-    private PlanoTratamento planoTratamento;
 
 }

@@ -35,9 +35,6 @@ public class Endereco implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @OneToOne(mappedBy = "endereco", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Paciente paciente;
-
     @Column(nullable = false, length = 9)
     private String cep;
 
@@ -59,5 +56,8 @@ public class Endereco implements Serializable {
 
     @Column(length = 40)
     private String complemento;
+
+    @OneToOne(mappedBy = "endereco", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Paciente paciente;
 
 }

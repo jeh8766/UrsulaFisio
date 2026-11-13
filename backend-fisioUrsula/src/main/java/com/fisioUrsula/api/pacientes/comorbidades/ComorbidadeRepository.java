@@ -9,7 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ComorbidadeRepository extends JpaRepository<Comorbidade, Long> {
 
     Optional<Comorbidade> findByNomeIgnoreCase(String nome);
-     boolean existsByCodigoCID(String codigoCID);
 
-    List<Comorbidade> findByNomeContainingIgnoreCase(String nome);
+    List<Comorbidade> findByAtivoTrueAndNomeContainingIgnoreCase(String nome);
+
+    List<Comorbidade> findByAtivoTrue();
 }
