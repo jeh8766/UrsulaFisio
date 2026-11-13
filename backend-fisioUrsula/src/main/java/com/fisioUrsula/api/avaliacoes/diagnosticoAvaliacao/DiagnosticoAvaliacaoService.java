@@ -26,10 +26,14 @@ public class DiagnosticoAvaliacaoService {
 
     @Transactional
     public void atribuirDiagnostico(AtribuirDiagnosticoDTO dto) {
+
         Avaliacao avaliacao = avaliacaoRepository.findById(dto.avaliacaoId())
                 .orElseThrow(() -> new RegistroNaoEncontradoException("Avaliação não encontrada."));
+
         Diagnostico diagnostico = diagnosticoRepository.findById(dto.diagnosticoId())
                 .orElseThrow(() -> new RegistroNaoEncontradoException("Diagnóstico não encontrado."));
+
+
 
         diagnosticoAvaliacaoRepository.save(new DiagnosticoAvaliacao(dto, avaliacao, diagnostico));
     }

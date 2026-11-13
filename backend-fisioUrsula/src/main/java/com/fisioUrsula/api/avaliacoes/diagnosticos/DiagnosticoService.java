@@ -71,4 +71,17 @@ public class DiagnosticoService {
 
     }
 
+    @Transactional
+    public void inativarDiagnostico(Long id){
+
+        Diagnostico diagnostico = diagnosticoRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Não existe diagnostico com esse id!"));
+
+        if (!diagnostico.isAtivo()){
+            throw new IllegalStateException("diagnostico ja esta inativo!");
+        }
+
+        diagnostico.setAtivo(false);
+        diagnosticoRepository.save(diagnostico);
+    }
+
 }
