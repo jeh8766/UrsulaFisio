@@ -1,16 +1,13 @@
 package com.fisioUrsula.api.avaliacoes.diagnosticos;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.fisioUrsula.api.avaliacoes.diagnosticos.dto.AtualizarDiagnosticoDTO;
-import com.fisioUrsula.api.avaliacoes.diagnosticos.dto.CriarDiagnosticoDTO;
-import com.fisioUrsula.api.avaliacoes.diagnosticos.dto.ListarDiagnosticosDTO;
+import com.fisioUrsula.api.avaliacoes.diagnosticos.dtos.*;
+import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
-
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,30 +16,59 @@ public class DiagnosticoService {
     private final DiagnosticoRepository diagnosticoRepository;
 
     @Transactional
-    public void criarDiagnostico(CriarDiagnosticoDTO dto) {
-        diagnosticoRepository.save(new Diagnostico(dto));
-    }
+    public CriarDiagnosticoResponseDTO criarDiagnostico(CriarDiagnosticoRequestDTO dto) {
 
-    @Transactional(readOnly = true)
-    public List<ListarDiagnosticosDTO> listarDiagnosticos() {
-        return diagnosticoRepository.findAll()
-                .stream()
-                .map(ListarDiagnosticosDTO::new)
-                .toList();
-    }
+        if (diagnosticoRepository.findByNomeIgnoreCase(dto.nome()).isPresent()) {
+            throw new RegistroDuplicadoException("Ja existe um diagnostico com esse nome!");
+        }
 
-    @Transactional(readOnly = true)
-    public ListarDiagnosticosDTO buscarDiagnosticoPorId(Long id) {
-        return new ListarDiagnosticosDTO(buscarEntidade(id));
+        Diagnostico diagnostico = new Diagnostico(dto);
+        Diagnostico diagnosticoSalvo = diagnosticoRepository.save(diagnostico);
+
+        return new CriarDiagnosticoResponseDTO(diagnosticoSalvo);
+
     }
 
     @Transactional
-    public void atualizarDiagnostico(Long id, AtualizarDiagnosticoDTO dto) {
-        buscarEntidade(id).atualizar(dto);
+    public List<ListarDiagnosticoResponseDTO> listarDiagnosticos(String nome) {
+
+        List<Diagnostico> diagnosticos;
+
+        if (nome == null || nome.isBlank()) {
+            diagnosticos = diagnosticoRepository.findAll();
+        } else {
+            diagnosticos = diagnosticoRepository.findByNomeContainingIgnoreCase(nome.trim());
+        }
+
+        return diagnosticos.stream()
+                .map(ListarDiagnosticoResponseDTO::new)
+                .toList();
     }
 
-    private Diagnostico buscarEntidade(Long id) {
-        return diagnosticoRepository.findById(id)
-                .orElseThrow(() -> new RegistroNaoEncontradoException("Diagnóstico não encontrado."));
+    @Transactional
+    public ListarDiagnosticoResponseDTO buscarDiagnosticoPorId(Long id) {
+
+        Diagnostico diagnostico = diagnosticoRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Não existe diagnostico com esse id!"));
+
+        return new ListarDiagnosticoResponseDTO(diagnostico);
     }
+
+    @Transactional
+    public DetalharDiagnosticoResponseDTO atualizarDiagnostico(Long id, AtualizarDiagnosticoRequestDTO dto) {
+
+        Diagnostico diagnostico = diagnosticoRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Não existe diagnostico com esse id!"));
+
+        if (dto.nome() != null) {
+            diagnostico.setNome(dto.nome());
+        }
+        if (dto.descricao() != null) {
+            diagnostico.setDescricao(dto.descricao());
+        }
+
+        diagnosticoRepository.save(diagnostico);
+
+        return new DetalharDiagnosticoResponseDTO(diagnostico);
+
+    }
+
 }
