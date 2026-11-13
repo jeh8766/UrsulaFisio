@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.DiagnosticoAvaliacao;
 
+import com.fisioUrsula.api.avaliacoes.diagnosticos.dtos.CriarDiagnosticoRequestDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,6 +29,7 @@ public class Diagnostico {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(nullable = false, length = 40)
@@ -36,10 +38,11 @@ public class Diagnostico {
     @Column(length = 60)
     private String descricao;
 
-    @Column(nullable = false, length = 6)
-    private String codigoCID;
-
     @OneToMany(mappedBy = "diagnostico")
     private List<DiagnosticoAvaliacao> diagnosticos;
 
+    public Diagnostico (CriarDiagnosticoRequestDTO dto){
+        this.nome = dto.nome();
+        this.descricao = dto.descricao();
+    }
 }

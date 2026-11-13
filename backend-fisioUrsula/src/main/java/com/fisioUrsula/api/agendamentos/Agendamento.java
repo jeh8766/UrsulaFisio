@@ -6,7 +6,6 @@ import java.time.LocalTime;
 import com.fisioUrsula.api.agendamentos.dtos.AgendarAvaliacaoRequestDTO;
 import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
 import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
-import com.fisioUrsula.api.avaliacoes.planoTratamento.planoTratamento.PlanoTratamento;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.TipoAgendamento;
@@ -62,10 +61,6 @@ public class Agendamento {
     private StatusAgendamento statusAgendamento;
 
     private LocalDate dataCancelamento;
-
-    @ManyToOne
-    @JoinColumn(name = "plano_tratamento_id")
-    private PlanoTratamento planoTratamento;
 
     @ManyToOne
     @JoinColumn(name = "paciente", nullable = false)
