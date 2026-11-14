@@ -59,8 +59,17 @@ public class DiagnosticoService {
         Diagnostico diagnostico = diagnosticoRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Não existe diagnostico com esse id!"));
 
         if (dto.nome() != null) {
-            diagnostico.setNome(dto.nome());
+
+            String nome = dto.nome().trim();
+
+            if (diagnosticoRepository.existsByNomeIgnoreCaseAndIdNot(nome,id)){
+                throw new RegistroDuplicadoException(
+                        "Já existe outro diagnóstico com esse nome!"
+                );
+            }
+            diagnostico.setNome(nome);
         }
+
         if (dto.descricao() != null) {
             diagnostico.setDescricao(dto.descricao());
         }

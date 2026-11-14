@@ -5,11 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface AtendimentoRepository extends JpaRepository<Atendimento, Long> {
-
-    Optional<Atendimento> findByAgendamento_Id(Long agendamentoId);
 
     List<Atendimento> findByAgendamento_Paciente_IdOrderByAgendamento_DataDesc(
             Long pacienteId
@@ -19,8 +16,10 @@ public interface AtendimentoRepository extends JpaRepository<Atendimento, Long> 
             LocalDate dataInicio,
             LocalDate dataFim
     );
+
     List<Atendimento> findByDataPagamentoBetween(
             LocalDate dataInicio,
-            LocalDate dataFim
-    );
+            LocalDate dataFim);
+
+    boolean existsByAgendamento_Id(Long agendamentoId);
 }

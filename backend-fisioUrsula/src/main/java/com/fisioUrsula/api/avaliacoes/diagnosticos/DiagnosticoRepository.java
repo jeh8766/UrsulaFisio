@@ -12,4 +12,6 @@ public interface DiagnosticoRepository extends JpaRepository<Diagnostico,Long> {
 
     List<Diagnostico> findByNomeContainingIgnoreCase(String nome);
 
+    boolean existsByNomeIgnoreCaseAndIdNot(String nome, Long id);
+
 }

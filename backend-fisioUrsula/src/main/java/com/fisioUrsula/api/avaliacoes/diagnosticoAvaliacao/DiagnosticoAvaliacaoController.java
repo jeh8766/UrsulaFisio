@@ -2,6 +2,7 @@ package com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao;
 
 import java.util.List;
 
+import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.dto.DetalharDiagnosticoAvaliacaoResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -15,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.dto.AtribuirDiagnosticoDTO;
-import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.dto.AtualizarDiagnosticoDaAvaliacaoDTO;
-import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.dto.ListarDiagnosticosDaAvaliacaoDTO;
+import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.dto.AtribuirDiagnosticoAvaliacaoRequestDTO;
+import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.dto.AtualizarDiagnosticoAvaliacaoRequestDTO;
+import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.dto.ListarDiagnosticosAvaliacaoResponseDTO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,39 +32,25 @@ public class DiagnosticoAvaliacaoController {
     private final DiagnosticoAvaliacaoService diagnosticoAvaliacaoService;
 
     @PostMapping
-    public ResponseEntity<Void> atribuirDiagnostico(@Valid @RequestBody AtribuirDiagnosticoDTO dto) {
-        diagnosticoAvaliacaoService.atribuirDiagnostico(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removerDiagnosticoDeAvaliacao(@PathVariable Long id) {
-        diagnosticoAvaliacaoService.removerDiagnosticoDeAvaliacao(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> atualizarDiagnosticoDaAvaliacao(@PathVariable Long id,
-                                                                @Valid @RequestBody AtualizarDiagnosticoDaAvaliacaoDTO dto) {
-        diagnosticoAvaliacaoService.atualizarDiagnosticoDaAvaliacao(id, dto);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<DetalharDiagnosticoAvaliacaoResponseDTO> atribuirDiagnosticoAvaliacao(@Valid @RequestBody AtribuirDiagnosticoAvaliacaoRequestDTO dto) {
+        DetalharDiagnosticoAvaliacaoResponseDTO detalharDiagnosticoAvaliacaoResponseDTO = diagnosticoAvaliacaoService.atribuirDiagnosticoAvaliacao(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(detalharDiagnosticoAvaliacaoResponseDTO);
     }
 
     @GetMapping("/avaliacao/{avaliacaoId}")
-    public ResponseEntity<List<ListarDiagnosticosDaAvaliacaoDTO>> listarDiagnosticosDaAvaliacao(
-            @PathVariable Long avaliacaoId) {
+    public ResponseEntity<List<ListarDiagnosticosAvaliacaoResponseDTO>> listarDiagnosticosDaAvaliacao(@PathVariable Long avaliacaoId) {
         return ResponseEntity.ok(diagnosticoAvaliacaoService.listarDiagnosticosDaAvaliacao(avaliacaoId));
     }
 
-    @PatchMapping("/{id}/ativar")
-    public ResponseEntity<Void> ativar(@PathVariable Long id) {
-        diagnosticoAvaliacaoService.ativar(id);
-        return ResponseEntity.noContent().build();
+    @PatchMapping("/{id}/atualizar")
+    public ResponseEntity<DetalharDiagnosticoAvaliacaoResponseDTO> atualizarDiagnosticoDaAvaliacao(@PathVariable Long id, @Valid @RequestBody AtualizarDiagnosticoAvaliacaoRequestDTO dto) {
+        DetalharDiagnosticoAvaliacaoResponseDTO detalharDiagnosticoAvaliacaoResponseDTO = diagnosticoAvaliacaoService.atualizarDiagnosticoAvaliacao(id, dto);
+        return ResponseEntity.ok(detalharDiagnosticoAvaliacaoResponseDTO);
     }
 
     @PatchMapping("/{id}/inativar")
     public ResponseEntity<Void> inativar(@PathVariable Long id) {
-        diagnosticoAvaliacaoService.inativar(id);
+        diagnosticoAvaliacaoService.inativarDiagnosticoAvaliacao(id);
         return ResponseEntity.noContent().build();
     }
 }
