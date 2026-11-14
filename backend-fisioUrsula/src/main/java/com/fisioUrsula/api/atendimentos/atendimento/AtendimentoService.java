@@ -6,9 +6,11 @@ import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitaisRepository;
 import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.agendamentos.AgendamentoRepository;
 import com.fisioUrsula.api.avaliacoes.Exercicios.AtendimentoExercicio.AtendimentoExercicioService;
+import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 import com.fisioUrsula.api.shared.enums.TipoAgendamento;
+import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.DuplicateFormatFlagsException;
 import java.util.List;
 
 @Service
@@ -28,8 +31,7 @@ public class AtendimentoService {
     private final AtendimentoExercicioService atendimentoExercicioService;
 
     @Transactional
-    public CriarAtendimentoResponseDTO criarAtendimento(
-            CriarAtendimentoRequestDTO criarAtendimentoRequestDTO) {
+    public CriarAtendimentoResponseDTO criarAtendimento(CriarAtendimentoRequestDTO criarAtendimentoRequestDTO) {
 
         Atendimento atendimento = new Atendimento();
 
@@ -45,8 +47,14 @@ public class AtendimentoService {
                 ));
 
         if (agendamentoAtendimento.getTipoAgendamento() != TipoAgendamento.ATENDIMENTO) {
-            throw new IllegalArgumentException(
+            throw new IllegalStateException(
                     "O agendamento informado não é do tipo atendimento."
+            );
+        }
+
+        if (atendimentoRepository.existsByAgendamento_Id(agendamentoAtendimento.getId())) {
+            throw new IllegalStateException(
+                    "Esse agendamento já possui um atendimento registrado!"
             );
         }
 
@@ -106,6 +114,7 @@ public class AtendimentoService {
         atendimento.setEvolucao(dto.evolucao());
 
         atendimento.setStatusAtendimento(StatusAtendimento.ATENDIDO);
+        atendimento.getAgendamento().setStatusAgendamento(StatusAgendamento.CONCLUIDO);
 
         Atendimento atendimentoSalvo = atendimentoRepository.save(atendimento);
 
@@ -125,12 +134,12 @@ public class AtendimentoService {
         }
 
         atendimento.setStatusPagamento(StatusPagamento.PAGO);
+        atendimento.setDataPagamento(LocalDate.now());
 
         atendimentoRepository.save(atendimento);
     }
 
     public List<ListarAtendimentosResponseDTO> listarAtendimentos() {
-
         return atendimentoRepository.findAll()
                 .stream()
                 .map(ListarAtendimentosResponseDTO::new)

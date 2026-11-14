@@ -1,17 +1,18 @@
 package com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.dto;
 
-import java.time.LocalDate;
-
 import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.DiagnosticoAvaliacao;
 import com.fisioUrsula.api.shared.enums.StatusDiagnostico;
 
-public record ListarDiagnosticosDaAvaliacaoDTO(Long id,
-                                               Long diagnosticoId,
-                                               LocalDate dataDiagnostico,
-                                               StatusDiagnostico status,
-                                               String observacao) {
+import java.time.LocalDate;
 
-    public ListarDiagnosticosDaAvaliacaoDTO(DiagnosticoAvaliacao diagnosticoAvaliacao) {
+public record DetalharDiagnosticoAvaliacaoResponseDTO(
+        Long id,
+        Long diagnosticoId,
+        LocalDate dataDiagnostico,
+        StatusDiagnostico status,
+        String observacao
+) {
+    public DetalharDiagnosticoAvaliacaoResponseDTO(DiagnosticoAvaliacao diagnosticoAvaliacao) {
         this(
                 diagnosticoAvaliacao.getId(),
                 diagnosticoAvaliacao.getDiagnostico().getId(),

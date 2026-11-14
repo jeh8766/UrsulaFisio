@@ -39,4 +39,10 @@ public class DiagnosticoController {
         DetalharDiagnosticoResponseDTO detalharDiagnosticoResponseDTO = diagnosticoService.atualizarDiagnostico(id, dto);
         return ResponseEntity.ok(detalharDiagnosticoResponseDTO);
     }
+
+    @PatchMapping("/{id}/inativar")
+    public ResponseEntity<Void> inativardiagnostico(@PathVariable Long id) {
+        diagnosticoService.inativarDiagnostico(id);
+        return ResponseEntity.noContent().build();
+    }
 }

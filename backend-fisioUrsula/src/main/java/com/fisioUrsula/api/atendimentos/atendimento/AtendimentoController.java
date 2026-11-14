@@ -7,9 +7,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.fisioUrsula.api.atendimentos.atendimento.dtos.AlterarStatusPagamentoRequestDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,83 +21,52 @@ public class AtendimentoController {
 
     private final AtendimentoService atendimentoService;
 
-    @PostMapping("/agendamento/{agendamentoId}/realizar")
-    public ResponseEntity<DetalharAtendimentoResponseDTO> realizarAtendimento(
-            @PathVariable Long agendamentoId,
-            @Valid @RequestBody ConcluirAtendimentoRequestDTO dto
-    ) {
+    @PostMapping
+    public ResponseEntity<CriarAtendimentoResponseDTO> criarAtendimento(@Valid @RequestBody CriarAtendimentoRequestDTO criarAtendimentoRequestDTO){
 
-        return ResponseEntity.ok(
-                atendimentoService.realizarAtendimento(agendamentoId, dto)
-        );
+        CriarAtendimentoResponseDTO criarAtendimentoResponseDTO = atendimentoService.criarAtendimento(criarAtendimentoRequestDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(criarAtendimentoResponseDTO);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DetalharAtendimentoResponseDTO> detalharAtendimento(
-            @PathVariable Long id
-    ) {
-
-        return ResponseEntity.ok(
-                atendimentoService.detalharAtendimento(id)
-        );
+    public ResponseEntity<DetalharAtendimentoResponseDTO> detalharAtendimento(@PathVariable Long id) {
+        return ResponseEntity.ok(atendimentoService.detalharAtendimento(id));
     }
 
     @PatchMapping("/{id}/pagamento")
-    public ResponseEntity<Void> atualizarStatusPagamento(
-            @PathVariable Long id,
-            @Valid @RequestBody AlterarStatusPagamentoRequestDTO dto
-    ) {
-        atendimentoService.atualizarStatusPagamento(
-                id,
-                dto.statusPagamento()
-        );
-
+    public ResponseEntity<Void> registrarPagamento(@PathVariable Long id) {
+        atendimentoService.registrarPagamento(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     public ResponseEntity<List<ListarAtendimentosResponseDTO>> listarAtendimentos() {
-
-        return ResponseEntity.ok(
-                atendimentoService.listarAtendimentos()
-        );
+        return ResponseEntity.ok(atendimentoService.listarAtendimentos());
     }
 
     @PatchMapping("/{id}/atualizar")
-    public ResponseEntity<DetalharAtendimentoResponseDTO> atualizarAtendimento(
-            @PathVariable Long id,
-            @Valid @RequestBody AtualizarAtendimentoRequestDTO dto
-    ) {
-
-        return ResponseEntity.ok(
-                atendimentoService.atualizarAtendimento(id, dto)
-        );
+    public ResponseEntity<DetalharAtendimentoResponseDTO> atualizarAtendimento(@PathVariable Long id, @Valid @RequestBody AtualizarAtendimentoRequestDTO dto) {
+        return ResponseEntity.ok(atendimentoService.atualizarAtendimento(id, dto));
     }
 
     @GetMapping("/paciente/{pacienteId}")
-    public ResponseEntity<List<DetalharAtendimentoResponseDTO>> listarAtendimentoPorPaciente(
-            @PathVariable Long pacienteId
-    ) {
-
-        return ResponseEntity.ok(
-                atendimentoService.listarAtendimentoPorPaciente(pacienteId)
-        );
+    public ResponseEntity<List<DetalharAtendimentoResponseDTO>> listarAtendimentoPorPaciente(@PathVariable Long pacienteId) {
+        return ResponseEntity.ok(atendimentoService.listarAtendimentoPorPaciente(pacienteId));
     }
 
     @GetMapping("/data")
-    public ResponseEntity<List<DetalharAtendimentoResponseDTO>> listarAtendimentosPorData(
-            @RequestParam
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate dataInicio,
+    public ResponseEntity<List<DetalharAtendimentoResponseDTO>> listarAtendimentosPorData(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
+        return ResponseEntity.ok(atendimentoService.listarAtendimentosPorData(dataInicio, dataFim));
+    }
 
-            @RequestParam
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate dataFim
-    ) {
+    @PatchMapping("/{id}/concluir")
+    public ResponseEntity<DetalharAtendimentoResponseDTO> concluirAtendimento(@PathVariable Long id,
+                                                                              @Valid @RequestBody ConcluirAtendimentoRequestDTO concluirAtendimentoRequestDTO){
 
-        return ResponseEntity.ok(
-                atendimentoService.listarAtendimentosPorData(dataInicio, dataFim)
-        );
+        DetalharAtendimentoResponseDTO detalharAtendimentoResponseDTO = atendimentoService.concluirAtendimento(id, concluirAtendimentoRequestDTO);
+
+        return ResponseEntity.ok().body(detalharAtendimentoResponseDTO);
     }
 }
 

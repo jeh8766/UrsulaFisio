@@ -38,6 +38,9 @@ public class Diagnostico {
     @Column(length = 60)
     private String descricao;
 
+    @Column(nullable = false)
+    private boolean ativo = true;
+
     @OneToMany(mappedBy = "diagnostico")
     private List<DiagnosticoAvaliacao> diagnosticos;
 

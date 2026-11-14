@@ -52,6 +52,7 @@ public class PacienteComorbidadeService {
                 throw new RegistroDuplicadoException("Essa comorbidade ja esta associada ao paciente!");
             }
 
+
             pacienteComorbidade.setStatusDiagnostico(StatusDiagnostico.ATIVO);
 
 

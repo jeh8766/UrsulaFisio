@@ -7,13 +7,13 @@ import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +22,6 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@AllArgsConstructor
 @NoArgsConstructor
 public class Atendimento {
 
@@ -31,28 +30,35 @@ public class Atendimento {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(length = 250)
+    @Column(columnDefinition = "TEXT")
     private String intercorrencia;
 
-    @Column(length = 250)
+    @Column(columnDefinition = "TEXT")
     private String evolucao;
 
+    @Column(precision = 10, scale = 2)
     private BigDecimal valor;
 
+    @Column(name = "data_pagamento")
+    private LocalDate dataPagamento;
+
+    @Column(precision = 10, scale = 2)
     private BigDecimal taxaDeslocamento;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StatusAtendimento statusAtendimento;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StatusPagamento statusPagamento;
 
-    @OneToOne
-    @JoinColumn(name = "agendamento_id", unique = true)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "agendamento_id", nullable = false, unique = true)
     private Agendamento agendamento;
 
-    @OneToOne
-    @JoinColumn(name = "sinais_vitais_id", unique = true)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "sinais_vitais_id", nullable = false, unique = true)
     private SinaisVitais sinaisVitais;
 
     @OneToMany(

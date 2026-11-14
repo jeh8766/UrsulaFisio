@@ -4,7 +4,11 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotNull;
 
-public record AtualizarDiagnosticoDaAvaliacaoDTO(
+public record AtribuirDiagnosticoAvaliacaoRequestDTO(
+        @NotNull(message = "A avaliação é obrigatória.") Long avaliacaoId,
+
+        @NotNull(message = "O diagnóstico é obrigatório.") Long diagnosticoId,
+
         @NotNull(message = "A data do diagnóstico é obrigatória.") LocalDate dataDiagnostico,
 
         String observacao) {
