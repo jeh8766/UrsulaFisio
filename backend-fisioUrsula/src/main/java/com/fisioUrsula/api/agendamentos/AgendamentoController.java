@@ -24,7 +24,7 @@ public class AgendamentoController {
     @PostMapping("/avaliacao/{pacienteId}")
     public ResponseEntity<AgendarAvaliacaoResponseDTO> agendarAvaliacao(@PathVariable Long pacienteId,
             @RequestBody @Valid AgendarAvaliacaoRequestDTO dto) {
-        AgendarAvaliacaoResponseDTO agendamentoAvaliacao = agendamentoService.AgendarAvaliacao(pacienteId,
+        AgendarAvaliacaoResponseDTO agendamentoAvaliacao = agendamentoService.agendarAvaliacao(pacienteId,
                 dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(agendamentoAvaliacao);
     }

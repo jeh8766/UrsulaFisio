@@ -35,7 +35,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@AllArgsConstructor
 @NoArgsConstructor
 public class Agendamento {
 
@@ -58,6 +57,7 @@ public class Agendamento {
     private TipoAgendamento tipoAgendamento;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StatusAgendamento statusAgendamento;
 
     private LocalDate dataCancelamento;
@@ -66,10 +66,10 @@ public class Agendamento {
     @JoinColumn(name = "paciente", nullable = false)
     private Paciente paciente;
 
-    @OneToOne(mappedBy = "agendamento", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "agendamento")
     private Atendimento atendimento;
 
-    @OneToOne(mappedBy = "agendamento", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "agendamento")
     private Avaliacao avaliacao;
 
     public Agendamento(AgendarAvaliacaoRequestDTO dto, Paciente paciente) {
