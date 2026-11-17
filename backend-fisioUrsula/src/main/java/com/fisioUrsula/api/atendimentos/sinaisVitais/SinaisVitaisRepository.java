@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface SinaisVitaisRepository extends JpaRepository<SinaisVitais,Long> {
 
-    Optional<SinaisVitais> findByAtendimentoId(Long atendimentoId);
+    Optional<SinaisVitais> findByAtendimento_Id(Long atendimentoId);
 }

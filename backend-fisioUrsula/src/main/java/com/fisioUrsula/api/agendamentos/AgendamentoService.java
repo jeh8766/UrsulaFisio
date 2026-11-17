@@ -4,6 +4,7 @@ package com.fisioUrsula.api.agendamentos;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
@@ -88,7 +89,7 @@ public class AgendamentoService {
     }
 
     @Transactional
-    public AgendarAvaliacaoResponseDTO agendarAvaliacao(
+    public AgendarAvaliacaoResponseDTO criarAgendamentoAvaliacao(
             Long pacienteId,
             AgendarAvaliacaoRequestDTO dto
     ) {
@@ -309,7 +310,7 @@ public class AgendamentoService {
         }
 
         if (statusAtual == StatusAgendamento.PENDENTE
-                && novoStatus != StatusAgendamento.CONCLUIDO
+                && novoStatus != StatusAgendamento.CONFIRMADO
                 && novoStatus != StatusAgendamento.CANCELADO) {
             throw new IllegalStateException(
                     "Um agendamento pendente só pode ser confirmado ou cancelado."
@@ -320,7 +321,7 @@ public class AgendamentoService {
                 && novoStatus != StatusAgendamento.CANCELADO) {
 
             throw new IllegalStateException(
-                    "Um agendamento confirmado só pode ser cancelado por esta operação."
+                    "Um agendamento confirmado só pode ser cancelado."
             );
         }
 
@@ -329,7 +330,18 @@ public class AgendamentoService {
 
         // Atualiza a data de cancelamento quando necessário.
         if (novoStatus == StatusAgendamento.CANCELADO) {
+
             agendamento.setDataCancelamento(LocalDate.now());
+
+            if (agendamento.getAtendimento() != null) {
+                agendamento.getAtendimento()
+                        .setStatusAtendimento(StatusAtendimento.CANCELADO);
+            }
+
+            if (agendamento.getAvaliacao() != null) {
+                agendamento.getAvaliacao()
+                        .setStatusAtendimento(StatusAtendimento.CANCELADO);
+            }
         } else {
             agendamento.setDataCancelamento(null);
         }

@@ -8,7 +8,8 @@ import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 
-public record ListarAvaliacoesResponseDTO(Long id,
+public record ListarAvaliacoesResponseDTO(
+        Long id,
         String queixaPrincipal,
         String observacao,
         BigDecimal valor,
@@ -16,7 +17,8 @@ public record ListarAvaliacoesResponseDTO(Long id,
         StatusAtendimento statusAtendimento,
         String nomePaciente,
         LocalDate data,
-        LocalTime hora) {
+        LocalTime hora
+) {
 
     public ListarAvaliacoesResponseDTO(Avaliacao avaliacao) {
         this(

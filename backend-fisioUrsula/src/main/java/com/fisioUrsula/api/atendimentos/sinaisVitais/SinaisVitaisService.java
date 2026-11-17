@@ -9,15 +9,16 @@ import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.CriarSinaisVitaisReque
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.CriarSinaisVitaisResponseDTO;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class SinaisVitaisService {
 
-    public final SinaisVitaisRepository sinaisVitaisRepository;
+    private final SinaisVitaisRepository sinaisVitaisRepository;
 
+    @Transactional
     public CriarSinaisVitaisResponseDTO criarSinaisVitais(CriarSinaisVitaisRequestDTO criarSinaisVitaisRequestDTO) {
 
         SinaisVitais sinaisVitais = new SinaisVitais();
@@ -29,7 +30,7 @@ public class SinaisVitaisService {
 
         SinaisVitais sinaisVitaisSalvo = sinaisVitaisRepository.save(sinaisVitais);
 
-        CriarSinaisVitaisResponseDTO response = new CriarSinaisVitaisResponseDTO(
+        CriarSinaisVitaisResponseDTO criarSinaisVitaisResponseDTO = new CriarSinaisVitaisResponseDTO(
                 sinaisVitaisSalvo.getId(),
                 sinaisVitaisSalvo.getPressaoArterial(),
                 sinaisVitaisSalvo.getSaturacao(),
@@ -37,7 +38,7 @@ public class SinaisVitaisService {
                 sinaisVitaisSalvo.getFrequenciaRespiratoria()
         );
 
-        return response;
+        return criarSinaisVitaisResponseDTO;
 
     }
 
@@ -48,6 +49,7 @@ public class SinaisVitaisService {
         return new DetalharSinaisVitaisResponseDTO(sinaisVitais);
     }
 
+    @Transactional
     public DetalharSinaisVitaisResponseDTO atualizarSinaisVitais(Long id, AtualizarSinaisVitaisRequestDTO dto) {
 
         SinaisVitais sinaisVitais = sinaisVitaisRepository.findById(id).orElseThrow(() -> new RegistroNaoEncontradoException("Id de sinais vitais nao existe!"));
@@ -70,9 +72,9 @@ public class SinaisVitaisService {
         return new DetalharSinaisVitaisResponseDTO(sinaisVitais);
     }
 
-    public DetalharSinaisVitaisResponseDTO BuscarSinaisVitaisPorAtendimento(Long atendimentoId) {
+    public DetalharSinaisVitaisResponseDTO buscarSinaisVitaisPorAtendimento(Long atendimentoId) {
 
-        SinaisVitais sinaisVitais = sinaisVitaisRepository.findByAtendimentoId(atendimentoId).orElseThrow(() -> new RegistroNaoEncontradoException("sinais vitais não encontrado por esse atendimento"));
+        SinaisVitais sinaisVitais = sinaisVitaisRepository.findByAtendimento_Id(atendimentoId).orElseThrow(() -> new RegistroNaoEncontradoException("sinais vitais não encontrado por esse atendimento"));
 
         return new DetalharSinaisVitaisResponseDTO(sinaisVitais);
 

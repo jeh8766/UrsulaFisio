@@ -12,8 +12,7 @@ public record AtualizarAvaliacaoRequestDTO(
 
         String observacao,
 
-        @DecimalMin(value = "0.00", inclusive = false, message = "O valor deve ser maior que zero.") BigDecimal valor,
-
-        StatusPagamento statusPagamento) {
+        @DecimalMin(value = "0.00", inclusive = false, message = "O valor deve ser maior que zero.") BigDecimal valor
+) {
 
 }

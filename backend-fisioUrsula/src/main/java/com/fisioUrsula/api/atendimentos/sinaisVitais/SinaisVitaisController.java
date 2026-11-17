@@ -53,7 +53,7 @@ public class SinaisVitaisController {
             @PathVariable Long atendimentoId
     ) {
         return ResponseEntity.ok(
-                sinaisVitaisService.BuscarSinaisVitaisPorAtendimento(atendimentoId)
+                sinaisVitaisService.buscarSinaisVitaisPorAtendimento(atendimentoId)
         );
     }
 }
