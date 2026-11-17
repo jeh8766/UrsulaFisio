@@ -10,7 +10,6 @@ import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 import com.fisioUrsula.api.shared.enums.TipoAgendamento;
-import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.DuplicateFormatFlagsException;
 import java.util.List;
 
 @Service
@@ -37,7 +35,6 @@ public class AtendimentoService {
 
         atendimento.setValor(criarAtendimentoRequestDTO.valor());
         atendimento.setTaxaDeslocamento(criarAtendimentoRequestDTO.taxaDeslocamento());
-        atendimento.setStatusAtendimento(StatusAtendimento.AGENDADO);
         atendimento.setStatusPagamento(StatusPagamento.PENDENTE);
 
         Agendamento agendamentoAtendimento = agendamentoRepository
@@ -45,6 +42,14 @@ public class AtendimentoService {
                 .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Id de agendamento não existe!"
                 ));
+
+        if (agendamentoAtendimento.getStatusAgendamento() == StatusAgendamento.CANCELADO
+            || agendamentoAtendimento.getStatusAgendamento() == StatusAgendamento.CONCLUIDO) {
+            throw new IllegalStateException("Não e possivel criar um atendimento que o agendamento esta cancelado ou concluido!");
+        }
+
+        atendimento.setStatusAtendimento(StatusAtendimento.AGENDADO);
+
 
         if (agendamentoAtendimento.getTipoAgendamento() != TipoAgendamento.ATENDIMENTO) {
             throw new IllegalStateException(
@@ -105,6 +110,9 @@ public class AtendimentoService {
             throw new IllegalStateException("Esse atendimento já foi realizado!");
         }
 
+        if (atendimento.getAgendamento().getStatusAgendamento() != StatusAgendamento.CONFIRMADO) {
+            throw new IllegalStateException("Não se pode concluir um atendimento que não esteja confirmado!");
+        }
         atendimentoExercicioService.atribuirVariosExercicios(
                 atendimentoId,
                 dto.exerciciosIds()

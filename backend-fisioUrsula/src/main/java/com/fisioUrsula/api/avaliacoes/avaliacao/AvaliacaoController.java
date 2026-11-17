@@ -3,15 +3,11 @@ package com.fisioUrsula.api.avaliacoes.avaliacao;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fisioUrsula.api.avaliacoes.avaliacao.dto.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.fisioUrsula.api.avaliacoes.avaliacao.dto.AtualizarAvaliacaoRequestDTO;
-import com.fisioUrsula.api.avaliacoes.avaliacao.dto.AtualizarAvaliacaoResponseDTO;
-import com.fisioUrsula.api.avaliacoes.avaliacao.dto.AtualizarStatusAtendimentoAvaliacaoRequestDTO;
-import com.fisioUrsula.api.avaliacoes.avaliacao.dto.ListarAvaliacoesResponseDTO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +20,15 @@ public class AvaliacaoController {
 
     private final AvaliacaoService avaliacaoService;
 
-    @PutMapping("/{id}")
+    @PostMapping
+    public ResponseEntity<CriarAvaliacaoResponseDTO> criarAvaliacao(@Valid @RequestBody CriarAvaliacaoRequestDTO dto){
+
+        CriarAvaliacaoResponseDTO criarAvaliacaoResponseDTO = avaliacaoService.criarAvaliacao(dto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(criarAvaliacaoResponseDTO);
+    }
+
+    @PatchMapping("/{id}")
     public ResponseEntity<AtualizarAvaliacaoResponseDTO> atualizarAvaliacao(@PathVariable Long id,
                                                                             @Valid @RequestBody AtualizarAvaliacaoRequestDTO dto) {
 
@@ -34,11 +38,16 @@ public class AvaliacaoController {
     }
 
     @PatchMapping("atualizarStatus/{id}")
-    public ResponseEntity<Void> atualizarStatusAtendimento(@PathVariable Long id,
-                                                           @Valid @RequestBody AtualizarStatusAtendimentoAvaliacaoRequestDTO dto) {
+    public ResponseEntity<Void> concluirAvaliacao(@PathVariable Long id) {
 
-        avaliacaoService.atualizarStatusAtendimento(id, dto);
+        avaliacaoService.concluirAvaliacao(id);
 
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/pagamento")
+    public ResponseEntity<Void> registrarPagamento(@PathVariable Long id) {
+        avaliacaoService.RegistrarPagamento(id);
         return ResponseEntity.noContent().build();
     }
 
