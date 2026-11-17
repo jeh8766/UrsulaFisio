@@ -17,7 +17,7 @@ public record CadastrarPacienteRequestDTO(
 
         @NotNull(message = "O vínculo é obrigatório") Vinculo vinculo,
 
-        @NotNull(message = "O nome do responsavel e obrigatorio!")
+        @NotBlank(message = "O nome do responsavel e obrigatorio!")
         String nomeResponsavel,
 
         @NotBlank(message = "O telefone é obrigatório") @Pattern(regexp = "^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$", message = "Telefone inválido. Informe o DDD e o número.") String telefone,
@@ -32,7 +32,7 @@ public record CadastrarPacienteRequestDTO(
 
         @NotBlank(message = "A rua é obrigatória") String rua,
 
-        @NotNull(message = "O número é obrigatório") Integer numero,
+        @NotNull(message = "O número é obrigatório") String numero,
 
         String complemento) {
 }

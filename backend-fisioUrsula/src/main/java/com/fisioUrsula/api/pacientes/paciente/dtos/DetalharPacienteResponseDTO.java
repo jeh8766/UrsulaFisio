@@ -13,7 +13,7 @@ import com.fisioUrsula.api.shared.utils.DataUtil;
 public record DetalharPacienteResponseDTO(Long id, String nome, LocalDate dataNascimento, Integer idade,
                                           FaixaEtaria faixaEtaria, Vinculo vinculo, String nomeResponsavel, String telefone,
                                           LocalDateTime criadoEm, boolean ativo, String cep, Estado estado, String cidade, String bairro,
-                                          String rua, Integer numero, String complemento, List<String> comorbidades) {
+                                          String rua, String numero, String complemento, List<String> comorbidades) {
 
     public DetalharPacienteResponseDTO(Paciente p) {
         this(p.getId(), p.getNome(), p.getDataNascimento(),

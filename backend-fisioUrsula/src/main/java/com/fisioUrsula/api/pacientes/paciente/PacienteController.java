@@ -2,9 +2,9 @@ package com.fisioUrsula.api.pacientes.paciente;
 
 import java.util.List;
 
+import com.fisioUrsula.api.shared.enums.Vinculo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import com.fisioUrsula.api.pacientes.paciente.dtos.CadastrarPacienteResponseDTO;
@@ -16,7 +16,7 @@ import com.fisioUrsula.api.shared.enums.FaixaEtaria;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/pacientes")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -37,9 +37,10 @@ public class PacienteController {
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) FaixaEtaria faixaEtaria,
             @RequestParam(required = false) Long comorbidadeId,
+            @RequestParam(required = false) Vinculo vinculo,
             @RequestParam(defaultValue = "true") boolean ativo) {
 
-        return ResponseEntity.ok(pacienteService.listar(nome, faixaEtaria, comorbidadeId, ativo));
+        return ResponseEntity.ok(pacienteService.listar(nome, faixaEtaria, comorbidadeId,vinculo, ativo));
     }
 
     @GetMapping("/{id}")

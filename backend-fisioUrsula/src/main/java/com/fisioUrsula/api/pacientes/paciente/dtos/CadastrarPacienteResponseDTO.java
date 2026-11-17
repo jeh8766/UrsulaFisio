@@ -13,7 +13,7 @@ public record CadastrarPacienteResponseDTO(Long id, String nome, LocalDate dataN
                                            FaixaEtaria faixaEtaria, Vinculo vinculo,
                                            String nomeResponsavel, String telefone, LocalDateTime criadoEm, String cep, Estado estado, String cidade,
                                            String bairro, String rua,
-                                           Integer numero, String complemento) {
+                                           String numero, String complemento) {
 
     public CadastrarPacienteResponseDTO(Paciente paciente) {
         this(paciente.getId(), paciente.getNome(), paciente.getDataNascimento(),
