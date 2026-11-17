@@ -145,6 +145,10 @@ public class AtendimentoService {
             throw new IllegalStateException("Atendimento já foi pago!");
         }
 
+        if (atendimento.getAgendamento().getStatusAgendamento() == StatusAgendamento.CANCELADO){
+            throw new IllegalStateException("Não e possivgel registrar um pagamento que o agendamento foi cancelado!");
+        }
+
         atendimento.setStatusPagamento(StatusPagamento.PAGO);
         atendimento.setDataPagamento(LocalDate.now());
 
@@ -182,6 +186,10 @@ public class AtendimentoService {
 
         if (dto.taxaDeslocamento() != null) {
             atendimento.setTaxaDeslocamento(dto.taxaDeslocamento());
+        }
+
+        if (atendimento.getStatusPagamento() == StatusPagamento.PAGO) {
+            throw new IllegalStateException("Não pode alterar valores de um atendimento que ja foi pago!");
         }
 
         atendimentoRepository.save(atendimento);

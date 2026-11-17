@@ -57,6 +57,12 @@ public class AvaliacaoService {
             );
         }
 
+        if (agendamento.getStatusAgendamento() != StatusAgendamento.CONFIRMADO) {
+            throw new IllegalStateException(
+                    "Somente agendamentos confirmados podem gerar avaliaçoes."
+            );
+        }
+
         avaliacao.setAgendamento(agendamento);
 
         Avaliacao avaliacaoSalva = avaliacaoRepository.save(avaliacao);
@@ -81,6 +87,10 @@ public class AvaliacaoService {
             avaliacao.setValor(dto.valor());
         }
 
+        if (avaliacao.getStatusPagamento() == StatusPagamento.PAGO){
+            throw new IllegalStateException("Não pode alterar valores de uma avaliacao que ja foi paga!");
+        }
+
         Avaliacao avaliacaoSalva = avaliacaoRepository.save(avaliacao);
         return new AtualizarAvaliacaoResponseDTO(avaliacaoSalva);
     }
@@ -92,6 +102,10 @@ public class AvaliacaoService {
 
         if (avaliacao.getStatusPagamento() == StatusPagamento.PAGO) {
             throw new IllegalStateException("Essa avaliação ja esta paga!");
+        }
+
+        if (avaliacao.getAgendamento().getStatusAgendamento() == StatusAgendamento.CANCELADO){
+            throw new IllegalStateException("Não e possivgel registrar um pagamento que o agendamento foi cancelado!");
         }
 
         avaliacao.setStatusPagamento(StatusPagamento.PAGO);

@@ -116,7 +116,7 @@ public class FinanceiroService {
         }
 
         BigDecimal resultadoOperacional =
-                totalRecebido.subtract(totalDespesas);
+                totalRecebido.subtract(faturamentoBruto);
 
         long quantidadeAtendimentosNormais = atendimentosRealizados.size();
         long quantidadeAvaliacoes = avaliacoesRealizadas.size();

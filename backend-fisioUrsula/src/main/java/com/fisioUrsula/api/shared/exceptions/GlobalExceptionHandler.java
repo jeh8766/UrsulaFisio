@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> tratarViolacaoIntegridade(DataIntegrityViolationException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("Não foi possível salvar os dados por uma restrição de integridade");
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
