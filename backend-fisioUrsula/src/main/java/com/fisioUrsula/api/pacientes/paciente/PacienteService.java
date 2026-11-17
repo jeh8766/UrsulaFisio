@@ -2,6 +2,7 @@ package com.fisioUrsula.api.pacientes.paciente;
 
 import java.util.List;
 
+import com.fisioUrsula.api.shared.enums.Vinculo;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -37,10 +38,13 @@ public class PacienteService {
     }
 
     @Transactional
-    public List<ListarPacienteResponseDTO> listar(String nome, FaixaEtaria faixaEtaria,
-            Long comorbidadeId, boolean ativo) {
+    public List<ListarPacienteResponseDTO> listar(String nome
+            , FaixaEtaria faixaEtaria
+            , Long comorbidadeId,
+                                                  Vinculo vinculo, boolean ativo
+    ) {
         return pacienteRepository
-                .findAll(PacienteSpecification.filtrar(nome, faixaEtaria, comorbidadeId, ativo),
+                .findAll(PacienteSpecification.filtrar(nome, faixaEtaria, comorbidadeId, vinculo, ativo),
                         Sort.by("nome").ascending())
                 .stream()
                 .map(ListarPacienteResponseDTO::new)

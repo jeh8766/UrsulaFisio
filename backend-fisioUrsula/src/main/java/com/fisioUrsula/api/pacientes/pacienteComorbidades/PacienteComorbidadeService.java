@@ -41,6 +41,10 @@ public class PacienteComorbidadeService {
             throw new IllegalStateException("Não é possível associar uma comorbidade que está inativa!");
         }
 
+        if (!paciente.isAtivo()){
+            throw new IllegalStateException("Não é possivel associar uma comorbidade em um paciente inativo!");
+        }
+
         var jaAssociada = pacienteComorbidadeRepository.findByPaciente_IdAndComorbidade_Id(pacienteId,
                 dto.comorbidadeId());
 

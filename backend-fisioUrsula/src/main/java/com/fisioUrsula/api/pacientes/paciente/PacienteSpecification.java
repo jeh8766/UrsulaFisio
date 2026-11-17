@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fisioUrsula.api.shared.enums.Vinculo;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.fisioUrsula.api.pacientes.pacienteComorbidades.PacienteComorbidade;
@@ -16,12 +17,16 @@ import jakarta.persistence.criteria.Subquery;
 public class PacienteSpecification {
 
     public static Specification<Paciente> filtrar(String nome, FaixaEtaria faixaEtaria,
-                                                  Long comorbidadeId, boolean ativo) {
+                                                  Long comorbidadeId, Vinculo vinculo, boolean ativo) {
 
         return (root, query, cb) -> {
             List<Predicate> filtros = new ArrayList<>();
 
             filtros.add(cb.equal(root.get("ativo"), ativo));
+
+            if (vinculo != null) {
+                filtros.add(cb.equal(root.get("vinculo"), vinculo));
+            }
 
             if (nome != null && !nome.isBlank()) {
                 filtros.add(cb.like(cb.lower(root.get("nome")), "%" + nome.trim().toLowerCase() + "%"));

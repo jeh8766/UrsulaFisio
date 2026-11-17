@@ -52,12 +52,12 @@ public class Endereco implements Serializable {
     private String rua;
 
     @Column(nullable = false, length = 5)
-    private Integer numero;
+    private String numero;
 
     @Column(length = 40)
     private String complemento;
 
-    @OneToOne(mappedBy = "endereco", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "endereco")
     private Paciente paciente;
 
 }
