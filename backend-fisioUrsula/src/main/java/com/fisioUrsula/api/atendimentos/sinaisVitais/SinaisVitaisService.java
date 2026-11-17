@@ -8,8 +8,7 @@ import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.CriarSinaisVitaisReque
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.CriarSinaisVitaisResponseDTO;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.DetalharSinaisVitaisResponseDTO;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
-import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class SinaisVitaisService {
-    public interface SinaisVitaisRepository
-            extends JpaRepository<SinaisVitais, Long> {
-
-        Optional<SinaisVitais> findByAtendimentoId(Long atendimentoId);
-    }
 
     private final SinaisVitaisRepository sinaisVitaisRepository;
     private final AtendimentoRepository atendimentoRepository;
@@ -120,3 +114,4 @@ public class SinaisVitaisService {
         return new DetalharSinaisVitaisResponseDTO(sinaisVitais);
     }
 }
+

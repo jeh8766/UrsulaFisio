@@ -41,7 +41,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
 
         {/* Rotas protegidas */}
-        {/* <Route element={<ProtectedRoute />}> */}
+          <Route element={<ProtectedRoute />}>
 
         <Route path="/dashboard" element={<Dashboard />} />
 
@@ -94,7 +94,7 @@ export default function App() {
 
         <Route path="/exercicios" element={<Exercicios />} />
 
-        {/* </Route> */}
+        </Route>
 
         <Route path="*" element={<NotFound />} />
       </Routes>
