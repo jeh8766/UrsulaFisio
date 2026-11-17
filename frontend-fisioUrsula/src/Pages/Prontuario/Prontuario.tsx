@@ -1,99 +1,493 @@
-import { useMemo, useState } from 'react';
+
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ModuleLayout from "../ModuleLayout/ModuleLayout";
+import ModuleLayout from '../ModuleLayout/ModuleLayout';
 import './Prontuario.css';
 
-type RecordItem = { id: number; name: string; initials: string; date: string; type: string; summary: string; professional: string; status: 'Finalizado' | 'Em andamento' };
-const initialRecords: RecordItem[] = [
-  { id: 1, name: 'Mariana Costa', initials: 'MC', date: '10 out, 2026', type: 'Evolução de sessão', summary: 'Relata redução da dor lombar após os exercícios de mobilidade.', professional: 'Fisioterapeuta', status: 'Finalizado' },
-  { id: 2, name: 'Rafael Oliveira', initials: 'RO', date: '09 out, 2026', type: 'Avaliação inicial', summary: 'Avaliação funcional do joelho e definição de objetivos terapêuticos.', professional: 'Fisioterapeuta', status: 'Finalizado' },
-  { id: 3, name: 'Camila Ferreira', initials: 'CF', date: '08 out, 2026', type: 'Evolução de sessão', summary: 'Realizados exercícios de alongamento cervical e orientação postural.', professional: 'Fisioterapeuta', status: 'Em andamento' },
-  { id: 4, name: 'Beatriz Almeida', initials: 'BA', date: '07 out, 2026', type: 'Plano terapêutico', summary: 'Plano preventivo com exercícios domiciliares e acompanhamento periódico.', professional: 'Fisioterapeuta', status: 'Finalizado' },
-];
+const API_URL = 'http://localhost:8080';
+
+type Agendamento = {
+  id: number;
+  pacienteId: number;
+  nome: string;
+  data: string;
+  horaInicio: string;
+  horaFim: string;
+  tipoAgendamento: 'AVALIACAO' | 'ATENDIMENTO';
+  statusAgendamento: string;
+  atendimentoId: number | null;
+};
+
+type CsrfTokenResponse = {
+  token: string;
+  headerName: string;
+};
+
+async function obterTokenCsrf(): Promise<CsrfTokenResponse> {
+  const response = await fetch(`${API_URL}/csrf`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('Não foi possível obter o token de segurança.');
+  }
+
+  const csrf: CsrfTokenResponse = await response.json();
+
+  if (!csrf.token || !csrf.headerName) {
+    throw new Error('O servidor não retornou um token CSRF válido.');
+  }
+
+  return csrf;
+}
+
+async function obterMensagemErro(response: Response): Promise<string> {
+  try {
+    const erro = await response.json();
+
+    return (
+      erro.message ||
+      erro.mensagem ||
+      erro.error ||
+      'Ocorreu um erro ao comunicar com o servidor.'
+    );
+  } catch {
+    return 'Ocorreu um erro ao comunicar com o servidor.';
+  }
+}
+
+function formatarDataApi(data: Date): string {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
+
+  return `${ano}-${mes}-${dia}`;
+}
+
+function formatarData(data: string): string {
+  return new Date(`${data}T12:00:00`).toLocaleDateString('pt-BR');
+}
+
+function formatarHora(hora: string): string {
+  return hora?.substring(0, 5) ?? '';
+}
 
 export default function Prontuarios() {
   const navigate = useNavigate();
-  const [records] = useState<RecordItem[]>(initialRecords);
-  const [search, setSearch] = useState('');
-  const [kind, setKind] = useState('Todos os tipos');
+
+  const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+  const [agendamentoSelecionado, setAgendamentoSelecionado] =
+    useState<Agendamento | null>(null);
+
+  const [valor, setValor] = useState('');
+  const [taxaDeslocamento, setTaxaDeslocamento] = useState('0');
+
+  const [busca, setBusca] = useState('');
+  const [filtro, setFiltro] = useState('TODOS');
+
+  const [carregando, setCarregando] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+
+  const [erro, setErro] = useState('');
   const [notice, setNotice] = useState('');
 
-  const filtered = useMemo(() => 
-    records.filter(r => 
-      (r.name.toLowerCase().includes(search.toLowerCase()) || r.summary.toLowerCase().includes(search.toLowerCase())) && 
-      (kind === 'Todos os tipos' || r.type === kind)
-    ), 
-    [records, search, kind]
+  async function carregarAgendamentos() {
+    try {
+      setCarregando(true);
+      setErro('');
+      setNotice('');
+
+      const hoje = formatarDataApi(new Date());
+
+      const parametros = new URLSearchParams({
+        inicio: hoje,
+        fim: hoje,
+      });
+
+      const response = await fetch(
+        `${API_URL}/agendamentos?${parametros.toString()}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(await obterMensagemErro(response));
+      }
+
+      const dados: Agendamento[] = await response.json();
+
+      const confirmados = dados.filter(
+        (item) => item.statusAgendamento === 'CONFIRMADO'
+      );
+
+      setAgendamentos(confirmados);
+      setAgendamentoSelecionado(null);
+
+      if (confirmados.length === 0) {
+        setNotice('Não existem agendamentos confirmados para hoje.');
+      }
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível carregar os agendamentos.'
+      );
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  useEffect(() => {
+    carregarAgendamentos();
+  }, []);
+
+  const agendamentosFiltrados = useMemo(() => {
+    return agendamentos.filter((item) => {
+      const correspondeBusca =
+        item.nome.toLowerCase().includes(busca.toLowerCase()) ||
+        String(item.id).includes(busca);
+
+      const correspondeTipo =
+        filtro === 'TODOS' || item.tipoAgendamento === filtro;
+
+      return correspondeBusca && correspondeTipo;
+    });
+  }, [agendamentos, busca, filtro]);
+
+  const atendimentosConfirmados = agendamentos.filter(
+    (item) => item.tipoAgendamento === 'ATENDIMENTO'
   );
 
+  const avaliacoesConfirmadas = agendamentos.filter(
+    (item) => item.tipoAgendamento === 'AVALIACAO'
+  );
+
+  function selecionarAgendamento(item: Agendamento) {
+    setErro('');
+    setNotice('');
+
+    if (item.tipoAgendamento !== 'ATENDIMENTO') {
+      setAgendamentoSelecionado(null);
+      setErro(
+        'Este agendamento é uma avaliação. Ele deve seguir o fluxo próprio de avaliação.'
+      );
+      return;
+    }
+
+    // Verifica se o atendimento já foi criado anteriormente.
+    if (item.atendimentoId != null) {
+      navigate(`/atendimento/${item.atendimentoId}`);
+      return;
+    }
+
+    // Só abre o formulário financeiro quando ainda não existe atendimento.
+    setAgendamentoSelecionado(item);
+    setValor('');
+    setTaxaDeslocamento('0');
+  }
+
+  async function iniciarAtendimento() {
+    if (!agendamentoSelecionado) {
+      setErro('Selecione um agendamento de atendimento.');
+      return;
+    }
+
+    const valorNumerico = Number(valor);
+    const taxaNumerica = Number(taxaDeslocamento);
+
+    if (
+      valor.trim() === '' ||
+      !Number.isFinite(valorNumerico) ||
+      valorNumerico < 0 ||
+      !Number.isFinite(taxaNumerica) ||
+      taxaNumerica < 0
+    ) {
+      setErro('Informe valores financeiros válidos.');
+      return;
+    }
+
+    try {
+      setSalvando(true);
+      setErro('');
+      setNotice('');
+
+      const csrf = await obterTokenCsrf();
+
+      const response = await fetch(`${API_URL}/atendimentos`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          [csrf.headerName]: csrf.token,
+        },
+        body: JSON.stringify({
+          valor: valorNumerico,
+          taxaDeslocamento: taxaNumerica,
+          agendamentoId: agendamentoSelecionado.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await obterMensagemErro(response));
+      }
+
+      const atendimento = await response.json();
+
+      if (!atendimento.id) {
+        throw new Error(
+          'O atendimento foi criado, mas a API não retornou seu identificador.'
+        );
+      }
+
+      navigate(`/atendimento/${atendimento.id}`);
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível iniciar o atendimento.'
+      );
+    } finally {
+      setSalvando(false);
+    }
+  }
+
   return (
-    <ModuleLayout title="Prontuários" subtitle="Registre avaliações, evoluções e planos de tratamento com organização." eyebrow="ACOMPANHAMENTO CLÍNICO">
+    <ModuleLayout
+      title="Prontuários"
+      subtitle="Acesse os agendamentos confirmados e inicie os registros clínicos."
+      eyebrow="ACOMPANHAMENTO CLÍNICO"
+    >
       <div className="records-info-banner">
         <span className="records-info-symbol">✳</span>
+
         <div>
-          <strong>Histórico clínico organizado</strong>
-          <p>Reúna os registros de cada atendimento para acompanhar a evolução dos pacientes.</p>
+          <strong>Fluxo de atendimento</strong>
+          <p>
+            Selecione um atendimento confirmado para criar seu registro
+            clínico. As avaliações seguem um fluxo separado.
+          </p>
         </div>
-        <span className="records-banner-lock">▣ Dados sensíveis</span>
+
+        <span className="records-banner-lock">▣ Dados clínicos</span>
       </div>
 
       <div className="records-stat-row">
-        <article><small>Registros na lista</small><strong>{records.length}</strong><span>Históricos demonstrativos</span></article>
-        <article><small>Finalizados</small><strong>{records.filter(r => r.status === 'Finalizado').length}</strong><span>Registros concluídos</span></article>
-        <article><small>Em andamento</small><strong>{records.filter(r => r.status === 'Em andamento').length}</strong><span>Precisam de acompanhamento</span></article>
+        <article>
+          <small>Agendamentos confirmados</small>
+          <strong>{agendamentos.length}</strong>
+          <span>Para hoje</span>
+        </article>
+
+        <article>
+          <small>Atendimentos</small>
+          <strong>{atendimentosConfirmados.length}</strong>
+          <span>Podem abrir ou iniciar um atendimento</span>
+        </article>
+
+        <article>
+          <small>Avaliações</small>
+          <strong>{avaliacoesConfirmadas.length}</strong>
+          <span>Fluxo próprio de avaliação</span>
+        </article>
       </div>
 
       <section className="records-panel">
         <div className="records-panel-heading">
           <div>
-            <h2>Registros clínicos</h2>
-            <p>Pesquise e consulte as anotações registradas.</p>
+            <h2>Agendamentos confirmados</h2>
+            <p>
+              Escolha um atendimento para iniciar ou continuar o registro clínico.
+            </p>
           </div>
-          <button className="records-primary" onClick={() => navigate('/atendimento')}>
-            + Novo registro
+
+          <button
+            type="button"
+            className="records-primary"
+            onClick={carregarAgendamentos}
+            disabled={carregando || salvando}
+          >
+            {carregando ? 'Atualizando...' : 'Atualizar lista'}
           </button>
         </div>
 
-        {notice && <p className="records-notice" role="status">{notice}</p>}
+        {erro && (
+          <p className="records-notice" role="alert">
+            {erro}
+          </p>
+        )}
+
+        {notice && (
+          <p className="records-notice" role="status">
+            {notice}
+          </p>
+        )}
 
         <div className="records-toolbar">
           <label className="records-search">
             <span>⌕</span>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar paciente ou conteúdo..." />
+            <input
+              value={busca}
+              onChange={(evento) => setBusca(evento.target.value)}
+              placeholder="Buscar paciente ou número do agendamento..."
+            />
           </label>
-          <select value={kind} onChange={e => setKind(e.target.value)} aria-label="Filtrar por tipo">
-            <option>Todos os tipos</option>
-            <option>Evolução de sessão</option>
-            <option>Avaliação inicial</option>
-            <option>Plano terapêutico</option>
+
+          <select
+            value={filtro}
+            onChange={(evento) => setFiltro(evento.target.value)}
+            aria-label="Filtrar por tipo"
+          >
+            <option value="TODOS">Todos os tipos</option>
+            <option value="ATENDIMENTO">Atendimentos</option>
+            <option value="AVALIACAO">Avaliações</option>
           </select>
         </div>
 
         <div className="records-list">
-          {filtered.map(record => (
-            <article className="record-card" key={record.id}>
-              <div className="record-avatar">{record.initials}</div>
+          {agendamentosFiltrados.map((item) => (
+            <article className="record-card" key={item.id}>
+              <div className="record-avatar">
+                {item.nome
+                  .split(' ')
+                  .slice(0, 2)
+                  .map((parte) => parte[0])
+                  .join('')
+                  .toUpperCase()}
+              </div>
+
               <div className="record-main">
                 <div className="record-meta">
-                  <span>{record.type}</span>
+                  <span>
+                    {item.tipoAgendamento === 'ATENDIMENTO'
+                      ? 'Atendimento'
+                      : 'Avaliação'}
+                  </span>
                   <i>•</i>
-                  <time>{record.date}</time>
+                  <time>{formatarData(item.data)}</time>
                 </div>
-                <h3>{record.name}</h3>
-                <p>{record.summary}</p>
+
+                <h3>{item.nome}</h3>
+
+                <p>
+                  Horário: {formatarHora(item.horaInicio)} às{' '}
+                  {formatarHora(item.horaFim)}
+                </p>
+
                 <div className="record-bottom">
-                  <span>Responsável: {record.professional}</span>
-                  <span className={`record-status ${record.status === 'Finalizado' ? 'done' : 'progress'}`}>{record.status}</span>
+                  <span>Agendamento #{item.id}</span>
+                  <span className="record-status done">Confirmado</span>
                 </div>
               </div>
-              <button className="record-more" title="Detalhes do registro" aria-label={`Detalhes de ${record.name}`} onClick={() => setNotice(`Registro de ${record.name}: ${record.summary}`)}>···</button>
+
+              <button
+                type="button"
+                className="records-primary"
+                onClick={() => selecionarAgendamento(item)}
+                disabled={salvando}
+              >
+                {item.tipoAgendamento !== 'ATENDIMENTO'
+                  ? 'Avaliação'
+                  : item.atendimentoId != null
+                    ? 'Abrir atendimento'
+                    : 'Iniciar atendimento'}
+              </button>
             </article>
           ))}
-          {filtered.length === 0 && <div className="records-empty">Nenhum registro encontrado.</div>}
+
+          {agendamentosFiltrados.length === 0 && !carregando && (
+            <div className="records-empty">
+              Nenhum agendamento encontrado com esse filtro.
+            </div>
+          )}
         </div>
       </section>
 
-      <p className="records-disclaimer">Demonstração de interface. Não utilize estes dados de exemplo para decisões clínicas. Os registros ainda não são persistidos em banco de dados.</p>
+      {agendamentoSelecionado && (
+        <section className="records-panel">
+          <div className="records-panel-heading">
+            <div>
+              <h2>Iniciar atendimento</h2>
+              <p>
+                Confira o paciente e informe os valores iniciais do
+                atendimento.
+              </p>
+            </div>
+          </div>
+
+          <div className="atendimento-grid">
+            <div className="atendimento-info-card">
+              <span>Paciente</span>
+              <strong>{agendamentoSelecionado.nome}</strong>
+              <small>ID #{agendamentoSelecionado.pacienteId}</small>
+            </div>
+
+            <div className="atendimento-info-card">
+              <span>Data e horário</span>
+              <strong>{formatarData(agendamentoSelecionado.data)}</strong>
+              <small>
+                {formatarHora(agendamentoSelecionado.horaInicio)} às{' '}
+                {formatarHora(agendamentoSelecionado.horaFim)}
+              </small>
+            </div>
+
+            <label className="atendimento-field">
+              Valor do atendimento (R$)
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={valor}
+                onChange={(evento) => setValor(evento.target.value)}
+                placeholder="Ex.: 120,00"
+                disabled={salvando}
+              />
+            </label>
+
+            <label className="atendimento-field">
+              Taxa de deslocamento (R$)
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={taxaDeslocamento}
+                onChange={(evento) =>
+                  setTaxaDeslocamento(evento.target.value)
+                }
+                placeholder="Ex.: 20,00"
+                disabled={salvando}
+              />
+            </label>
+          </div>
+
+          <div className="atendimento-actions">
+            <button
+              type="button"
+              className="atendimento-button-secondary"
+              onClick={() => setAgendamentoSelecionado(null)}
+              disabled={salvando}
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              className="atendimento-button-primary"
+              onClick={iniciarAtendimento}
+              disabled={salvando}
+            >
+              {salvando ? 'Criando atendimento...' : 'Criar atendimento'}
+            </button>
+          </div>
+        </section>
+      )}
+
+      <p className="records-disclaimer">
+        Os dados exibidos são carregados da API. O atendimento só é criado
+        depois da confirmação no botão acima.
+      </p>
     </ModuleLayout>
   );
 }

@@ -7,11 +7,9 @@
     <list default="true" id="11b46df1-3b4a-46d5-8312-5997593d4d90" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/agendamentos/dtos/AgendamentoAgendaResponseDTO.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/agendamentos/dtos/AtualizarAgendamentoRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/atendimentos/atendimento/dtos/AlterarStatusPagamentoRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/planoTratamento/planoTratamento/PlanoTratamento.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/avaliacoes/planoTratamento/planoTratamento/PlanoTratamentoRepository.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/financeiro/despesas/FinanceiroController.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/financeiro/despesas/FinanceiroService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/financeiro/despesas/dtos/RecebimentoResponseDTO.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/financeiro/despesas/dtos/ResumoFinanceiroResponseDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>

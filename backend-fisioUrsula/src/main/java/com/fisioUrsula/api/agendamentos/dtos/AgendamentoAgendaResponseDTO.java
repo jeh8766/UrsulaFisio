@@ -1,5 +1,6 @@
 
-        package com.fisioUrsula.api.agendamentos.dtos;
+
+package com.fisioUrsula.api.agendamentos.dtos;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -15,5 +16,6 @@ public record AgendamentoAgendaResponseDTO(
         LocalTime horaInicio,
         LocalTime horaFim,
         TipoAgendamento tipoAgendamento,
-        StatusAgendamento statusAgendamento
+        StatusAgendamento statusAgendamento,
+        Long atendimentoId
 ) {}

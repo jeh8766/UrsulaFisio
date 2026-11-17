@@ -1,3 +1,4 @@
+
 package com.fisioUrsula.api.avaliacoes.Exercicios.exercicios.dtos;
 
 import com.fisioUrsula.api.avaliacoes.Exercicios.exercicios.Exercicio;
@@ -7,10 +8,17 @@ public record DetalharExercicioResponseDTO(
         Long id,
         String nome,
         TipoExercicio tipo,
-        String descricao) {
+        String descricao,
+        boolean ativo
+) {
 
     public DetalharExercicioResponseDTO(Exercicio exercicio) {
-        this(exercicio.getId(), exercicio.getNome(), exercicio.getTipoExercicio(),
-                exercicio.getDescricao());
+        this(
+                exercicio.getId(),
+                exercicio.getNome(),
+                exercicio.getTipoExercicio(),
+                exercicio.getDescricao(),
+                exercicio.isAtivo()
+        );
     }
 }

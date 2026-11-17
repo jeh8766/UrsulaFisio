@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -8,15 +9,17 @@ import Financeiro from "./Pages/Financeiro/Financeiro";
 import ModuleLayout from "./Pages/ModuleLayout/ModuleLayout";
 import Prontuario from "./Pages/Prontuario/Prontuario";
 import CadastroPaciente from "./Pages/Paciente/CadastroPaciente";
-import Atendimento from "./Pages/Prontuario/Atendimento";
+import AtendimentoDetalhe from "./Pages/Prontuario/AtendimentoDetalhe";
 import Paciente from "./Pages/Paciente/Paciente";
 import Despesas from "./Pages/Financeiro/Despesas";
 import EditarAgendamento from "./Pages/Agenda/EditarAgendamento";
 import CadastroComorbidade from "./Pages/Paciente/CadastroComorbidade";
 import AssociarComorbidade from "./Pages/Paciente/AssociarComorbidade";
 import Relatorios from "./Pages/Financeiro/Relatorios";
-import "./App.css";
 import Agendamentos from "./Pages/Agenda/Agendamentos";
+import Exercicios from "./Pages/Exercicio/Exercicios";
+
+import "./App.css";
 
 function NotFound() {
   return (
@@ -37,36 +40,61 @@ export default function App() {
 
         <Route path="/login" element={<Login />} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/agenda" element={<Agenda />} />
-          <Route path="/prontuarios" element={<Prontuario />} />
-          <Route path="/financeiro" element={<Financeiro />} />
-          <Route path="/paciente" element={<Paciente />} />
-          <Route path="/cadastro-paciente" element={<CadastroPaciente />} />
-          <Route path="/atendimento" element={<Atendimento />} />
-          <Route path="/despesas" element={<Despesas />} />
-          <Route path="/relatorios" element={<Relatorios />} />
-          <Route path="/cadastro-comorbidade" element={<CadastroComorbidade />} />
-          <Route path="/pacientes/:pacienteId/comorbidades"
-        element={<AssociarComorbidade />}
-/>
-          <Route
-            path="/modulo/:modulo"
-            element={
-              <ModuleLayout
-                title="Módulo"
-                subtitle="Área de trabalho do módulo selecionado."
-                eyebrow="MÓDULO EM DESENVOLVIMENTO"
-              >
-                <p>Conteúdo do módulo em desenvolvimento.</p>
-              </ModuleLayout>
-            }
-          />
+        {/* Rotas protegidas */}
+        {/* <Route element={<ProtectedRoute />}> */}
 
-          <Route path="/agendamento" element={<Agendamentos />} />
-          <Route path="/editar-agendamento" element={<EditarAgendamento />} />
-        </Route>
+        <Route path="/dashboard" element={<Dashboard />} />
+
+        <Route path="/agenda" element={<Agenda />} />
+
+        <Route path="/prontuarios" element={<Prontuario />} />
+
+        <Route path="/financeiro" element={<Financeiro />} />
+
+        <Route path="/paciente" element={<Paciente />} />
+
+        <Route path="/cadastro-paciente" element={<CadastroPaciente />} />
+
+        {/* Detalhes de um atendimento específico */}
+        <Route
+          path="/atendimento/:id"
+          element={<AtendimentoDetalhe />}
+        />
+
+        <Route path="/despesas" element={<Despesas />} />
+
+        <Route path="/relatorios" element={<Relatorios />} />
+
+        <Route
+          path="/cadastro-comorbidade"
+          element={<CadastroComorbidade />}
+        />
+
+        <Route
+          path="/pacientes/:pacienteId/comorbidades"
+          element={<AssociarComorbidade />}
+        />
+
+        <Route
+          path="/modulo/:modulo"
+          element={
+            <ModuleLayout
+              title="Módulo"
+              subtitle="Área de trabalho do módulo selecionado."
+              eyebrow="MÓDULO EM DESENVOLVIMENTO"
+            >
+              <p>Conteúdo do módulo em desenvolvimento.</p>
+            </ModuleLayout>
+          }
+        />
+
+        <Route path="/agendamento" element={<Agendamentos />} />
+
+        <Route path="/editar-agendamento" element={<EditarAgendamento />} />
+
+        <Route path="/exercicios" element={<Exercicios />} />
+
+        {/* </Route> */}
 
         <Route path="*" element={<NotFound />} />
       </Routes>

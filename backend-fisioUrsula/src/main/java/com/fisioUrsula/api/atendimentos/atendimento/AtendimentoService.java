@@ -30,56 +30,56 @@ public class AtendimentoService {
     private final AgendamentoRepository agendamentoRepository;
     private final AtendimentoExercicioService atendimentoExercicioService;
 
+
     @Transactional
-    public CriarAtendimentoResponseDTO criarAtendimento(CriarAtendimentoRequestDTO criarAtendimentoRequestDTO) {
-
-        Atendimento atendimento = new Atendimento();
-
-        atendimento.setValor(criarAtendimentoRequestDTO.valor());
-        atendimento.setTaxaDeslocamento(criarAtendimentoRequestDTO.taxaDeslocamento());
-        atendimento.setStatusAtendimento(StatusAtendimento.AGENDADO);
-        atendimento.setStatusPagamento(StatusPagamento.PENDENTE);
-
-        Agendamento agendamentoAtendimento = agendamentoRepository
-                .findById(criarAtendimentoRequestDTO.agendamentoId())
+    public CriarAtendimentoResponseDTO criarAtendimento(
+            CriarAtendimentoRequestDTO dto
+    ) {
+        Agendamento agendamento = agendamentoRepository
+                .findById(dto.agendamentoId())
                 .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Id de agendamento não existe!"
                 ));
 
-        if (agendamentoAtendimento.getTipoAgendamento() != TipoAgendamento.ATENDIMENTO) {
+        if (agendamento.getTipoAgendamento() != TipoAgendamento.ATENDIMENTO) {
             throw new IllegalStateException(
                     "O agendamento informado não é do tipo atendimento."
             );
         }
 
-        if (atendimentoRepository.existsByAgendamento_Id(agendamentoAtendimento.getId())) {
+        if (agendamento.getStatusAgendamento() != StatusAgendamento.CONFIRMADO) {
             throw new IllegalStateException(
+                    "Somente agendamentos confirmados podem gerar atendimentos."
+            );
+        }
+
+        if (atendimentoRepository.existsByAgendamento_Id(agendamento.getId())) {
+            throw new RegistroDuplicadoException(
                     "Esse agendamento já possui um atendimento registrado!"
             );
         }
 
-        atendimento.setAgendamento(agendamentoAtendimento);
+        Atendimento atendimento = new Atendimento();
 
-        SinaisVitais sinaisVitais = sinaisVitaisRepository
-                .findById(criarAtendimentoRequestDTO.sinaisVitaisId())
-                .orElseThrow(() -> new RegistroNaoEncontradoException(
-                        "Id de sinais vitais não existe!"
-                ));
+        atendimento.setAgendamento(agendamento);
+        atendimento.setValor(dto.valor());
+        atendimento.setTaxaDeslocamento(dto.taxaDeslocamento());
+        atendimento.setStatusAtendimento(StatusAtendimento.AGENDADO);
+        atendimento.setStatusPagamento(StatusPagamento.PENDENTE);
 
-        atendimento.setSinaisVitais(sinaisVitais);
-
-        Atendimento atendimentoSalvo = atendimentoRepository.save(atendimento);
+        Atendimento salvo = atendimentoRepository.save(atendimento);
 
         return new CriarAtendimentoResponseDTO(
-                atendimentoSalvo.getId(),
-                atendimentoSalvo.getIntercorrencia(),
-                atendimentoSalvo.getEvolucao(),
-                atendimentoSalvo.getValor(),
-                atendimentoSalvo.getTaxaDeslocamento(),
-                atendimentoSalvo.getStatusAtendimento(),
-                atendimentoSalvo.getStatusPagamento()
+                salvo.getId(),
+                salvo.getIntercorrencia(),
+                salvo.getEvolucao(),
+                salvo.getValor(),
+                salvo.getTaxaDeslocamento(),
+                salvo.getStatusAtendimento(),
+                salvo.getStatusPagamento()
         );
     }
+
 
     public DetalharAtendimentoResponseDTO detalharAtendimento(Long id) {
 

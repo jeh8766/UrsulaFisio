@@ -57,8 +57,11 @@ public class Atendimento {
     @JoinColumn(name = "agendamento_id", nullable = false, unique = true)
     private Agendamento agendamento;
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "sinais_vitais_id", nullable = false, unique = true)
+    @OneToOne(optional = true)
+    @JoinColumn(
+            name = "sinais_vitais_id",
+            unique = true
+    )
     private SinaisVitais sinaisVitais;
 
     @OneToMany(

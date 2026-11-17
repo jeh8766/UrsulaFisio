@@ -17,7 +17,14 @@ type AtendimentoApi = {
   taxaDeslocamento: number | string | null;
   statusAtendimento: string;
   statusPagamento: StatusPagamento;
-  tipoAgendamento?: 'AVALIACAO' | 'ATENDIMENTO';
+};
+
+type RecebimentoApi = {
+  atendimentoId: number;
+  dataPagamento: string;
+  pacienteNome: string;
+  valor: number | string;
+  taxaDeslocamento: number | string;
 };
 
 type DespesaApi = {
@@ -62,7 +69,10 @@ type RespostaCsrf = {
   token: string;
 };
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = (
+  import.meta.env.VITE_API_URL || 'http://localhost:8080'
+).replace(/\/$/, '');
+
 const API_CSRF_URL = `${API_BASE}/csrf`;
 
 const obterDataLocal = (data: Date) =>
@@ -79,7 +89,6 @@ const obterInicioMes = (mes: string) => `${mes}-01`;
 
 const obterFimMes = (mes: string) => {
   const [ano, numeroMes] = mes.split('-').map(Number);
-
   return obterDataLocal(new Date(ano, numeroMes, 0));
 };
 
@@ -191,6 +200,7 @@ export default function Financeiro() {
 
   const [resumo, setResumo] = useState<ResumoFinanceiro | null>(null);
   const [atendimentos, setAtendimentos] = useState<AtendimentoApi[]>([]);
+  const [recebimentos, setRecebimentos] = useState<RecebimentoApi[]>([]);
   const [despesas, setDespesas] = useState<DespesaApi[]>([]);
 
   const [busca, setBusca] = useState('');
@@ -225,7 +235,7 @@ export default function Financeiro() {
         fim,
       });
 
-      const [dadosResumo, dadosAtendimentos, dadosDespesas] =
+      const [dadosResumo, dadosAtendimentos, dadosRecebimentos, dadosDespesas] =
         await Promise.all([
           requisicao<ResumoFinanceiro>(
             `${API_BASE}/financeiro/resumo?${parametrosResumo.toString()}`,
@@ -235,6 +245,10 @@ export default function Financeiro() {
             `${API_BASE}/atendimentos/data?${parametrosAtendimentos.toString()}`,
           ),
 
+          requisicao<RecebimentoApi[]>(
+            `${API_BASE}/financeiro/recebimentos?${parametrosResumo.toString()}`,
+          ),
+
           requisicao<DespesaApi[]>(
             `${API_BASE}/despesas/periodo?${parametrosDespesas.toString()}`,
           ),
@@ -242,6 +256,7 @@ export default function Financeiro() {
 
       setResumo(dadosResumo);
       setAtendimentos(dadosAtendimentos ?? []);
+      setRecebimentos(dadosRecebimentos ?? []);
       setDespesas(dadosDespesas ?? []);
     } catch (error) {
       setErro(
@@ -292,25 +307,38 @@ export default function Financeiro() {
   }
 
   const movimentacoes = useMemo<RegistroFinanceiro[]>(() => {
+    const recebimentosPorAtendimento = new Map(
+      recebimentos.map((recebimento) => [
+        recebimento.atendimentoId,
+        recebimento,
+      ]),
+    );
+
     const entradas: RegistroFinanceiro[] = atendimentos.map(
       (atendimento) => {
-        const ehAvaliacao =
-          atendimento.tipoAgendamento === 'AVALIACAO';
+        const recebimento = recebimentosPorAtendimento.get(atendimento.id);
 
         const valorTotal =
           numero(atendimento.valor) +
           numero(atendimento.taxaDeslocamento);
+
+        /*
+         * Se o pagamento foi realizado, usamos a data real do recebimento.
+         * Se ainda está pendente, usamos a data do atendimento.
+         */
+        const dataMovimentacao =
+          atendimento.statusPagamento === 'PAGO' && recebimento
+            ? recebimento.dataPagamento
+            : atendimento.data;
 
         return {
           chave: `atendimento-${atendimento.id}`,
           id: atendimento.id,
           atendimentoId: atendimento.id,
           statusPagamento: atendimento.statusPagamento,
-          descricao: ehAvaliacao
-            ? 'Avaliação fisioterapêutica'
-            : 'Sessão de fisioterapia',
+          descricao: 'Atendimento fisioterapêutico',
           origem: atendimento.pacienteNome || 'Paciente não informado',
-          data: atendimento.data,
+          data: dataMovimentacao,
           valor: valorTotal,
           status:
             atendimento.statusPagamento === 'PAGO'
@@ -335,7 +363,7 @@ export default function Financeiro() {
     return [...entradas, ...saidas].sort((a, b) =>
       b.data.localeCompare(a.data),
     );
-  }, [atendimentos, despesas]);
+  }, [atendimentos, recebimentos, despesas]);
 
   const movimentacoesFiltradas = useMemo(() => {
     const texto = busca.trim().toLowerCase();
@@ -432,7 +460,7 @@ export default function Financeiro() {
             </div>
             <strong>{formatarMoeda(totalRecebido)}</strong>
             <small>
-              {resumo?.quantidadePagos ?? 0} pagamentos realizados no período
+              Recebimentos registrados no mês
             </small>
           </article>
 
@@ -462,7 +490,7 @@ export default function Financeiro() {
               <span className="finance-icon received">=</span>
             </div>
             <strong>{formatarMoeda(resultadoOperacional)}</strong>
-            <small>Faturamento bruto menos despesas</small>
+            <small>Recebimentos menos despesas</small>
           </article>
         </section>
 
@@ -471,7 +499,7 @@ export default function Financeiro() {
             <div>
               <h2>Movimentações</h2>
               <p>
-                Atendimentos, avaliações e despesas do período selecionado.
+                Atendimentos, recebimentos e despesas do período selecionado.
               </p>
             </div>
 
@@ -501,7 +529,7 @@ export default function Financeiro() {
               aria-label="Filtrar movimentações"
             >
               <option value="TODOS">Todas as movimentações</option>
-              <option value="ENTRADAS">Atendimentos e avaliações</option>
+              <option value="ENTRADAS">Atendimentos e recebimentos</option>
               <option value="RECEBIDO">Recebidos</option>
               <option value="PENDENTE">Pendentes</option>
               <option value="DESPESAS">Despesas</option>
@@ -632,9 +660,10 @@ export default function Financeiro() {
         </section>
 
         <p className="finance-disclaimer">
-          O resultado operacional considera o faturamento bruto menos as
-          despesas registradas. Ele não representa o saldo disponível em caixa,
-          pois as despesas não possuem controle de pagamento.
+          O faturamento bruto considera os atendimentos realizados no período.
+          O total recebido considera a data em que os pagamentos foram
+          registrados. O resultado operacional é calculado subtraindo as
+          despesas dos recebimentos do período.
         </p>
       </div>
     </ModuleLayout>

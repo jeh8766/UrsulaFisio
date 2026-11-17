@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fisioUrsula.api.financeiro.despesas.dtos.RecebimentoResponseDTO;
 import com.fisioUrsula.api.financeiro.despesas.dtos.ResumoFinanceiroResponseDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,8 +94,7 @@ public class FinanceiroService {
         }
 
         BigDecimal resultadoOperacional =
-                faturamentoBruto.subtract(totalDespesas);
-
+                totalRecebido.subtract(totalDespesas);
         return new ResumoFinanceiroResponseDTO(
                 inicio,
                 fim,
@@ -110,6 +110,21 @@ public class FinanceiroService {
                 quantidadeAtendimentosNormais
         );
     }
+
+    @Transactional(readOnly = true)
+    public List<RecebimentoResponseDTO> listarRecebimentos(
+            LocalDate inicio,
+            LocalDate fim
+    ) {
+        validarPeriodo(inicio, fim);
+
+        return atendimentoRepository
+                .findByDataPagamentoBetween(inicio, fim)
+                .stream()
+                .map(RecebimentoResponseDTO::new)
+                .toList();
+    }
+
 
     private void validarPeriodo(LocalDate inicio, LocalDate fim) {
         if (inicio == null || fim == null) {

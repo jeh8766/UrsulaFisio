@@ -58,8 +58,9 @@ public record DetalharAtendimentoResponseDTO(
                 atendimento.getAgendamento()
                         .getPaciente()
                         .getNome(),
-
-                atendimento.getSinaisVitais().getId()
+                atendimento.getSinaisVitais() != null
+                        ? atendimento.getSinaisVitais().getId()
+                        : null
         );
     }
 }

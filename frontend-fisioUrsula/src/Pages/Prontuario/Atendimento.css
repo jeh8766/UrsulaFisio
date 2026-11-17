@@ -371,3 +371,382 @@
         width: 100%;
     }
 }
+
+/* ==========================================================================
+   1. CABEÇALHO E IDENTIFICAÇÃO DO ATENDIMENTO
+   ========================================================================== */
+
+.atendimento-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.atendimento-header h1 {
+  margin: 0 0 6px;
+  color: #243c39;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.atendimento-header p {
+  margin: 0;
+  color: #819087;
+  font-size: 13px;
+}
+
+.atendimento-status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 7px 13px;
+  border-radius: 20px;
+  background: #fff3df;
+  color: #a77b34;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.atendimento-status.concluido {
+  background: #e8f5ec;
+  color: #438163;
+}
+
+/* ==========================================================================
+   2. SINAIS VITAIS
+   ========================================================================== */
+
+.atendimento-vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.atendimento-vitals-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 17px;
+  background: #f7f9f6;
+  border: 1px solid #e5ebe5;
+  border-radius: 12px;
+}
+
+.atendimento-vitals-card span {
+  color: #829087;
+  font-size: 12px;
+}
+
+.atendimento-vitals-card strong {
+  color: #30443a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.atendimento-vitals-card small {
+  color: #87938a;
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   3. EXERCÍCIOS SELECIONADOS
+   ========================================================================== */
+
+.atendimento-exercises-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.atendimento-exercises-header h3 {
+  margin: 0;
+  color: #30443a;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.atendimento-exercises-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.atendimento-exercise-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 17px;
+  background: #f7f9f6;
+  border: 1px solid #e5ebe5;
+  border-radius: 12px;
+  transition: border-color 0.2s;
+}
+
+.atendimento-exercise-item:hover {
+  border-color: #cbded0;
+}
+
+.atendimento-exercise-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.atendimento-exercise-info strong {
+  color: #30443a;
+  font-size: 13px;
+}
+
+.atendimento-exercise-info span {
+  color: #819087;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.atendimento-exercise-remove {
+  flex-shrink: 0;
+  padding: 8px 11px;
+  color: #a34b4b;
+  background: #fff5f4;
+  border: 1px solid #f0d8d5;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.atendimento-exercise-remove:hover {
+  background: #ffe9e6;
+}
+
+.atendimento-exercise-empty {
+  padding: 25px;
+  color: #89978f;
+  background: #f9faf8;
+  border: 1px dashed #dce5dd;
+  border-radius: 12px;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ==========================================================================
+   4. MODAL DE SELEÇÃO DE EXERCÍCIOS
+   ========================================================================== */
+
+.atendimento-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgb(25 42 33 / 45%);
+  backdrop-filter: blur(3px);
+}
+
+.atendimento-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 650px;
+  max-height: 85vh;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e5ebe5;
+  border-radius: 18px;
+  box-shadow: 0 15px 50px rgb(0 0 0 / 15%);
+}
+
+.atendimento-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 24px;
+  border-bottom: 1px solid #edf0eb;
+}
+
+.atendimento-modal-header h2 {
+  margin: 0 0 5px;
+  color: #243c39;
+  font-size: 18px;
+}
+
+.atendimento-modal-header p {
+  margin: 0;
+  color: #819087;
+  font-size: 12px;
+}
+
+.atendimento-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: #65776b;
+  background: #f4f7f3;
+  border: none;
+  border-radius: 9px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.atendimento-modal-close:hover {
+  background: #e9f0e9;
+}
+
+.atendimento-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 24px;
+  overflow-y: auto;
+}
+
+.atendimento-modal-search {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 14px;
+  color: #30443a;
+  background: #fcfdfb;
+  border: 1px solid #dce5dd;
+  border-radius: 10px;
+  outline: none;
+  font: 12px 'DM Sans', sans-serif;
+}
+
+.atendimento-modal-search:focus {
+  border-color: #6ca681;
+  box-shadow: 0 0 0 3px rgb(108 166 129 / 13%);
+}
+
+.atendimento-modal-exercise {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 15px;
+  background: #fff;
+  border: 1px solid #e5ebe5;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.atendimento-modal-exercise:hover {
+  background: #f7faf6;
+  border-color: #9dbda3;
+}
+
+.atendimento-modal-exercise.selected {
+  background: #edf5ee;
+  border-color: #6ca681;
+}
+
+.atendimento-modal-exercise-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.atendimento-modal-exercise-info strong {
+  color: #30443a;
+  font-size: 13px;
+}
+
+.atendimento-modal-exercise-info span {
+  color: #819087;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.atendimento-modal-exercise input {
+  width: 17px;
+  height: 17px;
+  accent-color: #3f7759;
+  cursor: pointer;
+}
+
+.atendimento-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 18px 24px;
+  border-top: 1px solid #edf0eb;
+}
+
+/* ==========================================================================
+   5. AVISOS E MENSAGENS
+   ========================================================================== */
+
+.atendimento-error {
+  padding: 14px 17px;
+  color: #a34b4b;
+  background: #fff5f4;
+  border: 1px solid #f0d8d5;
+  border-radius: 11px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.atendimento-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 180px;
+  color: #6f8979;
+  font-size: 13px;
+}
+
+/* ==========================================================================
+   6. RESPONSIVIDADE
+   ========================================================================== */
+
+@media (max-width: 700px) {
+  .atendimento-header {
+    align-items: flex-start;
+  }
+
+  .atendimento-vitals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .atendimento-exercise-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .atendimento-exercise-remove {
+    width: 100%;
+  }
+
+  .atendimento-modal {
+    max-height: 90vh;
+  }
+
+  .atendimento-modal-header,
+  .atendimento-modal-body,
+  .atendimento-modal-footer {
+    padding: 17px;
+  }
+
+  .atendimento-modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .atendimento-modal-footer button {
+    width: 100%;
+  }
+}

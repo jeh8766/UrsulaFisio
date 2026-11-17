@@ -8,8 +8,6 @@ import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
 import com.fisioUrsula.api.agendamentos.dtos.*;
-import com.fisioUrsula.api.atendimentos.atendimento.AtendimentoRepository;
-import com.fisioUrsula.api.avaliacoes.avaliacao.AvaliacaoRepository;
 import com.fisioUrsula.api.pacientes.paciente.Paciente;
 import com.fisioUrsula.api.pacientes.paciente.PacienteRepository;
 import com.fisioUrsula.api.pacientes.paciente.dtos.PacienteResumoResponseDTO;
@@ -17,7 +15,6 @@ import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +24,6 @@ public class AgendamentoService {
 
     private final PacienteRepository pacienteRepository;
     private final AgendamentoRepository agendamentoRepository;
-
 
     public List<AgendamentoAgendaResponseDTO> listarPorPeriodo(
             LocalDate inicio,
@@ -48,23 +44,7 @@ public class AgendamentoService {
         return agendamentoRepository
                 .findByDataBetweenOrderByDataAscHoraInicioAsc(inicio, fim)
                 .stream()
-                .map(agendamento -> {
-                    PacienteResumoResponseDTO pacienteDTO =
-                            new PacienteResumoResponseDTO(
-                                    agendamento.getPaciente()
-                            );
-
-                    return new AgendamentoAgendaResponseDTO(
-                            agendamento.getId(),
-                            pacienteDTO.id(),
-                            pacienteDTO.nome(),
-                            agendamento.getData(),
-                            agendamento.getHoraInicio(),
-                            agendamento.getHoraFim(),
-                            agendamento.getTipoAgendamento(),
-                            agendamento.getStatusAgendamento()
-                    );
-                })
+                .map(this::converterParaAgenda)
                 .toList();
     }
 
@@ -74,8 +54,18 @@ public class AgendamentoService {
                         "Agendamento não encontrado."
                 ));
 
+        return converterParaAgenda(agendamento);
+    }
+
+    private AgendamentoAgendaResponseDTO converterParaAgenda(
+            Agendamento agendamento
+    ) {
         PacienteResumoResponseDTO pacienteDTO =
                 new PacienteResumoResponseDTO(agendamento.getPaciente());
+
+        Long atendimentoId = agendamento.getAtendimento() != null
+                ? agendamento.getAtendimento().getId()
+                : null;
 
         return new AgendamentoAgendaResponseDTO(
                 agendamento.getId(),
@@ -85,7 +75,8 @@ public class AgendamentoService {
                 agendamento.getHoraInicio(),
                 agendamento.getHoraFim(),
                 agendamento.getTipoAgendamento(),
-                agendamento.getStatusAgendamento()
+                agendamento.getStatusAgendamento(),
+                atendimentoId
         );
     }
 
@@ -127,6 +118,7 @@ public class AgendamentoService {
                 agendamentoAvaliacaoSalvo
         );
     }
+
     @Transactional
     public CriarAgendamentoAtendimentoResponseDTO criarAgendamentoAtendimento(
             Long pacienteId,
@@ -245,19 +237,7 @@ public class AgendamentoService {
 
         Agendamento atualizado = agendamentoRepository.save(agendamento);
 
-        PacienteResumoResponseDTO pacienteDTO =
-                new PacienteResumoResponseDTO(atualizado.getPaciente());
-
-        return new AgendamentoAgendaResponseDTO(
-                atualizado.getId(),
-                pacienteDTO.id(),
-                pacienteDTO.nome(),
-                atualizado.getData(),
-                atualizado.getHoraInicio(),
-                atualizado.getHoraFim(),
-                atualizado.getTipoAgendamento(),
-                atualizado.getStatusAgendamento()
-        );
+        return converterParaAgenda(atualizado);
     }
 
     @Transactional
@@ -276,17 +256,13 @@ public class AgendamentoService {
             );
         }
 
-        // Altera somente o status do agendamento.
         agendamento.setStatusAgendamento(novoStatus);
 
-        // Atualiza a data de cancelamento quando necessário.
         if (novoStatus == StatusAgendamento.CANCELADO) {
             agendamento.setDataCancelamento(LocalDate.now());
         } else {
             agendamento.setDataCancelamento(null);
         }
     }
-
-        }
-
+}
 

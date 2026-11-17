@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/sinais_vitais")
@@ -19,12 +20,13 @@ public class SinaisVitaisController {
 
     private final SinaisVitaisService sinaisVitaisService;
 
-    @PostMapping
+    @PostMapping("/atendimento/{atendimentoId}")
     public ResponseEntity<CriarSinaisVitaisResponseDTO> criarSinaisVitais(
+            @PathVariable Long atendimentoId,
             @Valid @RequestBody CriarSinaisVitaisRequestDTO dto
     ) {
         CriarSinaisVitaisResponseDTO resposta =
-                sinaisVitaisService.criarSinaisVitais(dto);
+                sinaisVitaisService.criarSinaisVitais(atendimentoId, dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
     }

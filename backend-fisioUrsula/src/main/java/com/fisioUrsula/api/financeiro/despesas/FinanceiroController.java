@@ -1,7 +1,9 @@
 package com.fisioUrsula.api.financeiro.despesas;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import com.fisioUrsula.api.financeiro.despesas.dtos.RecebimentoResponseDTO;
 import com.fisioUrsula.api.financeiro.despesas.dtos.ResumoFinanceiroResponseDTO;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,21 @@ import lombok.RequiredArgsConstructor;
 public class FinanceiroController {
 
     private final FinanceiroService financeiroService;
+
+    @GetMapping("/recebimentos")
+    public ResponseEntity<List<RecebimentoResponseDTO>> listarRecebimentos(
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate inicio,
+
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate fim
+    ) {
+        return ResponseEntity.ok(
+                financeiroService.listarRecebimentos(inicio, fim)
+        );
+    }
 
     @GetMapping("/resumo")
     public ResponseEntity<ResumoFinanceiroResponseDTO> obterResumo(
