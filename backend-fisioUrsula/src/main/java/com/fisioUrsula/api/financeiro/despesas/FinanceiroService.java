@@ -1,3 +1,4 @@
+
 package com.fisioUrsula.api.financeiro.despesas;
 
 import java.math.BigDecimal;
@@ -6,21 +7,24 @@ import java.util.List;
 
 import com.fisioUrsula.api.financeiro.despesas.dtos.RecebimentoResponseDTO;
 import com.fisioUrsula.api.financeiro.despesas.dtos.ResumoFinanceiroResponseDTO;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
 import com.fisioUrsula.api.atendimentos.atendimento.AtendimentoRepository;
+import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
+import com.fisioUrsula.api.avaliacoes.avaliacao.AvaliacaoRepository;
+import com.fisioUrsula.api.shared.enums.StatusAgendamento;
+import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
-import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class FinanceiroService {
 
     private final AtendimentoRepository atendimentoRepository;
+    private final AvaliacaoRepository avaliacaoRepository;
     private final DespesaRepository despesaRepository;
 
     @Transactional(readOnly = true)
@@ -28,63 +32,81 @@ public class FinanceiroService {
             LocalDate inicio,
             LocalDate fim
     ) {
+
         validarPeriodo(inicio, fim);
 
-        List<Atendimento> atendimentos =
-                atendimentoRepository.findByAgendamento_DataBetween(inicio, fim);
+        List<Atendimento> atendimentosRealizados =
+                atendimentoRepository.findByAgendamento_DataBetween(inicio, fim)
+                        .stream()
+                        .filter(this::atendimentoFoiRealizado)
+                        .toList();
 
-        BigDecimal faturamentoBruto = BigDecimal.ZERO;
-        BigDecimal totalRecebido = BigDecimal.ZERO;
-        BigDecimal totalPendente = BigDecimal.ZERO;
+        List<Avaliacao> avaliacoesRealizadas =
+                avaliacaoRepository.findByAgendamento_DataBetween(inicio, fim)
+                        .stream()
+                        .filter(this::avaliacaoFoiRealizada)
+                        .toList();
 
-        long quantidadePagos = 0;
-        long quantidadePendentes = 0;
-        long quantidadeAvaliacoes = 0;
-        long quantidadeAtendimentosNormais = 0;
+        BigDecimal faturamentoAtendimentos = atendimentosRealizados.stream()
+                .map(this::calcularValorAtendimento)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        for (Atendimento atendimento : atendimentos) {
+        BigDecimal faturamentoAvaliacoes = avaliacoesRealizadas.stream()
+                .map(avaliacao -> valorOuZero(avaliacao.getValor()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            BigDecimal valor = atendimento.getValor() != null
-                    ? atendimento.getValor()
-                    : BigDecimal.ZERO;
+        BigDecimal faturamentoBruto =
+                faturamentoAtendimentos.add(faturamentoAvaliacoes);
 
-            BigDecimal deslocamento = atendimento.getTaxaDeslocamento() != null
-                    ? atendimento.getTaxaDeslocamento()
-                    : BigDecimal.ZERO;
+        List<Atendimento> atendimentosPendentes = atendimentosRealizados.stream()
+                .filter(a -> a.getStatusPagamento() == StatusPagamento.PENDENTE)
+                .toList();
 
-            BigDecimal valorTotal = valor.add(deslocamento);
+        List<Avaliacao> avaliacoesPendentes = avaliacoesRealizadas.stream()
+                .filter(a -> a.getStatusPagamento() == StatusPagamento.PENDENTE)
+                .toList();
 
-            faturamentoBruto = faturamentoBruto.add(valorTotal);
+        BigDecimal totalPendenteAtendimentos = atendimentosPendentes.stream()
+                .map(this::calcularValorAtendimento)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            if (atendimento.getStatusPagamento() == StatusPagamento.PAGO) {
-                quantidadePagos++;
-            } else {
-                totalPendente = totalPendente.add(valorTotal);
-                quantidadePendentes++;
-            }
+        BigDecimal totalPendenteAvaliacoes = avaliacoesPendentes.stream()
+                .map(avaliacao -> valorOuZero(avaliacao.getValor()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            if (atendimento.getAgendamento().getTipoAgendamento()
-                    == TipoAgendamento.AVALIACAO) {
-                quantidadeAvaliacoes++;
-            } else {
-                quantidadeAtendimentosNormais++;
-            }
-        }
-        List<Atendimento> recebimentos =
-                atendimentoRepository.findByDataPagamentoBetween(inicio, fim);
+        BigDecimal totalPendente =
+                totalPendenteAtendimentos.add(totalPendenteAvaliacoes);
 
-        for (Atendimento atendimento : recebimentos) {
+        long quantidadePendentes =
+                atendimentosPendentes.size() + avaliacoesPendentes.size();
 
-            BigDecimal valor = atendimento.getValor() != null
-                    ? atendimento.getValor()
-                    : BigDecimal.ZERO;
+        List<Atendimento> pagamentosAtendimentos =
+                atendimentoRepository.findByDataPagamentoBetweenAndStatusPagamento(
+                        inicio,
+                        fim,
+                        StatusPagamento.PAGO
+                );
 
-            BigDecimal deslocamento = atendimento.getTaxaDeslocamento() != null
-                    ? atendimento.getTaxaDeslocamento()
-                    : BigDecimal.ZERO;
+        List<Avaliacao> pagamentosAvaliacoes =
+                avaliacaoRepository.findByDataPagamentoBetweenAndStatusPagamento(
+                        inicio,
+                        fim,
+                        StatusPagamento.PAGO
+                );
 
-            totalRecebido = totalRecebido.add(valor).add(deslocamento);
-        }
+        BigDecimal recebidoAtendimentos = pagamentosAtendimentos.stream()
+                .map(this::calcularValorAtendimento)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal recebidoAvaliacoes = pagamentosAvaliacoes.stream()
+                .map(avaliacao -> valorOuZero(avaliacao.getValor()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalRecebido =
+                recebidoAtendimentos.add(recebidoAvaliacoes);
+
+        long quantidadePagos =
+                pagamentosAtendimentos.size() + pagamentosAvaliacoes.size();
 
         BigDecimal totalDespesas =
                 despesaRepository.somarValores(null, inicio, fim);
@@ -95,6 +117,13 @@ public class FinanceiroService {
 
         BigDecimal resultadoOperacional =
                 totalRecebido.subtract(totalDespesas);
+
+        long quantidadeAtendimentosNormais = atendimentosRealizados.size();
+        long quantidadeAvaliacoes = avaliacoesRealizadas.size();
+
+        long quantidadeAtendimentos =
+                quantidadeAtendimentosNormais + quantidadeAvaliacoes;
+
         return new ResumoFinanceiroResponseDTO(
                 inicio,
                 fim,
@@ -103,7 +132,7 @@ public class FinanceiroService {
                 totalPendente,
                 totalDespesas,
                 resultadoOperacional,
-                atendimentos.size(),
+                quantidadeAtendimentos,
                 quantidadePagos,
                 quantidadePendentes,
                 quantidadeAvaliacoes,
@@ -121,12 +150,39 @@ public class FinanceiroService {
         return atendimentoRepository
                 .findByDataPagamentoBetween(inicio, fim)
                 .stream()
+                .filter(a -> a.getStatusPagamento() == StatusPagamento.PAGO)
                 .map(RecebimentoResponseDTO::new)
                 .toList();
     }
 
+    private boolean atendimentoFoiRealizado(Atendimento atendimento) {
+
+        return atendimento.getStatusAtendimento() == StatusAtendimento.ATENDIDO
+                && atendimento.getAgendamento().getStatusAgendamento()
+                == StatusAgendamento.CONCLUIDO;
+    }
+
+    private boolean avaliacaoFoiRealizada(Avaliacao avaliacao) {
+
+        return avaliacao.getStatusAtendimento() == StatusAtendimento.ATENDIDO
+                && avaliacao.getAgendamento().getStatusAgendamento()
+                == StatusAgendamento.CONCLUIDO;
+    }
+
+    private BigDecimal calcularValorAtendimento(Atendimento atendimento) {
+
+        BigDecimal valor = valorOuZero(atendimento.getValor());
+        BigDecimal deslocamento = valorOuZero(atendimento.getTaxaDeslocamento());
+
+        return valor.add(deslocamento);
+    }
+
+    private BigDecimal valorOuZero(BigDecimal valor) {
+        return valor != null ? valor : BigDecimal.ZERO;
+    }
 
     private void validarPeriodo(LocalDate inicio, LocalDate fim) {
+
         if (inicio == null || fim == null) {
             throw new IllegalArgumentException(
                     "A data inicial e a data final são obrigatórias."

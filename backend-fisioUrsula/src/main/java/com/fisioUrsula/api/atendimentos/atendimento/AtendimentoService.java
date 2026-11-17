@@ -1,7 +1,7 @@
+
 package com.fisioUrsula.api.atendimentos.atendimento;
 
 import com.fisioUrsula.api.atendimentos.atendimento.dtos.*;
-import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitaisRepository;
 import com.fisioUrsula.api.agendamentos.Agendamento;
 import com.fisioUrsula.api.agendamentos.AgendamentoRepository;
@@ -10,15 +10,14 @@ import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
 import com.fisioUrsula.api.shared.enums.TipoAgendamento;
-import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
+import com.fisioUrsula.api.shared.exceptions.RegistroDuplicadoException;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.DuplicateFormatFlagsException;
 import java.util.List;
 
 @Service
@@ -30,16 +29,23 @@ public class AtendimentoService {
     private final AgendamentoRepository agendamentoRepository;
     private final AtendimentoExercicioService atendimentoExercicioService;
 
-
     @Transactional
     public CriarAtendimentoResponseDTO criarAtendimento(
             CriarAtendimentoRequestDTO dto
     ) {
+
         Agendamento agendamento = agendamentoRepository
                 .findById(dto.agendamentoId())
                 .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Id de agendamento não existe!"
                 ));
+
+        if (agendamento.getStatusAgendamento() == StatusAgendamento.CANCELADO
+                || agendamento.getStatusAgendamento() == StatusAgendamento.CONCLUIDO) {
+            throw new IllegalStateException(
+                    "Não é possível criar um atendimento para um agendamento cancelado ou concluído!"
+            );
+        }
 
         if (agendamento.getTipoAgendamento() != TipoAgendamento.ATENDIMENTO) {
             throw new IllegalStateException(
@@ -80,7 +86,6 @@ public class AtendimentoService {
         );
     }
 
-
     public DetalharAtendimentoResponseDTO detalharAtendimento(Long id) {
 
         Atendimento atendimento = atendimentoRepository.findById(id)
@@ -103,6 +108,13 @@ public class AtendimentoService {
 
         if (atendimento.getStatusAtendimento() == StatusAtendimento.ATENDIDO) {
             throw new IllegalStateException("Esse atendimento já foi realizado!");
+        }
+
+        if (atendimento.getAgendamento().getStatusAgendamento()
+                != StatusAgendamento.CONFIRMADO) {
+            throw new IllegalStateException(
+                    "Não se pode concluir um atendimento que não esteja confirmado!"
+            );
         }
 
         atendimentoExercicioService.atribuirVariosExercicios(

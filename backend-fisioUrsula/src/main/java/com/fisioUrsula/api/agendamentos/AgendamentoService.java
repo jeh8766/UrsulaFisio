@@ -4,6 +4,7 @@ package com.fisioUrsula.api.agendamentos;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
@@ -81,7 +82,7 @@ public class AgendamentoService {
     }
 
     @Transactional
-    public AgendarAvaliacaoResponseDTO AgendarAvaliacao(
+    public AgendarAvaliacaoResponseDTO criarAgendamentoAvaliacao(
             Long pacienteId,
             AgendarAvaliacaoRequestDTO dto
     ) {
@@ -95,6 +96,12 @@ public class AgendamentoService {
                 .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Paciente não encontrado."
                 ));
+
+        if (!paciente.isAtivo()) {
+            throw new IllegalStateException(
+                    "Não é possível agendar para um paciente inativo."
+            );
+        }
 
         boolean existeConflito = agendamentoRepository.existeConflito(
                 dto.data(),
@@ -134,6 +141,12 @@ public class AgendamentoService {
                 .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Paciente não encontrado."
                 ));
+
+        if (!paciente.isAtivo()) {
+            throw new IllegalStateException(
+                    "Não é possível agendar para um paciente inativo."
+            );
+        }
 
         boolean existeConflito = agendamentoRepository.existeConflito(
                 dto.data(),
@@ -202,10 +215,10 @@ public class AgendamentoService {
                         "Agendamento não encontrado."
                 ));
 
-        if (agendamento.getStatusAgendamento()
-                == StatusAgendamento.CANCELADO) {
+        if (agendamento.getStatusAgendamento() == StatusAgendamento.CANCELADO
+                || agendamento.getStatusAgendamento() == StatusAgendamento.CONCLUIDO) {
             throw new IllegalStateException(
-                    "Não é possível editar um agendamento cancelado."
+                    "Não é possível editar um agendamento cancelado ou concluído."
             );
         }
 
@@ -213,6 +226,12 @@ public class AgendamentoService {
                 .orElseThrow(() -> new RegistroNaoEncontradoException(
                         "Paciente não encontrado."
                 ));
+
+        if (!paciente.isAtivo()) {
+            throw new IllegalStateException(
+                    "Não é possível agendar para um paciente inativo."
+            );
+        }
 
         boolean existeConflito =
                 agendamentoRepository.existeConflitoExcetoAgendamento(
@@ -229,7 +248,6 @@ public class AgendamentoService {
             );
         }
 
-        // Atualiza o paciente, a data e os horários.
         agendamento.setPaciente(paciente);
         agendamento.setData(dto.data());
         agendamento.setHoraInicio(dto.horaInicio());
@@ -256,13 +274,54 @@ public class AgendamentoService {
             );
         }
 
+        StatusAgendamento statusAtual = agendamento.getStatusAgendamento();
+
+        if (statusAtual == StatusAgendamento.CONCLUIDO
+                || statusAtual == StatusAgendamento.CANCELADO) {
+            throw new IllegalStateException(
+                    "Não é possível alterar um agendamento cancelado ou concluído."
+            );
+        }
+
+        if (novoStatus == StatusAgendamento.CONCLUIDO) {
+            throw new IllegalStateException(
+                    "O agendamento só pode ser concluído pela realização do atendimento ou avaliação."
+            );
+        }
+
+        if (statusAtual == StatusAgendamento.PENDENTE
+                && novoStatus != StatusAgendamento.CONFIRMADO
+                && novoStatus != StatusAgendamento.CANCELADO) {
+            throw new IllegalStateException(
+                    "Um agendamento pendente só pode ser confirmado ou cancelado."
+            );
+        }
+
+        if (statusAtual == StatusAgendamento.CONFIRMADO
+                && novoStatus != StatusAgendamento.CANCELADO) {
+            throw new IllegalStateException(
+                    "Um agendamento confirmado só pode ser cancelado."
+            );
+        }
+
         agendamento.setStatusAgendamento(novoStatus);
 
         if (novoStatus == StatusAgendamento.CANCELADO) {
+
             agendamento.setDataCancelamento(LocalDate.now());
+
+            if (agendamento.getAtendimento() != null) {
+                agendamento.getAtendimento()
+                        .setStatusAtendimento(StatusAtendimento.CANCELADO);
+            }
+
+            if (agendamento.getAvaliacao() != null) {
+                agendamento.getAvaliacao()
+                        .setStatusAtendimento(StatusAtendimento.CANCELADO);
+            }
+
         } else {
             agendamento.setDataCancelamento(null);
         }
     }
 }
-

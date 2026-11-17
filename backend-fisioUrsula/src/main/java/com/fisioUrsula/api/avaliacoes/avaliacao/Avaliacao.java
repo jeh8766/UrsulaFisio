@@ -2,6 +2,7 @@ package com.fisioUrsula.api.avaliacoes.avaliacao;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import com.fisioUrsula.api.agendamentos.Agendamento;
@@ -45,6 +46,9 @@ public class Avaliacao implements Serializable {
 
     @Enumerated(EnumType.STRING)
     private StatusPagamento statusPagamento;
+
+    @Column(name = "data_pagamento")
+    private LocalDate dataPagamento;
 
     @Enumerated(EnumType.STRING)
     private StatusAtendimento statusAtendimento;
