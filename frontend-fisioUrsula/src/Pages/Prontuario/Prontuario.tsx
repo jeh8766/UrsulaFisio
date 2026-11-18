@@ -6,6 +6,8 @@ import './Prontuario.css';
 
 const API_URL = 'http://localhost:8080';
 
+type TipoAgendamento = 'AVALIACAO' | 'ATENDIMENTO';
+
 type Agendamento = {
   id: number;
   pacienteId: number;
@@ -13,14 +15,24 @@ type Agendamento = {
   data: string;
   horaInicio: string;
   horaFim: string;
-  tipoAgendamento: 'AVALIACAO' | 'ATENDIMENTO';
+  tipoAgendamento: TipoAgendamento;
   statusAgendamento: string;
   atendimentoId: number | null;
+  avaliacaoId: number | null;
 };
 
 type CsrfTokenResponse = {
   token: string;
   headerName: string;
+};
+
+type CriarAvaliacaoResponse = {
+  id: number;
+  queixaPrincipal: string;
+  statusPagamento: string;
+  statusAtendimento: string;
+  observacao: string;
+  valor: number;
 };
 
 async function obterTokenCsrf(): Promise<CsrfTokenResponse> {
@@ -82,6 +94,10 @@ export default function Prontuarios() {
 
   const [valor, setValor] = useState('');
   const [taxaDeslocamento, setTaxaDeslocamento] = useState('0');
+
+  const [queixaPrincipal, setQueixaPrincipal] = useState('');
+  const [observacao, setObservacao] = useState('');
+  const [valorAvaliacao, setValorAvaliacao] = useState('');
 
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState('TODOS');
@@ -169,28 +185,34 @@ export default function Prontuarios() {
     setErro('');
     setNotice('');
 
-    if (item.tipoAgendamento !== 'ATENDIMENTO') {
-      setAgendamentoSelecionado(null);
-      setErro(
-        'Este agendamento é uma avaliação. Ele deve seguir o fluxo próprio de avaliação.'
-      );
+    if (item.tipoAgendamento === 'ATENDIMENTO') {
+      if (item.atendimentoId != null) {
+        navigate(`/atendimento/${item.atendimentoId}`);
+        return;
+      }
+
+      setAgendamentoSelecionado(item);
+      setValor('');
+      setTaxaDeslocamento('0');
       return;
     }
 
-    // Verifica se o atendimento já foi criado anteriormente.
-    if (item.atendimentoId != null) {
-      navigate(`/atendimento/${item.atendimentoId}`);
+    if (item.avaliacaoId != null) {
+      navigate(`/avaliacao/${item.avaliacaoId}`);
       return;
     }
 
-    // Só abre o formulário financeiro quando ainda não existe atendimento.
     setAgendamentoSelecionado(item);
-    setValor('');
-    setTaxaDeslocamento('0');
+    setQueixaPrincipal('');
+    setObservacao('');
+    setValorAvaliacao('');
   }
 
   async function iniciarAtendimento() {
-    if (!agendamentoSelecionado) {
+    if (
+      !agendamentoSelecionado ||
+      agendamentoSelecionado.tipoAgendamento !== 'ATENDIMENTO'
+    ) {
       setErro('Selecione um agendamento de atendimento.');
       return;
     }
@@ -254,6 +276,79 @@ export default function Prontuarios() {
     }
   }
 
+  async function iniciarAvaliacao() {
+    if (
+      !agendamentoSelecionado ||
+      agendamentoSelecionado.tipoAgendamento !== 'AVALIACAO'
+    ) {
+      setErro('Selecione um agendamento de avaliação.');
+      return;
+    }
+
+    const valorNumerico = Number(valorAvaliacao);
+
+    if (
+      !queixaPrincipal.trim() ||
+      valorAvaliacao.trim() === '' ||
+      !Number.isFinite(valorNumerico) ||
+      valorNumerico < 0
+    ) {
+      setErro('Informe a queixa principal e um valor válido para a avaliação.');
+      return;
+    }
+
+    try {
+      setSalvando(true);
+      setErro('');
+      setNotice('');
+
+      const csrf = await obterTokenCsrf();
+
+      const response = await fetch(`${API_URL}/avaliacoes`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          [csrf.headerName]: csrf.token,
+        },
+        body: JSON.stringify({
+          queixaPrincipal: queixaPrincipal.trim(),
+          observacao: observacao.trim(),
+          valor: valorNumerico,
+          agendamentoId: agendamentoSelecionado.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await obterMensagemErro(response));
+      }
+
+      const avaliacao: CriarAvaliacaoResponse = await response.json();
+
+      if (!avaliacao.id) {
+        throw new Error(
+          'A avaliação foi criada, mas a API não retornou seu identificador.'
+        );
+      }
+
+      navigate(`/avaliacao/${avaliacao.id}`);
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível iniciar a avaliação.'
+      );
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  function cancelarCriacao() {
+    setAgendamentoSelecionado(null);
+    setErro('');
+    setNotice('');
+  }
+
   return (
     <ModuleLayout
       title="Prontuários"
@@ -266,8 +361,8 @@ export default function Prontuarios() {
         <div>
           <strong>Fluxo de atendimento</strong>
           <p>
-            Selecione um atendimento confirmado para criar seu registro
-            clínico. As avaliações seguem um fluxo separado.
+            Selecione um agendamento confirmado para criar ou continuar uma
+            avaliação ou atendimento.
           </p>
         </div>
 
@@ -290,7 +385,7 @@ export default function Prontuarios() {
         <article>
           <small>Avaliações</small>
           <strong>{avaliacoesConfirmadas.length}</strong>
-          <span>Fluxo próprio de avaliação</span>
+          <span>Podem abrir ou iniciar uma avaliação</span>
         </article>
       </div>
 
@@ -299,7 +394,8 @@ export default function Prontuarios() {
           <div>
             <h2>Agendamentos confirmados</h2>
             <p>
-              Escolha um atendimento para iniciar ou continuar o registro clínico.
+              Escolha um agendamento para iniciar ou continuar o registro
+              clínico.
             </p>
           </div>
 
@@ -347,55 +443,61 @@ export default function Prontuarios() {
         </div>
 
         <div className="records-list">
-          {agendamentosFiltrados.map((item) => (
-            <article className="record-card" key={item.id}>
-              <div className="record-avatar">
-                {item.nome
-                  .split(' ')
-                  .slice(0, 2)
-                  .map((parte) => parte[0])
-                  .join('')
-                  .toUpperCase()}
-              </div>
+          {agendamentosFiltrados.map((item) => {
+            const ehAtendimento = item.tipoAgendamento === 'ATENDIMENTO';
 
-              <div className="record-main">
-                <div className="record-meta">
-                  <span>
-                    {item.tipoAgendamento === 'ATENDIMENTO'
-                      ? 'Atendimento'
-                      : 'Avaliação'}
-                  </span>
-                  <i>•</i>
-                  <time>{formatarData(item.data)}</time>
+            const registroExiste = ehAtendimento
+              ? item.atendimentoId != null
+              : item.avaliacaoId != null;
+
+            return (
+              <article className="record-card" key={item.id}>
+                <div className="record-avatar">
+                  {item.nome
+                    .split(' ')
+                    .slice(0, 2)
+                    .map((parte) => parte[0])
+                    .join('')
+                    .toUpperCase()}
                 </div>
 
-                <h3>{item.nome}</h3>
+                <div className="record-main">
+                  <div className="record-meta">
+                    <span>{ehAtendimento ? 'Atendimento' : 'Avaliação'}</span>
+                    <i>•</i>
+                    <time>{formatarData(item.data)}</time>
+                  </div>
 
-                <p>
-                  Horário: {formatarHora(item.horaInicio)} às{' '}
-                  {formatarHora(item.horaFim)}
-                </p>
+                  <h3>{item.nome}</h3>
 
-                <div className="record-bottom">
-                  <span>Agendamento #{item.id}</span>
-                  <span className="record-status done">Confirmado</span>
+                  <p>
+                    Horário: {formatarHora(item.horaInicio)} às{' '}
+                    {formatarHora(item.horaFim)}
+                  </p>
+
+                  <div className="record-bottom">
+                    <span>Agendamento #{item.id}</span>
+                    <span className="record-status done">Confirmado</span>
+                  </div>
                 </div>
-              </div>
 
-              <button
-                type="button"
-                className="records-primary"
-                onClick={() => selecionarAgendamento(item)}
-                disabled={salvando}
-              >
-                {item.tipoAgendamento !== 'ATENDIMENTO'
-                  ? 'Avaliação'
-                  : item.atendimentoId != null
-                    ? 'Abrir atendimento'
-                    : 'Iniciar atendimento'}
-              </button>
-            </article>
-          ))}
+                <button
+                  type="button"
+                  className="records-primary"
+                  onClick={() => selecionarAgendamento(item)}
+                  disabled={salvando}
+                >
+                  {ehAtendimento
+                    ? registroExiste
+                      ? 'Abrir atendimento'
+                      : 'Iniciar atendimento'
+                    : registroExiste
+                      ? 'Abrir avaliação'
+                      : 'Iniciar avaliação'}
+                </button>
+              </article>
+            );
+          })}
 
           {agendamentosFiltrados.length === 0 && !carregando && (
             <div className="records-empty">
@@ -405,7 +507,7 @@ export default function Prontuarios() {
         </div>
       </section>
 
-      {agendamentoSelecionado && (
+      {agendamentoSelecionado?.tipoAgendamento === 'ATENDIMENTO' && (
         <section className="records-panel">
           <div className="records-panel-heading">
             <div>
@@ -453,9 +555,7 @@ export default function Prontuarios() {
                 min="0"
                 step="0.01"
                 value={taxaDeslocamento}
-                onChange={(evento) =>
-                  setTaxaDeslocamento(evento.target.value)
-                }
+                onChange={(evento) => setTaxaDeslocamento(evento.target.value)}
                 placeholder="Ex.: 20,00"
                 disabled={salvando}
               />
@@ -466,7 +566,7 @@ export default function Prontuarios() {
             <button
               type="button"
               className="atendimento-button-secondary"
-              onClick={() => setAgendamentoSelecionado(null)}
+              onClick={cancelarCriacao}
               disabled={salvando}
             >
               Cancelar
@@ -484,9 +584,94 @@ export default function Prontuarios() {
         </section>
       )}
 
+      {agendamentoSelecionado?.tipoAgendamento === 'AVALIACAO' && (
+        <section className="records-panel">
+          <div className="records-panel-heading">
+            <div>
+              <h2>Iniciar avaliação</h2>
+              <p>
+                Confira o paciente e informe os dados iniciais da avaliação.
+              </p>
+            </div>
+          </div>
+
+          <div className="atendimento-grid">
+            <div className="atendimento-info-card">
+              <span>Paciente</span>
+              <strong>{agendamentoSelecionado.nome}</strong>
+              <small>ID #{agendamentoSelecionado.pacienteId}</small>
+            </div>
+
+            <div className="atendimento-info-card">
+              <span>Data e horário</span>
+              <strong>{formatarData(agendamentoSelecionado.data)}</strong>
+              <small>
+                {formatarHora(agendamentoSelecionado.horaInicio)} às{' '}
+                {formatarHora(agendamentoSelecionado.horaFim)}
+              </small>
+            </div>
+
+            <label className="atendimento-field">
+              Queixa principal
+              <textarea
+                value={queixaPrincipal}
+                onChange={(evento) => setQueixaPrincipal(evento.target.value)}
+                placeholder="Descreva a queixa principal do paciente..."
+                rows={4}
+                disabled={salvando}
+              />
+            </label>
+
+            <label className="atendimento-field">
+              Observações iniciais
+              <textarea
+                value={observacao}
+                onChange={(evento) => setObservacao(evento.target.value)}
+                placeholder="Observações adicionais..."
+                rows={4}
+                disabled={salvando}
+              />
+            </label>
+
+            <label className="atendimento-field">
+              Valor da avaliação (R$)
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={valorAvaliacao}
+                onChange={(evento) => setValorAvaliacao(evento.target.value)}
+                placeholder="Ex.: 120,00"
+                disabled={salvando}
+              />
+            </label>
+          </div>
+
+          <div className="atendimento-actions">
+            <button
+              type="button"
+              className="atendimento-button-secondary"
+              onClick={cancelarCriacao}
+              disabled={salvando}
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              className="atendimento-button-primary"
+              onClick={iniciarAvaliacao}
+              disabled={salvando}
+            >
+              {salvando ? 'Criando avaliação...' : 'Criar avaliação'}
+            </button>
+          </div>
+        </section>
+      )}
+
       <p className="records-disclaimer">
-        Os dados exibidos são carregados da API. O atendimento só é criado
-        depois da confirmação no botão acima.
+        Os dados exibidos são carregados da API. A avaliação ou o atendimento
+        só é criado depois da confirmação no botão correspondente.
       </p>
     </ModuleLayout>
   );

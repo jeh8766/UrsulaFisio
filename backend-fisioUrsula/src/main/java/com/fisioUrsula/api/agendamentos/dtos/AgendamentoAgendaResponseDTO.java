@@ -17,5 +17,6 @@ public record AgendamentoAgendaResponseDTO(
         LocalTime horaFim,
         TipoAgendamento tipoAgendamento,
         StatusAgendamento statusAgendamento,
-        Long atendimentoId
+        Long atendimentoId,
+        Long avaliacaoId
 ) {}

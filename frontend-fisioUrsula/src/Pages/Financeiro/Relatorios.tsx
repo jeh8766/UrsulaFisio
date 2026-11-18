@@ -4,7 +4,11 @@ import type { CSSProperties } from 'react';
 import ModuleLayout from '../ModuleLayout/ModuleLayout';
 import './Relatorios.css';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE = (
+    import.meta.env.VITE_API_URL || 'http://localhost:8080'
+).replace(/\/$/, '');
+
+type StatusPagamento = 'PAGO' | 'PENDENTE';
 
 type ResumoFinanceiro = {
     inicio: string;
@@ -31,10 +35,22 @@ type Atendimento = {
     valor: number | string | null;
     taxaDeslocamento: number | string | null;
     statusAtendimento: string;
-    statusPagamento: 'PAGO' | 'PENDENTE';
+    statusPagamento: StatusPagamento;
     pacienteId: number;
     pacienteNome: string;
     sinaisVitaisId: number | null;
+};
+
+type Avaliacao = {
+    id: number;
+    queixaPrincipal: string;
+    observacao: string | null;
+    valor: number | string;
+    statusPagamento: StatusPagamento;
+    statusAtendimento: string;
+    nomePaciente: string;
+    data: string;
+    hora: string;
 };
 
 type Recebimento = {
@@ -143,6 +159,7 @@ export default function Relatorios() {
 
     const [resumo, setResumo] = useState<ResumoFinanceiro | null>(null);
     const [atendimentos, setAtendimentos] = useState<Atendimento[]>([]);
+    const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
     const [recebimentos, setRecebimentos] = useState<Recebimento[]>([]);
     const [despesas, setDespesas] = useState<Despesa[]>([]);
 
@@ -167,6 +184,7 @@ export default function Relatorios() {
 
         setResumo(null);
         setAtendimentos([]);
+        setAvaliacoes([]);
         setRecebimentos([]);
         setDespesas([]);
 
@@ -191,18 +209,26 @@ export default function Relatorios() {
                 dadosAtendimentos,
                 dadosRecebimentos,
                 dadosDespesas,
+                dadosAvaliacoes,
             ] = await Promise.all([
                 buscar<ResumoFinanceiro>(
-                    `${API_BASE}/financeiro/resumo?${parametrosResumo}`
+                    `${API_BASE}/financeiro/resumo?${parametrosResumo.toString()}`
                 ),
+
                 buscar<Atendimento[]>(
-                    `${API_BASE}/atendimentos/data?${parametrosAtendimentos}`
+                    `${API_BASE}/atendimentos/data?${parametrosAtendimentos.toString()}`
                 ),
+
                 buscar<Recebimento[]>(
-                    `${API_BASE}/financeiro/recebimentos?${parametrosResumo}`
+                    `${API_BASE}/financeiro/recebimentos?${parametrosResumo.toString()}`
                 ),
+
                 buscar<Despesa[]>(
-                    `${API_BASE}/despesas/periodo?${parametrosDespesas}`
+                    `${API_BASE}/despesas/periodo?${parametrosDespesas.toString()}`
+                ),
+
+                buscar<Avaliacao[]>(
+                    `${API_BASE}/avaliacoes`
                 ),
             ]);
 
@@ -210,6 +236,17 @@ export default function Relatorios() {
             setAtendimentos(dadosAtendimentos ?? []);
             setRecebimentos(dadosRecebimentos ?? []);
             setDespesas(dadosDespesas ?? []);
+
+            // O endpoint de avaliações retorna todas.
+            // Aqui filtramos pelo período escolhido no relatório.
+            const avaliacoesDoPeriodo = (dadosAvaliacoes ?? []).filter(
+                (avaliacao) =>
+                    avaliacao.data >= inicio &&
+                    avaliacao.data <= fim
+            );
+
+            setAvaliacoes(avaliacoesDoPeriodo);
+
             setCarregado(true);
         } catch (error) {
             console.error('Erro ao carregar relatório financeiro:', error);
@@ -228,18 +265,21 @@ export default function Relatorios() {
         void carregarRelatorio();
     }, [carregarRelatorio]);
 
+    // Total de pagamentos de atendimentos registrados no período.
     const totalRecebimentosDetalhados = recebimentos.reduce(
         (total, item) =>
             total + numero(item.valor) + numero(item.taxaDeslocamento),
         0
     );
 
+    // Total de despesas do período.
     const totalDespesasDetalhadas = despesas.reduce(
         (total, item) => total + numero(item.valor),
         0
     );
 
-    const totalPendenteDetalhado = atendimentos
+    // Pendências de atendimentos.
+    const pendenteAtendimentos = atendimentos
         .filter((item) => item.statusPagamento === 'PENDENTE')
         .reduce(
             (total, item) =>
@@ -247,6 +287,27 @@ export default function Relatorios() {
             0
         );
 
+    // Pendências de avaliações.
+    const pendenteAvaliacoes = avaliacoes
+        .filter((item) => item.statusPagamento === 'PENDENTE')
+        .reduce(
+            (total, item) => total + numero(item.valor),
+            0
+        );
+
+    // Soma as pendências dos dois tipos de serviço.
+    const totalPendenteDetalhado =
+        pendenteAtendimentos + pendenteAvaliacoes;
+
+    // Total das avaliações pagas.
+    const totalAvaliacoesPagas = avaliacoes
+        .filter((item) => item.statusPagamento === 'PAGO')
+        .reduce(
+            (total, item) => total + numero(item.valor),
+            0
+        );
+
+    // O resumo oficial continua sendo calculado pelo backend.
     const resultado = resumo
         ? numero(resumo.totalRecebido) - numero(resumo.totalDespesas)
         : 0;
@@ -272,6 +333,7 @@ export default function Relatorios() {
 
     function preencherMesAnterior() {
         const hoje = new Date();
+
         const anterior = new Date(
             hoje.getFullYear(),
             hoje.getMonth() - 1,
@@ -280,7 +342,12 @@ export default function Relatorios() {
 
         const ano = anterior.getFullYear();
         const mes = String(anterior.getMonth() + 1).padStart(2, '0');
-        const ultimoDia = new Date(ano, anterior.getMonth() + 1, 0).getDate();
+
+        const ultimoDia = new Date(
+            ano,
+            anterior.getMonth() + 1,
+            0
+        ).getDate();
 
         setInicio(`${ano}-${mes}-01`);
         setFim(`${ano}-${mes}-${String(ultimoDia).padStart(2, '0')}`);
@@ -302,8 +369,8 @@ export default function Relatorios() {
                         <h1>Relatórios financeiros</h1>
 
                         <p>
-                            Consulte recebimentos, atendimentos, valores
-                            pendentes e despesas em qualquer período.
+                            Consulte recebimentos, atendimentos, avaliações,
+                            valores pendentes e despesas em qualquer período.
                         </p>
                     </div>
 
@@ -324,6 +391,7 @@ export default function Relatorios() {
                             <span className="relatorios-section-eyebrow">
                                 CONSULTA
                             </span>
+
                             <h2>Período do relatório</h2>
                         </div>
 
@@ -335,6 +403,7 @@ export default function Relatorios() {
                     <div className="relatorios-filtros-conteudo">
                         <label className="relatorios-campo">
                             <span>Data inicial</span>
+
                             <input
                                 type="date"
                                 value={inicio}
@@ -346,6 +415,7 @@ export default function Relatorios() {
 
                         <label className="relatorios-campo">
                             <span>Data final</span>
+
                             <input
                                 type="date"
                                 value={fim}
@@ -385,7 +455,10 @@ export default function Relatorios() {
                 {erro && (
                     <div className="relatorios-alerta erro">
                         <div>
-                            <strong>Não foi possível carregar o relatório</strong>
+                            <strong>
+                                Não foi possível carregar o relatório
+                            </strong>
+
                             <p>{erro}</p>
                         </div>
 
@@ -419,8 +492,7 @@ export default function Relatorios() {
                                 </strong>
 
                                 <small>
-                                    {resumo.quantidadePagos} pagamento(s)
-                                    identificado(s) por data de recebimento
+                                    Pagamentos registrados no período
                                 </small>
                             </article>
 
@@ -435,8 +507,8 @@ export default function Relatorios() {
                                 </strong>
 
                                 <small>
-                                    {resumo.quantidadePendentes} atendimento(s)
-                                    ainda não pago(s)
+                                    {resumo.quantidadePendentes} pagamento(s)
+                                    pendente(s)
                                 </small>
                             </article>
 
@@ -455,7 +527,11 @@ export default function Relatorios() {
                                 </small>
                             </article>
 
-                            <article className={`relatorios-card resultado ${resultado < 0 ? 'negativo' : ''}`}>
+                            <article
+                                className={`relatorios-card resultado ${
+                                    resultado < 0 ? 'negativo' : ''
+                                }`}
+                            >
                                 <div className="relatorios-card-cabecalho">
                                     <span>Resultado operacional</span>
                                     <span className="relatorios-card-icone">=</span>
@@ -476,7 +552,9 @@ export default function Relatorios() {
                                         <span className="relatorios-section-eyebrow">
                                             DESEMPENHO
                                         </span>
+
                                         <h2>Entradas e saídas</h2>
+
                                         <p>
                                             Comparação financeira do período
                                             selecionado.
@@ -491,6 +569,7 @@ export default function Relatorios() {
                                                 <i className="ponto-recebido" />
                                                 Recebimentos
                                             </span>
+
                                             <strong>
                                                 {dinheiro(numero(resumo.totalRecebido))}
                                             </strong>
@@ -512,6 +591,7 @@ export default function Relatorios() {
                                                 <i className="ponto-despesa" />
                                                 Despesas
                                             </span>
+
                                             <strong>
                                                 {dinheiro(numero(resumo.totalDespesas))}
                                             </strong>
@@ -530,7 +610,14 @@ export default function Relatorios() {
 
                                 <div className="relatorios-comparativo-rodape">
                                     <span>Resultado do período</span>
-                                    <strong className={resultado < 0 ? 'texto-negativo' : 'texto-positivo'}>
+
+                                    <strong
+                                        className={
+                                            resultado < 0
+                                                ? 'texto-negativo'
+                                                : 'texto-positivo'
+                                        }
+                                    >
                                         {dinheiro(resultado)}
                                     </strong>
                                 </div>
@@ -542,7 +629,9 @@ export default function Relatorios() {
                                         <span className="relatorios-section-eyebrow">
                                             PRODUÇÃO
                                         </span>
-                                        <h2>Atendimentos</h2>
+
+                                        <h2>Atendimentos e avaliações</h2>
+
                                         <p>
                                             Registros vinculados ao período.
                                         </p>
@@ -553,6 +642,7 @@ export default function Relatorios() {
                                     <strong>
                                         {resumo.quantidadeAtendimentos}
                                     </strong>
+
                                     <span>registros encontrados</span>
                                 </div>
 
@@ -588,10 +678,12 @@ export default function Relatorios() {
                                     <span className="relatorios-section-eyebrow">
                                         MOVIMENTAÇÕES
                                     </span>
+
                                     <h2>Detalhamento do período</h2>
+
                                     <p>
-                                        Consulte separadamente os serviços
-                                        realizados, pagamentos recebidos e
+                                        Consulte separadamente os atendimentos,
+                                        avaliações, pagamentos recebidos e
                                         despesas registradas.
                                     </p>
                                 </div>
@@ -599,14 +691,20 @@ export default function Relatorios() {
 
                             <div className="relatorios-resumo-detalhado">
                                 <div>
-                                    <span>Valor dos pagamentos listados</span>
+                                    <span>
+                                        Pagamentos de atendimentos listados
+                                    </span>
+
                                     <strong className="texto-positivo">
                                         {dinheiro(totalRecebimentosDetalhados)}
                                     </strong>
                                 </div>
 
                                 <div>
-                                    <span>Valores pendentes listados</span>
+                                    <span>
+                                        Valores pendentes de atendimentos e avaliações
+                                    </span>
+
                                     <strong>
                                         {dinheiro(totalPendenteDetalhado)}
                                     </strong>
@@ -614,16 +712,19 @@ export default function Relatorios() {
 
                                 <div>
                                     <span>Despesas listadas</span>
+
                                     <strong className="texto-negativo">
                                         {dinheiro(totalDespesasDetalhadas)}
                                     </strong>
                                 </div>
                             </div>
 
+                            {/* PAGAMENTOS DE ATENDIMENTOS */}
                             <div className="relatorios-tabela-bloco">
                                 <div className="relatorios-tabela-titulo">
                                     <div>
-                                        <h3>Pagamentos recebidos</h3>
+                                        <h3>Pagamentos recebidos de atendimentos</h3>
+
                                         <p>
                                             Filtrados pela data em que o
                                             pagamento foi registrado.
@@ -657,12 +758,15 @@ export default function Relatorios() {
                                                         <td className="celula-paciente">
                                                             {item.pacienteNome}
                                                         </td>
+
                                                         <td>
                                                             {formatarData(item.dataPagamento)}
                                                         </td>
+
                                                         <td>
                                                             #{item.atendimentoId}
                                                         </td>
+
                                                         <td className="texto-positivo valor-tabela">
                                                             {dinheiro(valor)}
                                                         </td>
@@ -673,7 +777,8 @@ export default function Relatorios() {
                                             {recebimentos.length === 0 && (
                                                 <tr>
                                                     <td colSpan={4} className="relatorios-vazio">
-                                                        Nenhum pagamento registrado neste período.
+                                                        Nenhum pagamento de atendimento
+                                                        registrado neste período.
                                                     </td>
                                                 </tr>
                                             )}
@@ -682,12 +787,121 @@ export default function Relatorios() {
                                 </div>
                             </div>
 
+                            {/* AVALIAÇÕES */}
+                            <div className="relatorios-tabela-bloco">
+                                <div className="relatorios-tabela-titulo">
+                                    <div>
+                                        <h3>Avaliações fisioterapêuticas</h3>
+
+                                        <p>
+                                            Filtradas pela data em que a
+                                            avaliação foi realizada.
+                                        </p>
+                                    </div>
+
+                                    <span className="relatorios-contagem">
+                                        {avaliacoes.length} registro(s)
+                                    </span>
+                                </div>
+
+                                <div className="relatorios-resumo-detalhado">
+                                    <div>
+                                        <span>Valor das avaliações pagas</span>
+
+                                        <strong className="texto-positivo">
+                                            {dinheiro(totalAvaliacoesPagas)}
+                                        </strong>
+                                    </div>
+
+                                    <div>
+                                        <span>Valor das avaliações pendentes</span>
+
+                                        <strong>
+                                            {dinheiro(pendenteAvaliacoes)}
+                                        </strong>
+                                    </div>
+                                </div>
+
+                                <div className="relatorios-tabela-scroll">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Paciente</th>
+                                                <th>Data da avaliação</th>
+                                                <th>Horário</th>
+                                                <th>Queixa principal</th>
+                                                <th>Valor</th>
+                                                <th>Pagamento</th>
+                                                <th>Situação</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            {avaliacoes.map((item) => (
+                                                <tr key={item.id}>
+                                                    <td className="celula-paciente">
+                                                        {item.nomePaciente}
+                                                    </td>
+
+                                                    <td>
+                                                        {formatarData(item.data)}
+                                                    </td>
+
+                                                    <td>
+                                                        {item.hora || '-'}
+                                                    </td>
+
+                                                    <td>
+                                                        {item.queixaPrincipal || '-'}
+                                                    </td>
+
+                                                    <td className="valor-tabela">
+                                                        {dinheiro(numero(item.valor))}
+                                                    </td>
+
+                                                    <td>
+                                                        <span
+                                                            className={`relatorios-status ${
+                                                                item.statusPagamento === 'PAGO'
+                                                                    ? 'pago'
+                                                                    : 'pendente'
+                                                            }`}
+                                                        >
+                                                            {item.statusPagamento === 'PAGO'
+                                                                ? 'Pago'
+                                                                : 'Pendente'}
+                                                        </span>
+                                                    </td>
+
+                                                    <td>
+                                                        {item.statusAtendimento === 'ATENDIDO'
+                                                            ? 'Realizada'
+                                                            : item.statusAtendimento}
+                                                    </td>
+                                                </tr>
+                                            ))}
+
+                                            {avaliacoes.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={7} className="relatorios-vazio">
+                                                        Nenhuma avaliação encontrada
+                                                        neste período.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* ATENDIMENTOS */}
                             <div className="relatorios-tabela-bloco">
                                 <div className="relatorios-tabela-titulo">
                                     <div>
                                         <h3>Atendimentos realizados</h3>
+
                                         <p>
-                                            Filtrados pela data do agendamento.
+                                            Filtrados pela data do atendimento.
                                         </p>
                                     </div>
 
@@ -720,16 +934,22 @@ export default function Relatorios() {
                                                         <td className="celula-paciente">
                                                             {item.pacienteNome}
                                                         </td>
-                                                        <td>{formatarData(item.data)}</td>
+
+                                                        <td>
+                                                            {formatarData(item.data)}
+                                                        </td>
+
                                                         <td>
                                                             {item.horaInicio || '--:--'}
                                                             {item.horaFim
                                                                 ? ` - ${item.horaFim}`
                                                                 : ''}
                                                         </td>
+
                                                         <td className="valor-tabela">
                                                             {dinheiro(valor)}
                                                         </td>
+
                                                         <td>
                                                             <span
                                                                 className={`relatorios-status ${
@@ -743,6 +963,7 @@ export default function Relatorios() {
                                                                     : 'Pendente'}
                                                             </span>
                                                         </td>
+
                                                         <td>
                                                             {item.statusAtendimento === 'ATENDIDO'
                                                                 ? 'Realizado'
@@ -755,7 +976,8 @@ export default function Relatorios() {
                                             {atendimentos.length === 0 && (
                                                 <tr>
                                                     <td colSpan={6} className="relatorios-vazio">
-                                                        Nenhum atendimento encontrado neste período.
+                                                        Nenhum atendimento encontrado
+                                                        neste período.
                                                     </td>
                                                 </tr>
                                             )}
@@ -764,10 +986,12 @@ export default function Relatorios() {
                                 </div>
                             </div>
 
+                            {/* DESPESAS */}
                             <div className="relatorios-tabela-bloco">
                                 <div className="relatorios-tabela-titulo">
                                     <div>
                                         <h3>Despesas registradas</h3>
+
                                         <p>
                                             Filtradas pela data da despesa.
                                         </p>
@@ -796,9 +1020,19 @@ export default function Relatorios() {
                                                     <td className="celula-paciente">
                                                         {item.descricao}
                                                     </td>
-                                                    <td>{item.categoria}</td>
-                                                    <td>{formatarData(item.dataDespesa)}</td>
-                                                    <td>{item.observacao || '-'}</td>
+
+                                                    <td>
+                                                        {item.categoria}
+                                                    </td>
+
+                                                    <td>
+                                                        {formatarData(item.dataDespesa)}
+                                                    </td>
+
+                                                    <td>
+                                                        {item.observacao || '-'}
+                                                    </td>
+
                                                     <td className="texto-negativo valor-tabela">
                                                         {dinheiro(numero(item.valor))}
                                                     </td>
@@ -808,7 +1042,8 @@ export default function Relatorios() {
                                             {despesas.length === 0 && (
                                                 <tr>
                                                     <td colSpan={5} className="relatorios-vazio">
-                                                        Nenhuma despesa encontrada neste período.
+                                                        Nenhuma despesa encontrada
+                                                        neste período.
                                                     </td>
                                                 </tr>
                                             )}
@@ -823,7 +1058,9 @@ export default function Relatorios() {
                 {!carregando && !erro && !carregado && (
                     <div className="relatorios-vazio-geral">
                         <span>▤</span>
+
                         <h2>Selecione um período</h2>
+
                         <p>
                             Escolha as datas e gere o relatório para consultar
                             os dados financeiros.

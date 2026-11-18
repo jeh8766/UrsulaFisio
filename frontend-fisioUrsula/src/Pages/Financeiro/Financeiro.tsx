@@ -19,6 +19,18 @@ type AtendimentoApi = {
   statusPagamento: StatusPagamento;
 };
 
+type AvaliacaoApi = {
+  id: number;
+  queixaPrincipal: string;
+  observacao?: string | null;
+  valor: number | string;
+  statusPagamento: StatusPagamento;
+  statusAtendimento: string;
+  nomePaciente: string;
+  data: string;
+  hora: string;
+};
+
 type RecebimentoApi = {
   atendimentoId: number;
   dataPagamento: string;
@@ -55,6 +67,7 @@ type RegistroFinanceiro = {
   chave: string;
   id: number;
   atendimentoId?: number;
+  avaliacaoId?: number;
   statusPagamento?: StatusPagamento;
   descricao: string;
   origem: string;
@@ -200,6 +213,7 @@ export default function Financeiro() {
 
   const [resumo, setResumo] = useState<ResumoFinanceiro | null>(null);
   const [atendimentos, setAtendimentos] = useState<AtendimentoApi[]>([]);
+  const [avaliacoes, setAvaliacoes] = useState<AvaliacaoApi[]>([]);
   const [recebimentos, setRecebimentos] = useState<RecebimentoApi[]>([]);
   const [despesas, setDespesas] = useState<DespesaApi[]>([]);
 
@@ -211,6 +225,11 @@ export default function Financeiro() {
 
   const [atualizandoPagamentoId, setAtualizandoPagamentoId] =
     useState<number | null>(null);
+
+  const [
+    atualizandoPagamentoAvaliacaoId,
+    setAtualizandoPagamentoAvaliacaoId,
+  ] = useState<number | null>(null);
 
   const carregarFinanceiro = useCallback(async () => {
     try {
@@ -235,29 +254,46 @@ export default function Financeiro() {
         fim,
       });
 
-      const [dadosResumo, dadosAtendimentos, dadosRecebimentos, dadosDespesas] =
-        await Promise.all([
-          requisicao<ResumoFinanceiro>(
-            `${API_BASE}/financeiro/resumo?${parametrosResumo.toString()}`,
-          ),
+      const [
+        dadosResumo,
+        dadosAtendimentos,
+        dadosRecebimentos,
+        dadosDespesas,
+        dadosAvaliacoes,
+      ] = await Promise.all([
+        requisicao<ResumoFinanceiro>(
+          `${API_BASE}/financeiro/resumo?${parametrosResumo.toString()}`,
+        ),
 
-          requisicao<AtendimentoApi[]>(
-            `${API_BASE}/atendimentos/data?${parametrosAtendimentos.toString()}`,
-          ),
+        requisicao<AtendimentoApi[]>(
+          `${API_BASE}/atendimentos/data?${parametrosAtendimentos.toString()}`,
+        ),
 
-          requisicao<RecebimentoApi[]>(
-            `${API_BASE}/financeiro/recebimentos?${parametrosResumo.toString()}`,
-          ),
+        requisicao<RecebimentoApi[]>(
+          `${API_BASE}/financeiro/recebimentos?${parametrosResumo.toString()}`,
+        ),
 
-          requisicao<DespesaApi[]>(
-            `${API_BASE}/despesas/periodo?${parametrosDespesas.toString()}`,
-          ),
-        ]);
+        requisicao<DespesaApi[]>(
+          `${API_BASE}/despesas/periodo?${parametrosDespesas.toString()}`,
+        ),
+
+        requisicao<AvaliacaoApi[]>(
+          `${API_BASE}/avaliacoes`,
+        ),
+      ]);
 
       setResumo(dadosResumo);
       setAtendimentos(dadosAtendimentos ?? []);
       setRecebimentos(dadosRecebimentos ?? []);
       setDespesas(dadosDespesas ?? []);
+
+      // Mantém somente as avaliações do mês selecionado.
+      setAvaliacoes(
+        (dadosAvaliacoes ?? []).filter(
+          (avaliacao) =>
+            avaliacao.data?.slice(0, 7) === mesSelecionado,
+        ),
+      );
     } catch (error) {
       setErro(
         error instanceof Error
@@ -273,6 +309,7 @@ export default function Financeiro() {
     void carregarFinanceiro();
   }, [carregarFinanceiro]);
 
+  // Altera o pagamento de um atendimento.
   async function alterarStatusPagamento(
     atendimentoId: number,
     statusAtual: StatusPagamento,
@@ -306,6 +343,32 @@ export default function Financeiro() {
     }
   }
 
+  // Registra o pagamento de uma avaliação.
+  async function registrarPagamentoAvaliacao(avaliacaoId: number) {
+    try {
+      setAtualizandoPagamentoAvaliacaoId(avaliacaoId);
+      setErro('');
+
+      await requisicao<void>(
+        `${API_BASE}/avaliacoes/${avaliacaoId}/pagamento`,
+        {
+          method: 'PATCH',
+        },
+      );
+
+      await carregarFinanceiro();
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível registrar o pagamento da avaliação.',
+      );
+    } finally {
+      setAtualizandoPagamentoAvaliacaoId(null);
+    }
+  }
+
+  // Monta as movimentações de atendimentos, avaliações e despesas.
   const movimentacoes = useMemo<RegistroFinanceiro[]>(() => {
     const recebimentosPorAtendimento = new Map(
       recebimentos.map((recebimento) => [
@@ -314,17 +377,20 @@ export default function Financeiro() {
       ]),
     );
 
-    const entradas: RegistroFinanceiro[] = atendimentos.map(
-      (atendimento) => {
-        const recebimento = recebimentosPorAtendimento.get(atendimento.id);
+    const entradasAtendimentos: RegistroFinanceiro[] =
+      atendimentos.map((atendimento) => {
+        const recebimento = recebimentosPorAtendimento.get(
+          atendimento.id,
+        );
 
         const valorTotal =
           numero(atendimento.valor) +
           numero(atendimento.taxaDeslocamento);
 
         /*
-         * Se o pagamento foi realizado, usamos a data real do recebimento.
-         * Se ainda está pendente, usamos a data do atendimento.
+         * Se o pagamento foi realizado, usamos a data real
+         * do recebimento. Se está pendente, usamos a data
+         * do atendimento.
          */
         const dataMovimentacao =
           atendimento.statusPagamento === 'PAGO' && recebimento
@@ -346,8 +412,24 @@ export default function Financeiro() {
               : 'Pendente',
           tipo: 'Entrada',
         };
-      },
-    );
+      });
+
+    const entradasAvaliacoes: RegistroFinanceiro[] =
+      avaliacoes.map((avaliacao) => ({
+        chave: `avaliacao-${avaliacao.id}`,
+        id: avaliacao.id,
+        avaliacaoId: avaliacao.id,
+        statusPagamento: avaliacao.statusPagamento,
+        descricao: 'Avaliação fisioterapêutica',
+        origem: avaliacao.nomePaciente || 'Paciente não informado',
+        data: avaliacao.data,
+        valor: numero(avaliacao.valor),
+        status:
+          avaliacao.statusPagamento === 'PAGO'
+            ? 'Recebido'
+            : 'Pendente',
+        tipo: 'Entrada',
+      }));
 
     const saidas: RegistroFinanceiro[] = despesas.map((despesa) => ({
       chave: `despesa-${despesa.id}`,
@@ -360,10 +442,12 @@ export default function Financeiro() {
       tipo: 'Saída',
     }));
 
-    return [...entradas, ...saidas].sort((a, b) =>
-      b.data.localeCompare(a.data),
-    );
-  }, [atendimentos, recebimentos, despesas]);
+    return [
+      ...entradasAtendimentos,
+      ...entradasAvaliacoes,
+      ...saidas,
+    ].sort((a, b) => b.data.localeCompare(a.data));
+  }, [atendimentos, recebimentos, avaliacoes, despesas]);
 
   const movimentacoesFiltradas = useMemo(() => {
     const texto = busca.trim().toLowerCase();
@@ -411,7 +495,9 @@ export default function Financeiro() {
               <input
                 type="month"
                 value={mesSelecionado}
-                onChange={(event) => setMesSelecionado(event.target.value)}
+                onChange={(event) =>
+                  setMesSelecionado(event.target.value)
+                }
                 aria-label="Selecionar mês do financeiro"
               />
             </label>
@@ -449,7 +535,8 @@ export default function Financeiro() {
             </div>
             <strong>{formatarMoeda(faturamentoBruto)}</strong>
             <small>
-              {resumo?.quantidadeAtendimentos ?? 0} atendimentos realizados
+              {resumo?.quantidadeAtendimentos ?? 0} atendimentos e avaliações
+              realizados
             </small>
           </article>
 
@@ -459,9 +546,7 @@ export default function Financeiro() {
               <span className="finance-icon received">R$</span>
             </div>
             <strong>{formatarMoeda(totalRecebido)}</strong>
-            <small>
-              Recebimentos registrados no mês
-            </small>
+            <small>Recebimentos registrados no mês</small>
           </article>
 
           <article>
@@ -499,7 +584,8 @@ export default function Financeiro() {
             <div>
               <h2>Movimentações</h2>
               <p>
-                Atendimentos, recebimentos e despesas do período selecionado.
+                Atendimentos, avaliações, recebimentos e despesas do período
+                selecionado.
               </p>
             </div>
 
@@ -529,7 +615,7 @@ export default function Financeiro() {
               aria-label="Filtrar movimentações"
             >
               <option value="TODOS">Todas as movimentações</option>
-              <option value="ENTRADAS">Atendimentos e recebimentos</option>
+              <option value="ENTRADAS">Atendimentos e avaliações</option>
               <option value="RECEBIDO">Recebidos</option>
               <option value="PENDENTE">Pendentes</option>
               <option value="DESPESAS">Despesas</option>
@@ -607,6 +693,7 @@ export default function Financeiro() {
                         </td>
 
                         <td>
+                          {/* Ação para pagamentos de atendimentos */}
                           {item.tipo === 'Entrada' &&
                             item.atendimentoId &&
                             item.statusPagamento && (
@@ -636,6 +723,35 @@ export default function Financeiro() {
                                     : 'Marcar recebido'}
                               </button>
                             )}
+
+                          {/* Ação para pagamentos de avaliações */}
+                          {item.tipo === 'Entrada' &&
+                            item.avaliacaoId &&
+                            item.statusPagamento &&
+                            (item.statusPagamento === 'PENDENTE' ? (
+                              <button
+                                type="button"
+                                className="finance-payment-button pending"
+                                disabled={
+                                  atualizandoPagamentoAvaliacaoId ===
+                                  item.avaliacaoId
+                                }
+                                onClick={() =>
+                                  void registrarPagamentoAvaliacao(
+                                    item.avaliacaoId!,
+                                  )
+                                }
+                              >
+                                {atualizandoPagamentoAvaliacaoId ===
+                                item.avaliacaoId
+                                  ? 'Atualizando...'
+                                  : 'Marcar recebido'}
+                              </button>
+                            ) : (
+                              <span className="finance-status recebido">
+                                Pagamento registrado
+                              </span>
+                            ))}
                         </td>
                       </tr>
                     ))}
@@ -660,8 +776,8 @@ export default function Financeiro() {
         </section>
 
         <p className="finance-disclaimer">
-          O faturamento bruto considera os atendimentos realizados no período.
-          O total recebido considera a data em que os pagamentos foram
+          O faturamento bruto considera os atendimentos e avaliações
+          realizados no período. O total recebido considera os pagamentos
           registrados. O resultado operacional é calculado subtraindo as
           despesas dos recebimentos do período.
         </p>

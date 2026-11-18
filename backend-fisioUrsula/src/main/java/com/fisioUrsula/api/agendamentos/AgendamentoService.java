@@ -68,6 +68,10 @@ public class AgendamentoService {
                 ? agendamento.getAtendimento().getId()
                 : null;
 
+        Long avaliacaoId = agendamento.getAvaliacao() != null
+                ? agendamento.getAvaliacao().getId()
+                : null;
+
         return new AgendamentoAgendaResponseDTO(
                 agendamento.getId(),
                 pacienteDTO.id(),
@@ -77,7 +81,8 @@ public class AgendamentoService {
                 agendamento.getHoraFim(),
                 agendamento.getTipoAgendamento(),
                 agendamento.getStatusAgendamento(),
-                atendimentoId
+                atendimentoId,
+                avaliacaoId
         );
     }
 
