@@ -1,5 +1,5 @@
-package com.fisioUrsula.api.atendimentos.sinaisVitais.dtos;
 
+package com.fisioUrsula.api.atendimentos.sinaisVitais.dtos;
 
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
 
@@ -9,8 +9,10 @@ public record DetalharSinaisVitaisResponseDTO(
         Double saturacao,
         int frequenciaCardiaca,
         int frequenciaRespiratoria,
-        Long atendimento_Id
+        Long atendimento_Id,
+        Long avaliacao_Id
 ) {
+
     public DetalharSinaisVitaisResponseDTO(SinaisVitais sinaisVitais) {
         this(
                 sinaisVitais.getId(),
@@ -20,6 +22,9 @@ public record DetalharSinaisVitaisResponseDTO(
                 sinaisVitais.getFrequenciaRespiratoria(),
                 sinaisVitais.getAtendimento() != null
                         ? sinaisVitais.getAtendimento().getId()
+                        : null,
+                sinaisVitais.getAvaliacao() != null
+                        ? sinaisVitais.getAvaliacao().getId()
                         : null
         );
     }

@@ -1,3 +1,4 @@
+
 package com.fisioUrsula.api.atendimentos.sinaisVitais.dtos;
 
 public record CriarSinaisVitaisResponseDTO(

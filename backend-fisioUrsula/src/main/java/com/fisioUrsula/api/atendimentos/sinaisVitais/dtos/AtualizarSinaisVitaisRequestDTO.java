@@ -1,3 +1,4 @@
+
 package com.fisioUrsula.api.atendimentos.sinaisVitais.dtos;
 
 import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
@@ -17,8 +18,10 @@ public record AtualizarSinaisVitaisRequestDTO(
 
         @Positive
         Integer frequenciaRespiratoria
+
 ) {
-    public AtualizarSinaisVitaisRequestDTO(SinaisVitais sinaisVitais){
+
+    public AtualizarSinaisVitaisRequestDTO(SinaisVitais sinaisVitais) {
         this(
                 sinaisVitais.getPressaoArterial(),
                 sinaisVitais.getSaturacao(),

@@ -1,3 +1,4 @@
+
 package com.fisioUrsula.api.atendimentos.sinaisVitais;
 
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.AtualizarSinaisVitaisRequestDTO;
@@ -10,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequiredArgsConstructor
@@ -25,8 +25,24 @@ public class SinaisVitaisController {
             @PathVariable Long atendimentoId,
             @Valid @RequestBody CriarSinaisVitaisRequestDTO dto
     ) {
+
         CriarSinaisVitaisResponseDTO resposta =
                 sinaisVitaisService.criarSinaisVitais(atendimentoId, dto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
+    }
+
+    @PostMapping("/avaliacao/{avaliacaoId}")
+    public ResponseEntity<CriarSinaisVitaisResponseDTO> criarSinaisVitaisParaAvaliacao(
+            @PathVariable Long avaliacaoId,
+            @Valid @RequestBody CriarSinaisVitaisRequestDTO dto
+    ) {
+
+        CriarSinaisVitaisResponseDTO resposta =
+                sinaisVitaisService.criarSinaisVitaisParaAvaliacao(
+                        avaliacaoId,
+                        dto
+                );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
     }
@@ -35,6 +51,7 @@ public class SinaisVitaisController {
     public ResponseEntity<DetalharSinaisVitaisResponseDTO> detalharSinaisVitais(
             @PathVariable Long id
     ) {
+
         return ResponseEntity.ok(
                 sinaisVitaisService.detalharSinaisVitais(id)
         );
@@ -45,6 +62,7 @@ public class SinaisVitaisController {
             @PathVariable Long id,
             @Valid @RequestBody AtualizarSinaisVitaisRequestDTO dto
     ) {
+
         return ResponseEntity.ok(
                 sinaisVitaisService.atualizarSinaisVitais(id, dto)
         );
@@ -54,8 +72,23 @@ public class SinaisVitaisController {
     public ResponseEntity<DetalharSinaisVitaisResponseDTO> buscarSinaisVitaisPorAtendimento(
             @PathVariable Long atendimentoId
     ) {
+
         return ResponseEntity.ok(
-                sinaisVitaisService.buscarSinaisVitaisPorAtendimento(atendimentoId)
+                sinaisVitaisService.buscarSinaisVitaisPorAtendimento(
+                        atendimentoId
+                )
+        );
+    }
+
+    @GetMapping("/avaliacao/{avaliacaoId}")
+    public ResponseEntity<DetalharSinaisVitaisResponseDTO> buscarSinaisVitaisPorAvaliacao(
+            @PathVariable Long avaliacaoId
+    ) {
+
+        return ResponseEntity.ok(
+                sinaisVitaisService.buscarSinaisVitaisPorAvaliacao(
+                        avaliacaoId
+                )
         );
     }
 }

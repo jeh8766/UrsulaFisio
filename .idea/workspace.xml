@@ -11,7 +11,6 @@
       <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/financeiro/despesas/FinanceiroService.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/financeiro/despesas/dtos/RecebimentoResponseDTO.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/backend-fisioUrsula/src/main/java/com/fisioUrsula/api/financeiro/despesas/dtos/ResumoFinanceiroResponseDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

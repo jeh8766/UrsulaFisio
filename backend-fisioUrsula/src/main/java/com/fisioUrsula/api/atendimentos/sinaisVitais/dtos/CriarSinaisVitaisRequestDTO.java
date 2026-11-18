@@ -1,3 +1,4 @@
+
 package com.fisioUrsula.api.atendimentos.sinaisVitais.dtos;
 
 import jakarta.validation.constraints.*;
@@ -20,5 +21,5 @@ public record CriarSinaisVitaisRequestDTO(
         @NotNull
         @Positive
         Integer frequenciaRespiratoria
-) {
-}
+
+) {}

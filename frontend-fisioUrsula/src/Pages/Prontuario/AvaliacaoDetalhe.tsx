@@ -18,6 +18,16 @@ type Avaliacao = {
   hora: string;
 };
 
+type SinaisVitais = {
+  id: number;
+  pressaoArterial: string;
+  saturacao: number;
+  frequenciaCardiaca: number;
+  frequenciaRespiratoria: number;
+  atendimento_Id?: number | null;
+  avaliacao_Id?: number | null;
+};
+
 type CsrfTokenResponse = {
   token: string;
   headerName: string;
@@ -75,11 +85,66 @@ export default function AvaliacaoDetalhe() {
   const [observacao, setObservacao] = useState('');
   const [valor, setValor] = useState('');
 
+  // Dados dos sinais vitais
+  const [sinaisVitais, setSinaisVitais] = useState<SinaisVitais | null>(null);
+
+  const [pressaoArterial, setPressaoArterial] = useState('');
+  const [saturacao, setSaturacao] = useState('');
+  const [frequenciaCardiaca, setFrequenciaCardiaca] = useState('');
+  const [frequenciaRespiratoria, setFrequenciaRespiratoria] = useState('');
+
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
+  const [salvandoSinaisVitais, setSalvandoSinaisVitais] = useState(false);
 
   const [erro, setErro] = useState('');
+  const [erroSinaisVitais, setErroSinaisVitais] = useState('');
   const [mensagem, setMensagem] = useState('');
+  const [mensagemSinaisVitais, setMensagemSinaisVitais] = useState('');
+
+  async function carregarSinaisVitais(avaliacaoId: number) {
+    try {
+      setErroSinaisVitais('');
+
+      const response = await fetch(
+        `${API_URL}/sinais_vitais/avaliacao/${avaliacaoId}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      );
+
+      // Uma avaliação sem sinais vitais ainda cadastrados é válida.
+      if (response.status === 404) {
+        setSinaisVitais(null);
+        setPressaoArterial('');
+        setSaturacao('');
+        setFrequenciaCardiaca('');
+        setFrequenciaRespiratoria('');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(await obterMensagemErro(response));
+      }
+
+      const dados: SinaisVitais = await response.json();
+
+      setSinaisVitais(dados);
+      setPressaoArterial(dados.pressaoArterial ?? '');
+      setSaturacao(String(dados.saturacao ?? ''));
+      setFrequenciaCardiaca(String(dados.frequenciaCardiaca ?? ''));
+      setFrequenciaRespiratoria(
+        String(dados.frequenciaRespiratoria ?? '')
+      );
+    } catch (error) {
+      setErroSinaisVitais(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível carregar os sinais vitais.'
+      );
+    }
+  }
 
   async function carregarAvaliacao() {
     if (!id) {
@@ -107,6 +172,8 @@ export default function AvaliacaoDetalhe() {
       setQueixaPrincipal(dados.queixaPrincipal ?? '');
       setObservacao(dados.observacao ?? '');
       setValor(String(dados.valor ?? ''));
+
+      await carregarSinaisVitais(dados.id);
     } catch (error) {
       setErro(
         error instanceof Error
@@ -172,6 +239,84 @@ export default function AvaliacaoDetalhe() {
       );
     } finally {
       setSalvando(false);
+    }
+  }
+
+  async function salvarSinaisVitais() {
+    if (!id || !avaliacao) return;
+
+    const saturacaoNumerica = Number(saturacao);
+    const frequenciaCardiacaNumerica = Number(frequenciaCardiaca);
+    const frequenciaRespiratoriaNumerica = Number(frequenciaRespiratoria);
+
+    if (
+      !pressaoArterial.trim() ||
+      saturacao.trim() === '' ||
+      frequenciaCardiaca.trim() === '' ||
+      frequenciaRespiratoria.trim() === '' ||
+      !Number.isFinite(saturacaoNumerica) ||
+      saturacaoNumerica < 0 ||
+      saturacaoNumerica > 100 ||
+      !Number.isInteger(frequenciaCardiacaNumerica) ||
+      frequenciaCardiacaNumerica <= 0 ||
+      !Number.isInteger(frequenciaRespiratoriaNumerica) ||
+      frequenciaRespiratoriaNumerica <= 0
+    ) {
+      setErroSinaisVitais(
+        'Preencha todos os campos com valores válidos.'
+      );
+      return;
+    }
+
+    try {
+      setSalvandoSinaisVitais(true);
+      setErroSinaisVitais('');
+      setMensagemSinaisVitais('');
+
+      const csrf = await obterTokenCsrf();
+
+      const dados = {
+        pressaoArterial: pressaoArterial.trim(),
+        saturacao: saturacaoNumerica,
+        frequenciaCardiaca: frequenciaCardiacaNumerica,
+        frequenciaRespiratoria: frequenciaRespiratoriaNumerica,
+      };
+
+      const editando = sinaisVitais !== null;
+
+      const url = editando
+        ? `${API_URL}/sinais_vitais/${sinaisVitais.id}/atualizar`
+        : `${API_URL}/sinais_vitais/avaliacao/${id}`;
+
+      const response = await fetch(url, {
+        method: editando ? 'PATCH' : 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          [csrf.headerName]: csrf.token,
+        },
+        body: JSON.stringify(dados),
+      });
+
+      if (!response.ok) {
+        throw new Error(await obterMensagemErro(response));
+      }
+
+      setMensagemSinaisVitais(
+        editando
+          ? 'Sinais vitais atualizados com sucesso.'
+          : 'Sinais vitais registrados com sucesso.'
+      );
+
+      await carregarSinaisVitais(Number(id));
+    } catch (error) {
+      setErroSinaisVitais(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível salvar os sinais vitais.'
+      );
+    } finally {
+      setSalvandoSinaisVitais(false);
     }
   }
 
@@ -418,6 +563,118 @@ export default function AvaliacaoDetalhe() {
             >
               {salvando ? 'Salvando...' : 'Salvar alterações'}
             </button>
+          )}
+        </section>
+
+        {/* SINAIS VITAIS */}
+        <section className="avaliacao-form-panel">
+          <div className="avaliacao-section-heading">
+            <h3>Sinais vitais</h3>
+            <p>
+              Registre os dados clínicos coletados durante a avaliação.
+            </p>
+          </div>
+
+          {erroSinaisVitais && (
+            <p className="avaliacao-message error" role="alert">
+              {erroSinaisVitais}
+            </p>
+          )}
+
+          {mensagemSinaisVitais && (
+            <p className="avaliacao-message success" role="status">
+              {mensagemSinaisVitais}
+            </p>
+          )}
+
+          <div className="avaliacao-vitals-grid">
+            <label className="avaliacao-field">
+              Pressão arterial
+              <input
+                type="text"
+                maxLength={15}
+                placeholder="Ex.: 120/80"
+                value={pressaoArterial}
+                onChange={(evento) =>
+                  setPressaoArterial(evento.target.value)
+                }
+                disabled={salvandoSinaisVitais || concluida}
+              />
+              <small>Exemplo: 120/80 mmHg</small>
+            </label>
+
+            <label className="avaliacao-field">
+              Saturação de oxigênio (%)
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                placeholder="Ex.: 98"
+                value={saturacao}
+                onChange={(evento) => setSaturacao(evento.target.value)}
+                disabled={salvandoSinaisVitais || concluida}
+              />
+            </label>
+
+            <label className="avaliacao-field">
+              Frequência cardíaca (bpm)
+              <input
+                type="number"
+                min="1"
+                step="1"
+                placeholder="Ex.: 75"
+                value={frequenciaCardiaca}
+                onChange={(evento) =>
+                  setFrequenciaCardiaca(evento.target.value)
+                }
+                disabled={salvandoSinaisVitais || concluida}
+              />
+            </label>
+
+            <label className="avaliacao-field">
+              Frequência respiratória (irpm)
+              <input
+                type="number"
+                min="1"
+                step="1"
+                placeholder="Ex.: 18"
+                value={frequenciaRespiratoria}
+                onChange={(evento) =>
+                  setFrequenciaRespiratoria(evento.target.value)
+                }
+                disabled={salvandoSinaisVitais || concluida}
+              />
+            </label>
+          </div>
+
+          <div className="avaliacao-actions">
+            <button
+              type="button"
+              className="avaliacao-button primary"
+              onClick={salvarSinaisVitais}
+              disabled={salvandoSinaisVitais || concluida}
+            >
+              {salvandoSinaisVitais
+                ? 'Salvando sinais vitais...'
+                : sinaisVitais
+                  ? 'Atualizar sinais vitais'
+                  : 'Registrar sinais vitais'}
+            </button>
+          </div>
+
+          {sinaisVitais && (
+            <p className="avaliacao-vitals-info">
+              <span className="avaliacao-vitals-indicator" />
+              Sinais vitais registrados nesta avaliação.
+            </p>
+          )}
+
+          {concluida && (
+            <p className="avaliacao-vitals-info">
+              Esta avaliação foi concluída. Os sinais vitais estão disponíveis
+              apenas para consulta.
+            </p>
           )}
         </section>
 

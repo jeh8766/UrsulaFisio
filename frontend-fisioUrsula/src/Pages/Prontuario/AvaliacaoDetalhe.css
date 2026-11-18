@@ -312,3 +312,48 @@
     padding: 18px;
   }
 }
+
+/* ==========================================================================
+   SINAIS VITAIS
+   ========================================================================== */
+
+.avaliacao-vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.avaliacao-vitals-grid .avaliacao-field {
+  min-width: 0;
+}
+
+.avaliacao-field small {
+  color: #829188;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.avaliacao-vitals-info {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 18px;
+  color: #587263;
+  font-size: 13px;
+}
+
+.avaliacao-vitals-indicator {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #579378;
+}
+
+@media (max-width: 650px) {
+  .avaliacao-vitals-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
