@@ -149,6 +149,7 @@ export default function Pacientes() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [detailsError, setDetailsError] = useState('');
 
+  // Busca os pacientes conforme a pesquisa e o filtro selecionado.
   useEffect(() => {
     const controller = new AbortController();
 
@@ -210,8 +211,13 @@ export default function Pacientes() {
     if (!selectedPatient) {
       setPatientDetails(null);
       setDetailsError('');
+      setLoadingDetails(false);
       return;
     }
+
+    // Guardamos o ID depois da verificação.
+    // A partir daqui, o TypeScript sabe que o paciente existe.
+    const pacienteId = selectedPatient.id;
 
     const controller = new AbortController();
 
@@ -222,7 +228,7 @@ export default function Pacientes() {
 
       try {
         const response = await fetch(
-          `${API_URL}/pacientes/${selectedPatient!.id}`,
+          `${API_URL}/pacientes/${pacienteId}`,
           {
             method: 'GET',
             headers: { Accept: 'application/json' },
@@ -311,6 +317,16 @@ export default function Pacientes() {
 
     setSelectedPatient(null);
     navigate(`/pacientes/${pacienteId}/comorbidades`);
+  }
+
+  // Abre o prontuário completo do paciente selecionado.
+  function abrirProntuarioCompleto() {
+    if (!patientDetails) return;
+
+    const pacienteId = patientDetails.id;
+
+    setSelectedPatient(null);
+    navigate(`/pacientes/${pacienteId}/prontuario`);
   }
 
   return (
@@ -553,19 +569,27 @@ export default function Pacientes() {
                       </div>
                       <div>
                         <small>Faixa etária</small>
-                        <strong>{patientDetails.faixaEtaria || 'Não informado'}</strong>
+                        <strong>
+                          {patientDetails.faixaEtaria || 'Não informado'}
+                        </strong>
                       </div>
                       <div>
                         <small>Vínculo</small>
-                        <strong>{patientDetails.vinculo || 'Não informado'}</strong>
+                        <strong>
+                          {patientDetails.vinculo || 'Não informado'}
+                        </strong>
                       </div>
                       <div>
                         <small>Nome do responsável</small>
-                        <strong>{patientDetails.nomeResponsavel || 'Não informado'}</strong>
+                        <strong>
+                          {patientDetails.nomeResponsavel || 'Não informado'}
+                        </strong>
                       </div>
                       <div>
                         <small>Telefone</small>
-                        <strong>{patientDetails.telefone || 'Não informado'}</strong>
+                        <strong>
+                          {patientDetails.telefone || 'Não informado'}
+                        </strong>
                       </div>
                     </div>
                   </section>
@@ -575,31 +599,45 @@ export default function Pacientes() {
                     <div className="patient-detail-grid">
                       <div>
                         <small>CEP</small>
-                        <strong>{patientDetails.cep || 'Não informado'}</strong>
+                        <strong>
+                          {patientDetails.cep || 'Não informado'}
+                        </strong>
                       </div>
                       <div>
                         <small>Estado</small>
-                        <strong>{patientDetails.estado || 'Não informado'}</strong>
+                        <strong>
+                          {patientDetails.estado || 'Não informado'}
+                        </strong>
                       </div>
                       <div>
                         <small>Cidade</small>
-                        <strong>{patientDetails.cidade || 'Não informado'}</strong>
+                        <strong>
+                          {patientDetails.cidade || 'Não informado'}
+                        </strong>
                       </div>
                       <div>
                         <small>Bairro</small>
-                        <strong>{patientDetails.bairro || 'Não informado'}</strong>
+                        <strong>
+                          {patientDetails.bairro || 'Não informado'}
+                        </strong>
                       </div>
                       <div>
                         <small>Rua</small>
-                        <strong>{patientDetails.rua || 'Não informado'}</strong>
+                        <strong>
+                          {patientDetails.rua || 'Não informado'}
+                        </strong>
                       </div>
                       <div>
                         <small>Número</small>
-                        <strong>{patientDetails.numero ?? 'Não informado'}</strong>
+                        <strong>
+                          {patientDetails.numero ?? 'Não informado'}
+                        </strong>
                       </div>
                       <div className="patient-detail-full">
                         <small>Complemento</small>
-                        <strong>{patientDetails.complemento || 'Não informado'}</strong>
+                        <strong>
+                          {patientDetails.complemento || 'Não informado'}
+                        </strong>
                       </div>
                     </div>
                   </section>
@@ -627,7 +665,9 @@ export default function Pacientes() {
 
                   <section className="patient-detail-section patient-registration-info">
                     <small>Data de cadastro</small>
-                    <strong>{formatarDataHora(patientDetails.criadoEm)}</strong>
+                    <strong>
+                      {formatarDataHora(patientDetails.criadoEm)}
+                    </strong>
                   </section>
                 </div>
 
@@ -646,6 +686,14 @@ export default function Pacientes() {
                     onClick={abrirAssociacao}
                   >
                     + Atribuir comorbidade
+                  </button>
+
+                  <button
+                    type="button"
+                    className="patient-modal-history"
+                    onClick={abrirProntuarioCompleto}
+                  >
+                    Ver prontuário completo →
                   </button>
                 </footer>
               </>

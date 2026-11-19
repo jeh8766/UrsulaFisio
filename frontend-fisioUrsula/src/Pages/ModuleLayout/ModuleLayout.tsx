@@ -189,17 +189,6 @@ export default function ModuleLayout({
           </span>
         </NavLink>
 
-        <div className="module-profile">
-          <div className="module-avatar">U</div>
-
-          <div>
-            <strong>Fisioterapeuta</strong>
-            <small>Área profissional</small>
-          </div>
-
-          <span className="profile-status" />
-        </div>
-
         <p className="module-nav-label">MENU PRINCIPAL</p>
 
         <nav className="module-nav" aria-label="Navegação principal">
@@ -227,13 +216,15 @@ export default function ModuleLayout({
         </nav>
 
         <div className="module-sidebar-bottom">
-          <div className="module-help-icon">
-            <Icon name="activity" size={18} />
+          <div className="module-quote-icon">
+            <Icon name="activity" size={20} />
           </div>
 
-          <div>
-            <strong>Precisa de ajuda?</strong>
-            <small>Consulte o suporte</small>
+          <div className="module-quote-content">
+            <strong>Cuidar é transformar.</strong>
+            <p>
+              Cada movimento é uma conquista. Cada cuidado faz a diferença.
+            </p>
           </div>
         </div>
       </aside>
@@ -242,21 +233,6 @@ export default function ModuleLayout({
         <header className="module-topbar">
           <div className="module-breadcrumb">
             VittaFisio <span>/</span> <strong>{title}</strong>
-          </div>
-
-          <div className="module-top-actions">
-            <span className="module-date">Área de trabalho</span>
-
-            <button
-              className="module-notification"
-              aria-label="Notificações"
-              title="Notificações"
-            >
-              <Icon name="bell" size={20} />
-              <i />
-            </button>
-
-            <div className="module-avatar small">U</div>
           </div>
         </header>
 

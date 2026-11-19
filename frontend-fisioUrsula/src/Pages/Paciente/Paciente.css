@@ -783,3 +783,35 @@
     width: 100%;
   }
 }
+
+.patient-modal-history {
+  padding: 11px 16px;
+  border: 1px solid #d8e8dc;
+  border-radius: 9px;
+  background: #edf5ef;
+  color: #477052;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.patient-modal-history:hover {
+  background: #e1eee4;
+  transform: translateY(-1px);
+}
+
+.patient-modal-history:focus-visible {
+  outline: 3px solid #9bc5a4;
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .patient-modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .patient-modal-history {
+    width: 100%;
+  }
+}
