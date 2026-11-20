@@ -1,3 +1,4 @@
+
 package com.fisioUrsula.api.agendamentos;
 
 import java.time.LocalDate;
@@ -10,7 +11,6 @@ import com.fisioUrsula.api.pacientes.paciente.Paciente;
 import com.fisioUrsula.api.shared.enums.StatusAgendamento;
 import com.fisioUrsula.api.shared.enums.TipoAgendamento;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,7 +23,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +30,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "agendamentos", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "data", "horaInicio", "horaFim" }) })
+        @UniqueConstraint(columnNames = { "data", "horaInicio", "horaFim" })
+})
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -80,5 +80,4 @@ public class Agendamento {
         this.statusAgendamento = StatusAgendamento.PENDENTE;
         this.tipoAgendamento = TipoAgendamento.AVALIACAO;
     }
-
 }

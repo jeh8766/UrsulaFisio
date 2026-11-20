@@ -1,10 +1,11 @@
+
 package com.fisioUrsula.api.atendimentos.sinaisVitais;
 
 import java.io.Serializable;
 
 import com.fisioUrsula.api.atendimentos.atendimento.Atendimento;
+import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,16 +36,18 @@ public class SinaisVitais implements Serializable {
     @Column(nullable = false, length = 15)
     private String pressaoArterial;
 
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false)
     private Double saturacao;
 
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false)
     private Integer frequenciaCardiaca;
 
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false)
     private Integer frequenciaRespiratoria;
 
     @OneToOne(mappedBy = "sinaisVitais")
     private Atendimento atendimento;
 
+    @OneToOne(mappedBy = "sinaisVitais")
+    private Avaliacao avaliacao;
 }

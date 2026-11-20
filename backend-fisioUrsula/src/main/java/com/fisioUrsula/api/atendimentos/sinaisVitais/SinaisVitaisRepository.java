@@ -9,4 +9,6 @@ public interface SinaisVitaisRepository
         extends JpaRepository<SinaisVitais, Long> {
 
     Optional<SinaisVitais> findByAtendimentoId(Long atendimentoId);
+
+    Optional<SinaisVitais> findByAvaliacaoId(Long avaliacaoId);
 }

@@ -7,6 +7,8 @@ import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.AtualizarSinaisVitaisR
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.CriarSinaisVitaisRequestDTO;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.CriarSinaisVitaisResponseDTO;
 import com.fisioUrsula.api.atendimentos.sinaisVitais.dtos.DetalharSinaisVitaisResponseDTO;
+import com.fisioUrsula.api.avaliacoes.avaliacao.Avaliacao;
+import com.fisioUrsula.api.avaliacoes.avaliacao.AvaliacaoRepository;
 import com.fisioUrsula.api.shared.exceptions.RegistroNaoEncontradoException;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class SinaisVitaisService {
 
     private final SinaisVitaisRepository sinaisVitaisRepository;
     private final AtendimentoRepository atendimentoRepository;
+    private final AvaliacaoRepository avaliacaoRepository;
 
     @Transactional
     public CriarSinaisVitaisResponseDTO criarSinaisVitais(
@@ -38,6 +41,50 @@ public class SinaisVitaisService {
             );
         }
 
+        SinaisVitais sinaisVitais = criarEntidade(dto);
+
+        sinaisVitais.setAtendimento(atendimento);
+
+        SinaisVitais sinaisSalvos = sinaisVitaisRepository.save(sinaisVitais);
+
+        atendimento.setSinaisVitais(sinaisSalvos);
+        atendimentoRepository.save(atendimento);
+
+        return converterParaCriarResponse(sinaisSalvos);
+    }
+
+    @Transactional
+    public CriarSinaisVitaisResponseDTO criarSinaisVitaisParaAvaliacao(
+            Long avaliacaoId,
+            CriarSinaisVitaisRequestDTO dto
+    ) {
+
+        Avaliacao avaliacao = avaliacaoRepository
+                .findById(avaliacaoId)
+                .orElseThrow(() -> new RegistroNaoEncontradoException(
+                        "Avaliação não encontrada!"
+                ));
+
+        if (avaliacao.getSinaisVitais() != null) {
+            throw new IllegalStateException(
+                    "Essa avaliação já possui sinais vitais registrados!"
+            );
+        }
+
+        SinaisVitais sinaisVitais = criarEntidade(dto);
+
+        sinaisVitais.setAvaliacao(avaliacao);
+
+        SinaisVitais sinaisSalvos = sinaisVitaisRepository.save(sinaisVitais);
+
+        avaliacao.setSinaisVitais(sinaisSalvos);
+        avaliacaoRepository.save(avaliacao);
+
+        return converterParaCriarResponse(sinaisSalvos);
+    }
+
+    private SinaisVitais criarEntidade(CriarSinaisVitaisRequestDTO dto) {
+
         SinaisVitais sinaisVitais = new SinaisVitais();
 
         sinaisVitais.setPressaoArterial(dto.pressaoArterial());
@@ -45,20 +92,23 @@ public class SinaisVitaisService {
         sinaisVitais.setFrequenciaCardiaca(dto.frequenciaCardiaca());
         sinaisVitais.setFrequenciaRespiratoria(dto.frequenciaRespiratoria());
 
-        SinaisVitais sinaisSalvos = sinaisVitaisRepository.save(sinaisVitais);
+        return sinaisVitais;
+    }
 
-        atendimento.setSinaisVitais(sinaisSalvos);
-        atendimentoRepository.save(atendimento);
+    private CriarSinaisVitaisResponseDTO converterParaCriarResponse(
+            SinaisVitais sinaisVitais
+    ) {
 
         return new CriarSinaisVitaisResponseDTO(
-                sinaisSalvos.getId(),
-                sinaisSalvos.getPressaoArterial(),
-                sinaisSalvos.getSaturacao(),
-                sinaisSalvos.getFrequenciaCardiaca(),
-                sinaisSalvos.getFrequenciaRespiratoria()
+                sinaisVitais.getId(),
+                sinaisVitais.getPressaoArterial(),
+                sinaisVitais.getSaturacao(),
+                sinaisVitais.getFrequenciaCardiaca(),
+                sinaisVitais.getFrequenciaRespiratoria()
         );
     }
 
+    @Transactional(readOnly = true)
     public DetalharSinaisVitaisResponseDTO detalharSinaisVitais(Long id) {
 
         SinaisVitais sinaisVitais = sinaisVitaisRepository.findById(id)
@@ -96,11 +146,12 @@ public class SinaisVitaisService {
             sinaisVitais.setFrequenciaRespiratoria(dto.frequenciaRespiratoria());
         }
 
-        sinaisVitaisRepository.save(sinaisVitais);
-
-        return new DetalharSinaisVitaisResponseDTO(sinaisVitais);
+        return new DetalharSinaisVitaisResponseDTO(
+                sinaisVitaisRepository.save(sinaisVitais)
+        );
     }
 
+    @Transactional(readOnly = true)
     public DetalharSinaisVitaisResponseDTO buscarSinaisVitaisPorAtendimento(
             Long atendimentoId
     ) {
@@ -113,5 +164,18 @@ public class SinaisVitaisService {
 
         return new DetalharSinaisVitaisResponseDTO(sinaisVitais);
     }
-}
 
+    @Transactional(readOnly = true)
+    public DetalharSinaisVitaisResponseDTO buscarSinaisVitaisPorAvaliacao(
+            Long avaliacaoId
+    ) {
+
+        SinaisVitais sinaisVitais = sinaisVitaisRepository
+                .findByAvaliacaoId(avaliacaoId)
+                .orElseThrow(() -> new RegistroNaoEncontradoException(
+                        "Sinais vitais não encontrados para essa avaliação!"
+                ));
+
+        return new DetalharSinaisVitaisResponseDTO(sinaisVitais);
+    }
+}

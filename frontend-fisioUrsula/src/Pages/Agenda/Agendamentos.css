@@ -948,3 +948,182 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+/* ==========================================================================
+   REMARCAÇÃO DE AGENDAMENTOS
+   ========================================================================== */
+
+.agenda-remarcacao-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.agenda-remarcacao-heading h3 {
+  margin-bottom: 5px;
+}
+
+.agenda-remarcacao-heading p {
+  margin: 0;
+  color: #78847d;
+  font-size: 13px;
+}
+
+.agenda-remarcar-button {
+  border: 1px solid #cfe4d6;
+  border-radius: 9px;
+  padding: 10px 16px;
+  background: #edf7f0;
+  color: #286b43;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+
+.agenda-remarcar-button:hover {
+  background: #dcefe2;
+  transform: translateY(-1px);
+}
+
+.agenda-remarcacao-form {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  padding: 18px;
+  border: 1px solid #dcebe1;
+  border-radius: 13px;
+  background: #f8fbf8;
+}
+
+.agenda-remarcacao-current {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 13px 15px;
+  border-radius: 9px;
+  background: #edf3ef;
+}
+
+.agenda-remarcacao-current span {
+  color: #748078;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.agenda-remarcacao-current strong {
+  color: #344b3c;
+  font-size: 13px;
+}
+
+.agenda-remarcacao-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.agenda-remarcacao-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.agenda-remarcacao-fields label:first-child {
+  grid-column: 1 / -1;
+}
+
+.agenda-remarcacao-fields label span {
+  color: #46554b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.agenda-remarcacao-fields input {
+  width: 100%;
+  min-height: 43px;
+  padding: 10px 12px;
+  border: 1px solid #d8e2db;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  color: #344b3c;
+  font: inherit;
+  font-size: 13px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.agenda-remarcacao-fields input:focus {
+  border-color: #5c9b72;
+  box-shadow: 0 0 0 3px rgba(92, 155, 114, 0.12);
+}
+
+.agenda-remarcacao-fields input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.agenda-remarcacao-hint {
+  margin: 0;
+  color: #77847b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.agenda-remarcacao-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.agenda-remarcacao-actions button {
+  min-height: 40px;
+}
+
+.agenda-remarcacao-cancel {
+  padding: 10px 16px;
+  border: 1px solid #dce3de;
+  border-radius: 8px;
+  background: #fff;
+  color: #56645b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.agenda-remarcacao-cancel:hover {
+  background: #f0f4f1;
+}
+
+.agenda-remarcacao-actions button:disabled,
+.agenda-remarcacao-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  .agenda-remarcacao-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .agenda-remarcacao-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .agenda-remarcacao-fields label:first-child {
+    grid-column: auto;
+  }
+
+  .agenda-remarcacao-actions {
+    flex-direction: column-reverse;
+  }
+
+  .agenda-remarcacao-actions button {
+    width: 100%;
+  }
+}
+

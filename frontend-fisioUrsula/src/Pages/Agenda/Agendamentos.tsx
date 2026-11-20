@@ -1,5 +1,5 @@
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import ModuleLayout from "../ModuleLayout/ModuleLayout";
 import "./Agendamentos.css";
 
@@ -10,7 +10,9 @@ type StatusAgendamento =
   | "CANCELADO_FISIOTERAPEUTA"
   | "CONFIRMADO"
   | "PENDENTE"
-  | "REMARCADO";
+  | "REMARCADO"
+  | "CONCLUIDO"
+  | "REALIZADO";
 
 type Paciente = {
   id: number;
@@ -32,9 +34,13 @@ type RespostaCsrf = {
   token: string;
 };
 
-const API_AGENDAMENTOS = "http://localhost:8080/agendamentos";
-const API_PACIENTES = "http://localhost:8080/pacientes";
-const API_CSRF = "http://localhost:8080/csrf";
+const API_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:8080"
+).replace(/\/$/, "");
+
+const API_AGENDAMENTOS = `${API_URL}/agendamentos`;
+const API_PACIENTES = `${API_URL}/pacientes`;
+const API_CSRF = `${API_URL}/csrf`;
 
 function obterDataAtual() {
   const d = new Date();
@@ -42,9 +48,15 @@ function obterDataAtual() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+function obterMesAtual() {
+  const hoje = new Date();
+
+  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
+}
+
 function formatarData(data: string) {
-  const [a, m, d] = data.split("-");
-  return `${d}/${m}/${a}`;
+  const [ano, mes, dia] = data.split("-");
+  return `${dia}/${mes}/${ano}`;
 }
 
 function formatarTipo(tipo: TipoAgendamento) {
@@ -58,6 +70,8 @@ function formatarStatus(status: StatusAgendamento) {
     CONFIRMADO: "Confirmado",
     PENDENTE: "Pendente",
     REMARCADO: "Remarcado",
+    CONCLUIDO: "Concluído",
+    REALIZADO: "Realizado",
   };
 
   return nomes[status] ?? status;
@@ -70,10 +84,43 @@ function normalizarPaciente(v: any): Paciente | null {
   return Number.isInteger(id) && id > 0 && nome ? { id, nome } : null;
 }
 
-/**
- * Obtém o token CSRF da sessão do Spring Security.
- * Deve ser chamado antes de requisições POST, PUT, PATCH e DELETE.
- */
+function formatarMes(mes: string) {
+  const [ano, numeroMes] = mes.split("-").map(Number);
+
+  return new Date(ano, numeroMes - 1, 1).toLocaleDateString("pt-BR", {
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function alterarMes(mes: string, quantidade: number) {
+  const [ano, numeroMes] = mes.split("-").map(Number);
+  const novaData = new Date(ano, numeroMes - 1 + quantidade, 1);
+
+  return `${novaData.getFullYear()}-${String(
+    novaData.getMonth() + 1,
+  ).padStart(2, "0")}`;
+}
+
+function obterDiasDoMes(mes: string): (number | null)[] {
+  const [ano, numeroMes] = mes.split("-").map(Number);
+
+  const primeiroDia = new Date(ano, numeroMes - 1, 1);
+  const ultimoDia = new Date(ano, numeroMes, 0);
+
+  // O calendário começa na segunda-feira.
+  const deslocamento = (primeiroDia.getDay() + 6) % 7;
+
+  return [
+    ...Array.from({ length: deslocamento }, () => null),
+    ...Array.from({ length: ultimoDia.getDate() }, (_, i) => i + 1),
+  ];
+}
+
+function obterDataFormatadaParaApi(mes: string, dia: number) {
+  return `${mes}-${String(dia).padStart(2, "0")}`;
+}
+
 async function obterTokenCsrf(): Promise<RespostaCsrf> {
   const respostaCsrf = await fetch(API_CSRF, {
     method: "GET",
@@ -102,29 +149,135 @@ async function obterTokenCsrf(): Promise<RespostaCsrf> {
 
 export default function Agendamentos() {
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+
   const [pacienteId, setPacienteId] = useState("");
   const [buscaPaciente, setBuscaPaciente] = useState("");
-  const [pacientesEncontrados, setPacientesEncontrados] = useState<Paciente[]>(
-    [],
-  );
+  const [pacientesEncontrados, setPacientesEncontrados] = useState<Paciente[]>([]);
   const [pacienteSelecionado, setPacienteSelecionado] =
     useState<Paciente | null>(null);
+
   const [carregandoPacientes, setCarregandoPacientes] = useState(false);
   const [erroBuscaPaciente, setErroBuscaPaciente] = useState("");
+
   const [data, setData] = useState("");
   const [horaInicio, setHoraInicio] = useState("");
   const [horaFim, setHoraFim] = useState("");
+
   const [tipoAgendamento, setTipoAgendamento] =
     useState<TipoAgendamento>("AVALIACAO");
+
   const [busca, setBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("TODOS");
   const [filtroStatus, setFiltroStatus] = useState("TODOS");
+
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [salvando, setSalvando] = useState(false);
+
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
 
+  // Estados da visualização mensal.
+  const [mesSelecionado, setMesSelecionado] = useState(obterMesAtual());
+  const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null);
+  const [carregandoAgendamentos, setCarregandoAgendamentos] = useState(false);
+  const [erroCarregamento, setErroCarregamento] = useState("");
+
   const hoje = obterDataAtual();
+
+  // ============================================================
+  // CARREGAR AGENDAMENTOS DO MÊS SELECIONADO
+  // ============================================================
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function carregarAgendamentos() {
+      try {
+        setCarregandoAgendamentos(true);
+        setErroCarregamento("");
+
+        const [ano, numeroMes] = mesSelecionado.split("-").map(Number);
+
+        const inicio = `${mesSelecionado}-01`;
+
+        const ultimoDia = new Date(ano, numeroMes, 0).getDate();
+
+        const fim = `${mesSelecionado}-${String(ultimoDia).padStart(2, "0")}`;
+
+        const resposta = await fetch(
+          `${API_AGENDAMENTOS}?inicio=${inicio}&fim=${fim}`,
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              Accept: "application/json",
+            },
+            signal: controller.signal,
+          },
+        );
+
+        if (!resposta.ok) {
+          throw new Error(
+            `Não foi possível carregar os agendamentos (${resposta.status}).`,
+          );
+        }
+
+        const dados: unknown = await resposta.json();
+
+        const lista: Agendamento[] = (Array.isArray(dados) ? dados : [])
+          .map((item: any) => {
+            const paciente = normalizarPaciente(
+              item.paciente ?? {
+                id: item.pacienteId,
+                nome: item.pacienteNome,
+              },
+            );
+
+            return {
+              id: Number(item.id),
+              data: String(item.data ?? ""),
+              horaInicio: String(item.horaInicio ?? ""),
+              horaFim: String(item.horaFim ?? ""),
+              tipoAgendamento: item.tipoAgendamento,
+              statusAgendamento: item.statusAgendamento,
+              paciente: paciente ?? undefined,
+            };
+          })
+          .filter(
+            (item) =>
+              Number.isInteger(item.id) &&
+              item.id > 0 &&
+              item.data &&
+              item.horaInicio &&
+              item.horaFim,
+          );
+
+        setAgendamentos(lista);
+      } catch (e) {
+        if (e instanceof Error && e.name === "AbortError") return;
+
+        setAgendamentos([]);
+
+        setErroCarregamento(
+          e instanceof Error
+            ? e.message
+            : "Não foi possível carregar os agendamentos.",
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setCarregandoAgendamentos(false);
+        }
+      }
+    }
+
+    carregarAgendamentos();
+
+    return () => controller.abort();
+  }, [mesSelecionado]);
+
+  // ============================================================
+  // PESQUISA DE PACIENTES
+  // ============================================================
 
   useEffect(() => {
     const termo = buscaPaciente.trim();
@@ -201,8 +354,13 @@ export default function Agendamentos() {
     setErroBuscaPaciente("");
   }
 
+  // ============================================================
+  // CRIAR AGENDAMENTO
+  // ============================================================
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setErro("");
     setSucesso("");
 
@@ -230,10 +388,8 @@ export default function Agendamentos() {
       const rota =
         tipoAgendamento === "AVALIACAO" ? "avaliacao" : "atendimento";
 
-      // 1. Obtém o token CSRF antes do POST.
       const csrf = await obterTokenCsrf();
 
-      // 2. Envia o token no cabeçalho junto com os dados.
       const r = await fetch(
         `${API_AGENDAMENTOS}/${rota}/${encodeURIComponent(pacienteId)}`,
         {
@@ -241,6 +397,7 @@ export default function Agendamentos() {
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
+            Accept: "application/json",
             [csrf.headerName]: csrf.token,
           },
           body: JSON.stringify({
@@ -268,10 +425,21 @@ export default function Agendamentos() {
         horaFim: dto.horaFim ?? horaFim,
         tipoAgendamento: dto.tipoAgendamento ?? tipoAgendamento,
         statusAgendamento: dto.statusAgendamento ?? "PENDENTE",
-        paciente: normalizarPaciente(dto.paciente) ?? pacienteSelecionado,
+        paciente:
+          normalizarPaciente(dto.paciente) ?? pacienteSelecionado,
       };
 
-      setAgendamentos((xs) => [salvo, ...xs]);
+      // Se o agendamento pertence ao mês atualmente aberto,
+      // atualiza a tela imediatamente.
+      if (salvo.data.startsWith(mesSelecionado)) {
+        setAgendamentos((anteriores) => [
+          ...anteriores.filter((a) => a.id !== salvo.id),
+          salvo,
+        ]);
+      } else {
+        // Se pertence a outro mês, navega para o mês do agendamento.
+        setMesSelecionado(salvo.data.slice(0, 7));
+      }
 
       limparPaciente();
       setData("");
@@ -291,19 +459,74 @@ export default function Agendamentos() {
     }
   }
 
-  const filtrados = agendamentos.filter((a) => {
-    const nome = a.paciente?.nome ?? "";
-    const idPaciente = String(a.paciente?.id ?? "");
-    const termo = busca.toLowerCase();
+  // ============================================================
+  // FILTROS
+  // ============================================================
 
-    return (
-      (nome.toLowerCase().includes(termo) ||
-        idPaciente.includes(busca) ||
-        String(a.id).includes(busca)) &&
-      (filtroTipo === "TODOS" || a.tipoAgendamento === filtroTipo) &&
-      (filtroStatus === "TODOS" || a.statusAgendamento === filtroStatus)
+  const filtrados = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+
+    return agendamentos.filter((a) => {
+      const nome = a.paciente?.nome ?? "";
+      const idPaciente = String(a.paciente?.id ?? "");
+
+      const correspondeBusca =
+        nome.toLowerCase().includes(termo) ||
+        idPaciente.includes(termo) ||
+        String(a.id).includes(termo);
+
+      const correspondeTipo =
+        filtroTipo === "TODOS" || a.tipoAgendamento === filtroTipo;
+
+      const correspondeStatus =
+        filtroStatus === "TODOS" || a.statusAgendamento === filtroStatus;
+
+      return correspondeBusca && correspondeTipo && correspondeStatus;
+    });
+  }, [agendamentos, busca, filtroTipo, filtroStatus]);
+
+  const diasDoMes = useMemo(
+    () => obterDiasDoMes(mesSelecionado),
+    [mesSelecionado],
+  );
+
+  const agendamentosPorDia = useMemo(() => {
+    const agrupados: Record<string, Agendamento[]> = {};
+
+    filtrados.forEach((agendamento) => {
+      if (!agrupados[agendamento.data]) {
+        agrupados[agendamento.data] = [];
+      }
+
+      agrupados[agendamento.data].push(agendamento);
+    });
+
+    return agrupados;
+  }, [filtrados]);
+
+  const agendamentosDoDia = diaSelecionado
+    ? filtrados.filter((a) => a.data === diaSelecionado)
+    : filtrados;
+
+  function selecionarDia(dia: number) {
+    const dataSelecionada = obterDataFormatadaParaApi(
+      mesSelecionado,
+      dia,
     );
-  });
+
+    setDiaSelecionado((atual) =>
+      atual === dataSelecionada ? null : dataSelecionada,
+    );
+  }
+
+  function navegarMes(quantidade: number) {
+    setMesSelecionado((mes) => alterarMes(mes, quantidade));
+    setDiaSelecionado(null);
+  }
+
+  // ============================================================
+  // TELA
+  // ============================================================
 
   return (
     <ModuleLayout
@@ -318,7 +541,7 @@ export default function Agendamentos() {
             <div>
               <small>Total de agendamentos</small>
               <strong>{agendamentos.length}</strong>
-              <span>Registros nesta sessão</span>
+              <span>Registros do mês selecionado</span>
             </div>
           </article>
 
@@ -328,11 +551,12 @@ export default function Agendamentos() {
               <small>Avaliações</small>
               <strong>
                 {
-                  agendamentos.filter((a) => a.tipoAgendamento === "AVALIACAO")
-                    .length
+                  agendamentos.filter(
+                    (a) => a.tipoAgendamento === "AVALIACAO",
+                  ).length
                 }
               </strong>
-              <span>Avaliações nesta sessão</span>
+              <span>Avaliações do mês</span>
             </div>
           </article>
 
@@ -347,7 +571,7 @@ export default function Agendamentos() {
                   ).length
                 }
               </strong>
-              <span>Atendimentos nesta sessão</span>
+              <span>Atendimentos do mês</span>
             </div>
           </article>
         </div>
@@ -356,7 +580,9 @@ export default function Agendamentos() {
           <div className="agenda-panel-heading">
             <div>
               <h2>Agenda da clínica</h2>
-              <p>Consulte os horários e cadastre avaliações ou atendimentos.</p>
+              <p>
+                Consulte os horários e cadastre avaliações ou atendimentos.
+              </p>
             </div>
 
             <button
@@ -400,7 +626,9 @@ export default function Agendamentos() {
                   <select
                     value={tipoAgendamento}
                     onChange={(e) =>
-                      setTipoAgendamento(e.target.value as TipoAgendamento)
+                      setTipoAgendamento(
+                        e.target.value as TipoAgendamento,
+                      )
                     }
                     required
                   >
@@ -544,6 +772,180 @@ export default function Agendamentos() {
             </form>
           )}
 
+          {/* ================================================== */}
+          {/* CALENDÁRIO MENSAL */}
+          {/* ================================================== */}
+
+          <section className="agenda-calendar">
+            <div className="agenda-calendar-heading">
+              <div>
+                <span className="agenda-calendar-eyebrow">
+                  VISÃO GERAL
+                </span>
+                <h3>Calendário mensal</h3>
+                <p>
+                  Visualize os agendamentos distribuídos ao longo do mês.
+                </p>
+              </div>
+
+              <div className="agenda-calendar-navigation">
+                <button
+                  type="button"
+                  onClick={() => navegarMes(-1)}
+                  aria-label="Mês anterior"
+                >
+                  ‹
+                </button>
+
+                <strong>{formatarMes(mesSelecionado)}</strong>
+
+                <button
+                  type="button"
+                  onClick={() => navegarMes(1)}
+                  aria-label="Próximo mês"
+                >
+                  ›
+                </button>
+
+                <button
+                  type="button"
+                  className="agenda-calendar-today"
+                  onClick={() => {
+                    setMesSelecionado(obterMesAtual());
+                    setDiaSelecionado(null);
+                  }}
+                >
+                  Hoje
+                </button>
+              </div>
+            </div>
+
+            <div className="agenda-calendar-weekdays">
+              {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map(
+                (dia) => (
+                  <span key={dia}>{dia}</span>
+                ),
+              )}
+            </div>
+
+            <div className="agenda-calendar-grid">
+              {diasDoMes.map((dia, indice) => {
+                if (dia === null) {
+                  return (
+                    <div
+                      key={`vazio-${indice}`}
+                      className="agenda-calendar-day agenda-calendar-day-empty"
+                    />
+                  );
+                }
+
+                const dataDia = obterDataFormatadaParaApi(
+                  mesSelecionado,
+                  dia,
+                );
+
+                const compromissos = agendamentosPorDia[dataDia] ?? [];
+
+                const selecionado = diaSelecionado === dataDia;
+                const hojeEhEsteDia = hoje === dataDia;
+
+                return (
+                  <button
+                    type="button"
+                    key={dataDia}
+                    className={[
+                      "agenda-calendar-day",
+                      selecionado ? "selected" : "",
+                      hojeEhEsteDia ? "today" : "",
+                      compromissos.length > 0
+                        ? "has-appointments"
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onClick={() => selecionarDia(dia)}
+                    aria-label={`${dia} de ${formatarMes(mesSelecionado)}, ${compromissos.length} agendamentos`}
+                    aria-pressed={selecionado}
+                  >
+                    <span className="agenda-calendar-day-number">
+                      {dia}
+                    </span>
+
+                    {compromissos.length > 0 && (
+                      <div className="agenda-calendar-day-content">
+                        <span className="agenda-calendar-count">
+                          {compromissos.length}{" "}
+                          {compromissos.length === 1
+                            ? "agendamento"
+                            : "agendamentos"}
+                        </span>
+
+                        <div className="agenda-calendar-dots">
+                          {compromissos.slice(0, 4).map((a) => (
+                            <span
+                              key={a.id}
+                              className={
+                                a.tipoAgendamento === "AVALIACAO"
+                                  ? "evaluation"
+                                  : "attendance"
+                              }
+                              title={`${a.horaInicio.slice(0, 5)} - ${a.paciente?.nome ?? "Paciente"}`}
+                            />
+                          ))}
+
+                          {compromissos.length > 4 && (
+                            <small>
+                              +{compromissos.length - 4}
+                            </small>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="agenda-calendar-legend">
+              <span>
+                <i className="evaluation" />
+                Avaliação
+              </span>
+
+              <span>
+                <i className="attendance" />
+                Atendimento
+              </span>
+            </div>
+
+            {diaSelecionado && (
+              <div className="agenda-calendar-selection">
+                <div>
+                  <strong>
+                    Dia selecionado: {formatarData(diaSelecionado)}
+                  </strong>
+                  <span>
+                    {agendamentosDoDia.length}{" "}
+                    {agendamentosDoDia.length === 1
+                      ? "agendamento encontrado"
+                      : "agendamentos encontrados"}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setDiaSelecionado(null)}
+                >
+                  Ver mês completo
+                </button>
+              </div>
+            )}
+          </section>
+
+          {/* ================================================== */}
+          {/* PESQUISA E FILTROS */}
+          {/* ================================================== */}
+
           <div className="agenda-toolbar">
             <label className="agenda-search">
               <span>⌕</span>
@@ -577,6 +979,8 @@ export default function Agendamentos() {
                 <option value="PENDENTE">Pendente</option>
                 <option value="CONFIRMADO">Confirmado</option>
                 <option value="REMARCADO">Remarcado</option>
+                <option value="CONCLUIDO">Concluído</option>
+                <option value="REALIZADO">Realizado</option>
                 <option value="CANCELADO_PACIENTE">
                   Cancelado pelo paciente
                 </option>
@@ -587,9 +991,24 @@ export default function Agendamentos() {
             </label>
           </div>
 
+          {/* ================================================== */}
+          {/* LISTA DE AGENDAMENTOS */}
+          {/* ================================================== */}
+
           <div className="agenda-list">
-            {filtrados.length > 0 ? (
-              filtrados
+            {carregandoAgendamentos ? (
+              <div className="agenda-empty">
+                <h3>Carregando agendamentos...</h3>
+                <p>
+                  Estamos buscando os compromissos deste mês.
+                </p>
+              </div>
+            ) : erroCarregamento ? (
+              <div className="agenda-message error" role="alert">
+                {erroCarregamento}
+              </div>
+            ) : agendamentosDoDia.length > 0 ? (
+              agendamentosDoDia
                 .slice()
                 .sort((a, b) =>
                   `${a.data}T${a.horaInicio}`.localeCompare(
@@ -604,7 +1023,10 @@ export default function Agendamentos() {
                     </div>
 
                     <div className="agenda-appointment-info">
-                      <strong>{a.paciente?.nome ?? "Paciente"}</strong>
+                      <strong>
+                        {a.paciente?.nome ?? "Paciente"}
+                      </strong>
+
                       <span>
                         {formatarData(a.data)} ·{" "}
                         {formatarTipo(a.tipoAgendamento)} · #{a.id}
@@ -621,11 +1043,15 @@ export default function Agendamentos() {
             ) : (
               <div className="agenda-empty">
                 <span className="agenda-empty-icon">◷</span>
+
                 <h3>Nenhum agendamento encontrado</h3>
+
                 <p>
-                  {agendamentos.length === 0
-                    ? "Crie um agendamento para começar a organizar a agenda."
-                    : "Tente alterar a busca ou os filtros selecionados."}
+                  {diaSelecionado
+                    ? "Não existem agendamentos para este dia com os filtros selecionados."
+                    : agendamentos.length === 0
+                      ? "Não existem agendamentos cadastrados neste mês."
+                      : "Tente alterar a busca ou os filtros selecionados."}
                 </p>
 
                 {agendamentos.length === 0 && (
@@ -642,9 +1068,13 @@ export default function Agendamentos() {
           </div>
 
           <div className="agenda-footer">
-            Exibindo <strong>{filtrados.length}</strong> de{" "}
-            <strong>{agendamentos.length}</strong> agendamentos
-            <span>Registros recebidos nesta sessão.</span>
+            Exibindo <strong>{agendamentosDoDia.length}</strong> de{" "}
+            <strong>{filtrados.length}</strong> agendamentos filtrados
+            <span>
+              {diaSelecionado
+                ? `Dia ${formatarData(diaSelecionado)}`
+                : `Mês de ${formatarMes(mesSelecionado)}`}
+            </span>
           </div>
         </section>
       </div>

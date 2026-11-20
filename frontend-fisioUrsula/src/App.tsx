@@ -17,6 +17,8 @@ import CadastroComorbidade from "./Pages/Paciente/CadastroComorbidade";
 import AssociarComorbidade from "./Pages/Paciente/AssociarComorbidade";
 import Relatorios from "./Pages/Financeiro/Relatorios";
 import Agendamentos from "./Pages/Agenda/Agendamentos";
+import AvaliacaoDetalhe from "./Pages/Prontuario/AvaliacaoDetalhe";
+import ProntuarioPaciente from "./Pages/Prontuario/ProntuarioPaciente";
 import Exercicios from "./Pages/Exercicio/Exercicios";
 
 import "./App.css";
@@ -61,6 +63,12 @@ export default function App() {
           element={<AtendimentoDetalhe />}
         />
 
+        {/* Detalhes de uma avaliação específica */}
+        <Route
+          path="/avaliacao/:id"
+          element={<AvaliacaoDetalhe />}
+        />
+
         <Route path="/despesas" element={<Despesas />} />
 
         <Route path="/relatorios" element={<Relatorios />} />
@@ -74,8 +82,12 @@ export default function App() {
           path="/pacientes/:pacienteId/comorbidades"
           element={<AssociarComorbidade />}
         />
-
         <Route
+          path="/pacientes/:pacienteId/prontuario"
+          element={<ProntuarioPaciente />}
+        />
+
+        <Route  
           path="/modulo/:modulo"
           element={
             <ModuleLayout

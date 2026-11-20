@@ -1,3 +1,4 @@
+
 package com.fisioUrsula.api.avaliacoes.avaliacao;
 
 import java.io.Serializable;
@@ -6,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.fisioUrsula.api.agendamentos.Agendamento;
+import com.fisioUrsula.api.atendimentos.sinaisVitais.SinaisVitais;
 import com.fisioUrsula.api.avaliacoes.diagnosticoAvaliacao.DiagnosticoAvaliacao;
 import com.fisioUrsula.api.shared.enums.StatusAtendimento;
 import com.fisioUrsula.api.shared.enums.StatusPagamento;
@@ -62,7 +64,10 @@ public class Avaliacao implements Serializable {
     @JoinColumn(name = "agendamento_id", nullable = false, unique = true)
     private Agendamento agendamento;
 
+    @OneToOne
+    @JoinColumn(name = "sinais_vitais_id", unique = true)
+    private SinaisVitais sinaisVitais;
+
     @OneToMany(mappedBy = "avaliacao")
     private List<DiagnosticoAvaliacao> diagnosticos;
-
 }

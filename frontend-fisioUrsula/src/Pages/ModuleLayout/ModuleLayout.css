@@ -1,3 +1,4 @@
+
 /* ==========================================================================
    1. IMPORTS & BASE SHELL LAYOUT
    ========================================================================== */
@@ -18,7 +19,7 @@
 
 
 /* ==========================================================================
-   2. SIDEBAR, BRAND & PROFILE
+   2. SIDEBAR & BRAND
    ========================================================================== */
 
 .module-sidebar {
@@ -36,7 +37,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 0 10px 35px;
+  margin: 0 10px 38px;
   text-decoration: none;
   color: #203d35;
   font: 800 22px 'Manrope', sans-serif;
@@ -58,64 +59,9 @@
   font-size: 23px;
 }
 
-.module-profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 13px 10px;
-  border: 1px solid #e8eee9;
-  border-radius: 13px;
-  margin-bottom: 31px;
-  position: relative;
-}
-
-.module-profile strong,
-.module-sidebar-bottom strong {
-  display: block;
-  font-size: 11px;
-  color: #2c463c;
-  font-weight: 700;
-}
-
-.module-profile small,
-.module-sidebar-bottom small {
-  display: block;
-  margin-top: 4px;
-  color: #8a9a91;
-  font-size: 10px;
-}
-
-.module-avatar {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: #dcece1;
-  color: #276349;
-  font: 700 14px 'Manrope', sans-serif;
-}
-
-.module-avatar.small {
-  width: 34px;
-  height: 34px;
-}
-
-.profile-status {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #63a879;
-  border: 2px solid white;
-  top: 12px;
-  left: 36px;
-}
-
 
 /* ==========================================================================
-   3. SIDEBAR NAVIGATION & BOTTOM
+   3. SIDEBAR NAVIGATION
    ========================================================================== */
 
 .module-nav-label {
@@ -163,29 +109,55 @@
   font-size: 17px;
 }
 
+
+/* ==========================================================================
+   4. SIDEBAR INSTITUTIONAL MESSAGE
+   ========================================================================== */
+
 .module-sidebar-bottom {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 11px;
   margin-top: auto;
-  padding: 15px 8px 3px;
+  padding: 17px 12px 5px;
   border-top: 1px solid #edf1ed;
 }
 
-.module-help-icon {
+.module-quote-icon {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
+  flex: 0 0 35px;
   border: 1px solid #dce9df;
-  border-radius: 50%;
+  border-radius: 12px;
+  background: #f0f6f1;
   color: #4d8068;
-  font-weight: 700;
+}
+
+.module-quote-content {
+  min-width: 0;
+}
+
+.module-quote-content strong {
+  display: block;
+  margin: 1px 0 5px;
+  color: #2c463c;
+  font-family: 'Manrope', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.module-quote-content p {
+  margin: 0;
+  color: #8a9a91;
+  font-size: 10px;
+  line-height: 1.6;
 }
 
 
 /* ==========================================================================
-   4. MAIN CONTENT AREA & TOPBAR
+   5. MAIN CONTENT AREA & TOPBAR
    ========================================================================== */
 
 .module-main {
@@ -200,7 +172,7 @@
   min-height: 75px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 18px;
   border-bottom: 1px solid #e9eee9;
 }
@@ -220,42 +192,9 @@
   font-weight: 600;
 }
 
-.module-top-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.module-date {
-  color: #8a9a91;
-  font-size: 11px;
-}
-
-.module-notification {
-  position: relative;
-  width: 34px;
-  height: 34px;
-  border: 1px solid #e5ece6;
-  border-radius: 10px;
-  background: #fff;
-  color: #567565;
-  font-size: 19px;
-}
-
-.module-notification i {
-  position: absolute;
-  top: 7px;
-  right: 7px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #d88b72;
-  border: 1px solid #fff;
-}
-
 
 /* ==========================================================================
-   5. PAGE HEADINGS & CONTENT WRAPPER
+   6. PAGE HEADINGS & CONTENT WRAPPER
    ========================================================================== */
 
 .module-page-heading {
@@ -318,7 +257,7 @@
 
 
 /* ==========================================================================
-   6. RESPONSIVE MEDIA QUERIES
+   7. RESPONSIVE MEDIA QUERIES
    ========================================================================== */
 
 @media (max-width: 850px) {
@@ -328,7 +267,7 @@
     padding-left: 12px;
     padding-right: 12px;
   }
-  
+
   .module-main {
     padding: 0 22px 18px;
   }
@@ -338,7 +277,7 @@
   .module-shell {
     display: block;
   }
-  
+
   .module-sidebar {
     min-height: auto;
     width: 100%;
@@ -346,60 +285,55 @@
     border-right: 0;
     border-bottom: 1px solid #e8eee9;
   }
-  
+
   .module-brand {
     margin: 0 0 13px;
   }
-  
-  .module-profile,
+
   .module-nav-label,
   .module-sidebar-bottom {
     display: none;
   }
-  
+
   .module-nav {
     display: flex;
     gap: 5px;
     overflow-x: auto;
     padding-bottom: 3px;
   }
-  
+
   .module-nav-link {
     flex: 0 0 auto;
     min-height: 37px;
     padding: 0 10px;
     font-size: 10px;
   }
-  
+
   .module-nav-icon {
     display: none;
   }
-  
+
   .module-main {
     padding: 0 17px 18px;
   }
-  
+
   .module-topbar {
     min-height: 57px;
   }
-  
-  .module-date {
-    display: none;
-  }
-  
+
   .module-page-heading {
     padding: 24px 0 20px;
   }
-  
+
   .module-page-heading h1 {
     font-size: 25px;
   }
-  
+
   .module-heading-mark {
     width: 41px;
     height: 41px;
   }
-  
+
   .module-footer {
     flex-direction: column;
     gap: 7px;
