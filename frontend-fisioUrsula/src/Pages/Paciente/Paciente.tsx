@@ -46,6 +46,15 @@ type PatientDetails = {
   comorbidades: string[];
 };
 
+type ApiPacienteComorbidade = {
+  id: number;
+  dataDiagnostico: string | null;
+  statusDiagnostico: 'ATIVO' | 'INATIVO';
+  observacao: string | null;
+  pacienteNome: string;
+  comorbidadeNome: string;
+};
+
 const API_URL = (
   import.meta.env.VITE_API_URL || 'http://localhost:8080'
 ).replace(/\/$/, '');
@@ -67,16 +76,41 @@ function mapPatient(patient: ApiPatient): Patient {
     id,
     name,
     initials: getInitials(name),
-    condition:
-      patient.comorbidades?.length > 0
-        ? patient.comorbidades.join(', ')
-        : 'Nenhuma comorbidade',
+    condition: 'Carregando comorbidades...',
     phone: patient.telefone || 'Não informado',
     status: patient.ativo ? 'Ativo' : 'Inativo',
     color: ['sage', 'blue', 'rose', 'sand', 'lavender'][
       Math.abs(id) % 5
     ],
   };
+}
+
+// Busca somente as comorbidades que continuam associadas ao paciente.
+async function buscarComorbidadesAtivas(
+  pacienteId: number,
+  signal?: AbortSignal
+): Promise<string[]> {
+  const response = await fetch(
+    `${API_URL}/paciente-comorbidade/paciente/${pacienteId}`,
+    {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      credentials: 'include',
+      signal,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Erro HTTP ${response.status} ao consultar as comorbidades do paciente.`
+    );
+  }
+
+  const vinculos: ApiPacienteComorbidade[] = await response.json();
+
+  return vinculos
+    .filter((vinculo) => vinculo.statusDiagnostico === 'ATIVO')
+    .map((vinculo) => vinculo.comorbidadeNome);
 }
 
 async function buscarPacientes(
@@ -111,7 +145,25 @@ async function buscarPacientes(
     throw new Error('A API não retornou uma lista válida de pacientes.');
   }
 
-  return (data as ApiPatient[]).map(mapPatient);
+  const pacientes = (data as ApiPatient[]).map(mapPatient);
+
+  // Atualiza as comorbidades de cada paciente com base nos vínculos ativos.
+  return Promise.all(
+    pacientes.map(async (patient) => {
+      const comorbidades = await buscarComorbidadesAtivas(
+        patient.id,
+        signal
+      );
+
+      return {
+        ...patient,
+        condition:
+          comorbidades.length > 0
+            ? comorbidades.join(', ')
+            : 'Nenhuma comorbidade',
+      };
+    })
+  );
 }
 
 function formatarData(data?: string | null): string {
@@ -215,10 +267,7 @@ export default function Pacientes() {
       return;
     }
 
-    // Guardamos o ID depois da verificação.
-    // A partir daqui, o TypeScript sabe que o paciente existe.
     const pacienteId = selectedPatient.id;
-
     const controller = new AbortController();
 
     async function carregarDetalhes() {
@@ -245,8 +294,17 @@ export default function Pacientes() {
 
         const data: PatientDetails = await response.json();
 
+        // Substitui a lista antiga pela lista de associações realmente ativas.
+        const comorbidadesAtivas = await buscarComorbidadesAtivas(
+          pacienteId,
+          controller.signal
+        );
+
         if (!controller.signal.aborted) {
-          setPatientDetails(data);
+          setPatientDetails({
+            ...data,
+            comorbidades: comorbidadesAtivas,
+          });
         }
       } catch (err) {
         if (controller.signal.aborted) return;
